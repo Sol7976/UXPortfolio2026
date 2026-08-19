@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App IA &amp; navigation redesign · E.ON · Thomas Saldanha</title>
+<meta name="description" content="Card sorting, tree testing and usability research behind a new information architecture for the E.ON energy app.">
+<!-- Canonical and share metadata. These are the only ABSOLUTE urls on the site;
+     every other path is relative. Open Graph requires it: a relative og:image or
+     og:url is ignored by every crawler, so they cannot follow the site's usual
+     convention. This also means the share preview only resolves once the site is
+     live at www.uxtom.co.uk. -->
+<link rel="canonical" href="https://www.uxtom.co.uk/work/eon-app-ia/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Thomas Saldanha">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://www.uxtom.co.uk/work/eon-app-ia/">
+<meta property="og:title" content="App IA &amp; navigation redesign · E.ON · Thomas Saldanha">
+<meta property="og:description" content="Card sorting, tree testing and usability research behind a new information architecture for the E.ON energy app.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="App IA &amp; navigation redesign · E.ON · Thomas Saldanha">
+<meta name="twitter:description" content="Card sorting, tree testing and usability research behind a new information architecture for the E.ON energy app.">
+<meta property="og:image" content="https://www.uxtom.co.uk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Thomas Saldanha, UX and product design leader. I help teams find clarity in complex problems.">
+<meta name="twitter:image" content="https://www.uxtom.co.uk/og-image.png">
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<!-- Newsreader italic is the editorial accent, used here by the step 04 "In
+     their words" quotes. Unlike ArcelorMittal and HSBC this page DOES use
+     JetBrains Mono: the fourth tier of the step 02 IA trees sets its numbers in
+     it, so it is loaded. The design file also asks for Hanken weight 800 for
+     the // mark; the rest of the site loads 300–700 and strokes the mark, so
+     this page matches them rather than rendering one page's // heavier. -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&amp;family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles.css">
+<script>
+/* Breakpoint contract (SHIP-MANIFEST.md), identical to the homepage and the
+   other case studies:
+     >= 1200px  the desktop design, bands edge to edge, content column capped at
+                1680px (all of that is in styles.css, no JS involved)
+     900–1199px the same desktop design, scaled proportionally to the viewport
+     < 900px    the mobile design, its 440px column growing fluidly
+
+   The 900–1199px band is a geometric scale, not a re-layout: the page is laid
+   out at 1200px, the bottom of the desktop band, and then transformed, so
+   nothing re-wraps and 1199px is continuous with 1200px. 1200px is also where
+   this page's content column is 1104px, the width the desktop design was drawn
+   at, so the build and the design line up there exactly.
+
+   This page carries three things the other two studies do not, all at the
+   bottom of this script: the IA carousel's static connector rail, the step 04
+   prototype's tap cue, and its Restart control. */
+(function(){
+  var W = 1200, MIN = 900, root = document.documentElement, page, host, last;
+
+  /* Figures scale uniformly with the column. --k is the only thing computed
+     here: a figure cell's current width over data-fit, the width it had at the
+     authored 1200px. The CSS then zooms the cell by it, so everything inside
+     keeps its authored geometry and simply paints larger. It has to be computed
+     in script because CSS cannot divide one length by another.
+
+     Measuring the zoomed element is not circular: zoom scales an element's
+     contents, not the box its parent lays out, so the rect stays the track
+     width whatever --k is. */
+  function figures(w){
+    /* --col is the band content column, 1104px authored and 1584px at the cap.
+       Band statements take five twelfths of it. Measured here for the same
+       reason as the rest: CSS cannot divide one length by another. */
+    if (page) page.style.setProperty('--col',
+      (Math.min(page.getBoundingClientRect().width, 1680) - 96).toFixed(2) + 'px');
+    document.querySelectorAll('[data-fit]').forEach(function(el){
+      if (w < MIN){ el.style.removeProperty('--k'); return; }
+      var box = el.getBoundingClientRect().width;
+      var cap = parseFloat(el.getAttribute('data-fit-cap'));
+      if (cap) box = Math.min(box, cap);
+      var k = Math.max(1, box / parseFloat(el.getAttribute('data-fit')));
+      el.style.setProperty('--k', k.toFixed(4));
+    });
+  }
+
+  function fit(){
+    page = page || document.querySelector('.page');
+    host = host || document.querySelector('.viewport');
+    /* The breakpoint has to be decided the way the media query decides it.
+       A media query measures innerWidth, which includes a classic scrollbar;
+       documentElement.clientWidth excludes it. Between them the CSS served the
+       desktop design while this script still thought it was mobile, so .page
+       stayed 1200px wide, unscaled, inside a narrower viewport and .viewport
+       clipped the right third away. So: innerWidth picks the design, and
+       clientWidth, the box the page actually has to fit in, sets the scale. */
+    var w = innerWidth || root.clientWidth,
+        s = w >= MIN ? Math.min(1, root.clientWidth / W) : 1;
+    if (s !== last){ root.style.setProperty('--page-scale', String(s)); last = s; }
+    figures(w);
+    rails();
+    if (page && host) host.style.height = s < 1 ? Math.ceil(page.offsetHeight * s) + 'px' : '';
+  }
+
+  /* --- carousels: card height + the IA connector rail -----------------------
+     Split deliberately into an expensive half and a cheap one, because the
+     card's grey box has to be the right height at the INSTANT that card
+     arrives, not a beat later.
+
+     measure() is the expensive half. It lifts the track's height and the card
+     minimum so every card reports its OWN content height, reads them all, and
+     caches the result on the element. It has to lift them first: a card
+     padded up to a minimum reports that minimum back, so measuring in place
+     would only ever confirm whatever is already applied. Because it reflows
+     the track it runs on layout changes only, which is all it needs: load,
+     resize, font load.
+
+     applyFit() is the cheap half and measures nothing. It takes the tallest
+     card of the page in view straight out of the cache and writes it. Costing
+     nothing, it can run on EVERY scroll event instead of behind a debounce,
+     and that is what actually fixes the grey box arriving late. A swipe has
+     no click to lead it, so with the measurement in this path the sequence
+     was scroll, settle, wait out the debounce, then grow.
+
+     The connector rail is positioned here too. It lives inside the track so
+     it scrolls with the cards and is never recalculated per page (CLAUDE.md). */
+  function measure(t){
+    var cards = [].slice.call(t.querySelectorAll('[data-carousel-card]'));
+    if (!cards.length || !t.clientWidth) return;
+    /* above 900px the card-agreement module is a plain grid, not a track: it
+       has no pages, and fitting a grid to its tallest SINGLE card collapses it
+       to one row and spills the other two over the next band */
+    if (getComputedStyle(t).overflowX !== 'auto'){
+      t.style.removeProperty('height');
+      t.style.removeProperty('--card-min');
+      t.__m = null; t.__applied = 0;
+      return;
+    }
+    var prevAlign = t.style.alignItems, prevH = t.style.height, prevMin = t.style.getPropertyValue('--card-min');
+    t.style.alignItems = 'flex-start';
+    t.style.removeProperty('height');
+    t.style.setProperty('--card-min', '0px');
+    var base = cards[0].offsetLeft;
+    t.__m = cards.map(function(c){
+      return { x: c.offsetLeft - base, w: c.offsetWidth, h: c.offsetHeight };
+    });
+    var rail = t.querySelector('[data-ia-rail]');
+    if (rail){
+      var f = cards[0], l = cards[cards.length - 1];
+      var x1 = Math.round(f.offsetLeft + f.offsetWidth / 2);
+      var x2 = Math.round(l.offsetLeft + l.offsetWidth / 2);
+      rail.style.left = x1 + 'px';
+      rail.style.width = Math.max(0, x2 - x1) + 'px';
+    }
+    t.style.alignItems = prevAlign;
+    if (prevH) t.style.height = prevH; else t.style.removeProperty('height');
+    if (prevMin) t.style.setProperty('--card-min', prevMin); else t.style.removeProperty('--card-min');
+    t.__applied = 0;
+  }
+
+  /* page is optional: pass it to fit a page the scroll has not reached yet,
+     omit it to fit whatever is in view right now. */
+  function applyFit(t, page){
+    var m = t.__m;
+    if (!m || !m.length) return;
+    var mh = 0, i;
+    if (page != null){
+      var per = parseInt(t.getAttribute('data-carousel-perview') || '1', 10) || 1;
+      for (i = page * per; i < Math.min(page * per + per, m.length); i++) mh = Math.max(mh, m[i].h);
+    } else {
+      var sl = t.scrollLeft, cw = t.clientWidth;
+      for (i = 0; i < m.length; i++){
+        if (m[i].x + m[i].w > sl + 4 && m[i].x < sl + cw - 4) mh = Math.max(mh, m[i].h);
+      }
+    }
+    if (mh <= 8) return;
+    var next = Math.ceil(mh);
+    if (next === t.__applied) return;      /* the common case: no writes at all */
+    t.__applied = next;
+    t.style.setProperty('--card-min', next + 'px');
+    /* Grow in one step, ease only when shrinking. The track clips vertically
+       (overflow-x:auto forces overflow-y to auto), so easing upward would clip
+       an incoming taller card on its way in. Shrinking cannot do that, because
+       the incoming card is shorter than the height already applied, so that
+       direction keeps its easing and the page below settles gently. */
+    if (next > (parseFloat(t.style.height) || 0)){
+      t.style.transitionProperty = 'none';
+      t.style.height = next + 'px';
+      void t.offsetHeight;                 /* commit before easing returns */
+      t.style.removeProperty('transition-property');
+    } else {
+      t.style.height = next + 'px';
+    }
+  }
+  /* --- carousel page size ---------------------------------------------------
+     Neither track has a fixed page size. The cards hold their authored width at
+     every width, so how many fit is a function of the column: three IA cards at
+     1200, four at 1440, nearly five at the cap, one on mobile. ts-carousel
+     re-reads data-carousel-perview on every call, so it is recomputed here from
+     the cards that actually fit and the fraction's total is rewritten to match.
+
+     Left hard-coded at three, as the desktop design has it, the last page's
+     scroll target clamps to the end of the track and pages 3 and 4 land in the
+     same place (identical at the 1680 cap), and on mobile it paged three cards
+     at a time past a one-card viewport. */
+  function paging(t){
+    var cards = t.querySelectorAll('[data-carousel-card]');
+    if (cards.length < 2) return;
+    /* Fractional rects, not offsetLeft/offsetWidth: those round to whole
+       pixels, and on the card-agreement track, whose cards are a percentage of
+       the column, the rounding pushed an exact two-up to 1.99 and paged one
+       card at a time. The half-pixel tolerance covers the same case. */
+    var r0 = cards[0].getBoundingClientRect(), r1 = cards[1].getBoundingClientRect();
+    var pitch = r1.left - r0.left;                           /* card + gap */
+    if (pitch <= 0) return;
+    var gap = pitch - r0.width;
+    /* n cards occupy n*pitch - gap, so n = (clientWidth + gap) / pitch */
+    var per = Math.floor((t.clientWidth + gap + 0.5) / pitch);
+    per = Math.max(1, Math.min(per, cards.length));
+    t.setAttribute('data-carousel-perview', per);
+    var total = document.querySelector('[data-carousel-total="' + t.getAttribute('data-carousel-track-el') + '"]');
+    if (total) total.textContent = '/ ' + ('0' + Math.ceil(cards.length / per)).slice(-2);
+  }
+
+  function rails(){
+    document.querySelectorAll('[data-carousel-track-el]').forEach(function(t){
+      if (!t.__wired){
+        t.__wired = true;
+        /* every scroll event, no debounce: applyFit reads the cache and in the
+           common case writes nothing, so the card height stays locked to the
+           finger through a swipe instead of catching up after it */
+        t.addEventListener('scroll', function(){ applyFit(t); }, { passive: true });
+      }
+      /* same gate as measure: above 900px the card-agreement module is a
+         plain grid, so it has no pages and no counter to rewrite */
+      if (getComputedStyle(t).overflowX === 'auto') paging(t);
+      measure(t);
+      applyFit(t);
+    });
+  }
+
+  /* The height has to LEAD the scroll, not follow it. ts-carousel animates
+     scrollLeft over 420ms and the scroll handler above sits another 80ms
+     behind it, so fitting after the fact meant a taller card's text arrived
+     before the card did and the grey box grew late, a visible two-stage move
+     between pages. On a nav click the destination is already known, because
+     ts-carousel writes it to dataset.page synchronously, so the track is
+     fitted to that page's cards immediately and its height transition runs
+     alongside the scroll. Swipes still settle through the scroll handler. */
+  addEventListener('click', function(e){
+    var nav = e.target.closest && e.target.closest('[data-carousel-nav]');
+    if (!nav) return;
+    var t = document.querySelector(nav.getAttribute('data-carousel-track') || '');
+    if (!t || getComputedStyle(t).overflowX !== 'auto') return;
+    /* deferred by a timeout, not a frame: this listener is registered before
+       ts-carousel's, so dataset.page is only updated once its handler has run
+       later in the same dispatch, and a frame callback would not fire at all
+       while the page is in a background or hidden view. */
+    setTimeout(function(){ applyFit(t, parseInt(t.dataset.page, 10) || 0); }, 0);
+  });
+
+  /* --- step 04 prototype ---------------------------------------------------
+     The tap cue sits over the phone until the visitor touches the prototype;
+     after that it would be in the way, so the first pointerdown inside the
+     frame retires it. Reaching into the frame's document is same-origin here,
+     but it is still wrapped: if the prototype has not been dropped in yet the
+     access throws and the cue simply stays put rather than breaking the page.
+     Restart reloads the frame, which is the only way back to its first screen
+     from outside it. */
+  function proto(){
+    var f = document.getElementById('eon-proto-frame'),
+        cue = document.getElementById('eon-cue');
+    if (!f || !cue || f.__cueWired) return;
+    f.__cueWired = true;
+    function arm(){
+      var d; try { d = f.contentDocument; } catch (e) { return; }
+      if (!d) return;
+      function hide(){ cue.style.display = 'none'; }
+      d.addEventListener('pointerdown', hide, { capture: true, once: true });
+      d.addEventListener('click', hide, { capture: true, once: true });
+    }
+    f.addEventListener('load', arm);
+    try { if (f.contentDocument && f.contentDocument.readyState === 'complete') arm(); } catch (e) {}
+    /* a click that lands in a cross-document iframe never reaches this
+       document, so a window blur while the frame has focus counts as a tap */
+    addEventListener('blur', function(){
+      if (document.activeElement === f) cue.style.display = 'none';
+    });
+    var reset = document.getElementById('eon-proto-reset');
+    if (reset) reset.addEventListener('click', function(){
+      var s = f.getAttribute('src');
+      f.setAttribute('src', 'about:blank');
+      requestAnimationFrame(function(){ f.setAttribute('src', s); cue.style.display = ''; });
+    });
+  }
+
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('load', fit);
+  document.addEventListener('DOMContentLoaded', function(){
+    fit();
+    proto();
+    /* catches height changes from font/image load and width changes that fire
+       no resize event, such as the scrollbar appearing */
+    if (window.ResizeObserver){
+      var ro = new ResizeObserver(fit);
+      ro.observe(document.querySelector('.page'));
+      ro.observe(root);
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    [120, 400, 900].forEach(function(d){ setTimeout(fit, d); });
+  });
+})();
+</script>
+<!-- Microsoft Clarity, project y4a8k7mdho. Session recording and heatmaps.
+     Loads async and injects its own tag, so it cannot block first paint; it sits
+     at the end of <head> so it never competes with the stylesheet or the fonts
+     for the connection. The only third-party request on the site besides Google
+     Fonts. Sets cookies and records behaviour, so it is in scope for GDPR
+     consent: there is no cookie banner on this site, which was a deliberate
+     call, not an oversight. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y4a8k7mdho");
+</script>
+</head>
+<body>
+
+<div class="viewport">
+<div class="page page--cs page--eon">
+
+  <header class="nav nav--cs">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <nav class="nav-links">
+      <a href="../../#work"><span>Work</span></a>
+      <a class="nav-cv" href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span>CV</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="dl13" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></a>
+      <a class="nav-linkedin" href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <a class="nav-email" href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+    </nav>
+    <button class="nav-burger" type="button" data-nav-toggle aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span></button>
+  </header>
+
+  <!-- cover -------------------------------------------------------------- -->
+  <section class="cs-cover">
+    <div class="cs-cover-copy">
+      <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">E.ON</span></div>
+      <h1 class="cs-title">App IA &amp; navigation redesign<span class="cs-dot">.</span></h1>
+      <div class="cs-disc">Card sorting · Tree testing · Information architecture · Navigation design · User testing</div>
+    </div>
+    <!-- The hero collage is the one figure on this page that needs no data-fit:
+         its rows are sized in cqw against its own container, so it is already
+         fluid and scales itself with the column. Giving it a zoom as well would
+         scale it twice. -->
+    <div class="cs-cover-media eon-hero">
+      <div class="eon-collage eon-collage--hero">
+        <div class="eon-col">
+          <div class="eon-t eon-t--a" style="--h:26"><img src="../../images/eon-collage/dd-updated.png" alt="Confirmation: monthly Direct Debit updated" style="object-position:center 24.8%"></div>
+          <div class="eon-t eon-t--b"><img src="../../images/eon-collage/dd-adjust.png" alt="Manage your Direct Debit: adjust monthly payment" style="object-position:center 52%"></div>
+          <div class="eon-t eon-t--c"><img src="../../images/eon-collage/bills-payments.png" alt="Bills and payments: July bill ready to pay" style="object-position:center 26%"></div>
+        </div>
+        <div class="eon-col">
+          <div class="eon-t eon-t--a" style="--h:18"><img src="../../images/eon-collage/dash-home.png" alt="Dashboard: latest bills and meter readings" style="object-position:center 100%"></div>
+          <div class="eon-t eon-t--b"><img src="../../images/eon-collage/usage-breakdown.png" alt="Usage breakdown: electricity and gas split" style="object-position:center 57.5%"></div>
+          <div class="eon-t eon-t--c"><img src="../../images/eon-collage/tariff.png" alt="Your tariff breakdown" style="object-position:center 36.2%"></div>
+        </div>
+        <div class="eon-col">
+          <div class="eon-t eon-t--a" style="--h:36"><img src="../../images/eon-collage/bill-layout.jpg" alt="Personalise your bill: drag-and-drop bill layout" style="object-position:center 35.3%"></div>
+          <div class="eon-t eon-t--b"><img src="../../images/eon-collage/sme-dashboard.jpg" alt="SME dashboard: June bill and smart-meter countdown" style="object-position:center 26.6%"></div>
+          <div class="eon-t eon-t--c"><img src="../../images/eon-collage/select-account.jpg" alt="Select an account" style="object-position:center 20%"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- metric strip (no kicker above it) ---------------------------------- -->
+  <div class="cs-metrics">
+    <div class="cs-metric"><div class="cs-metric-n">+7<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Key task completion</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">-13<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Time to complete core tasks</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">86.2<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Tree-test task success</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">190</div><div class="cs-metric-l">Customers tested</div></div>
+  </div>
+
+  <!-- context + meta table ------------------------------------------------ -->
+  <section class="cs-context">
+    <div class="cs-context-main">
+      <div class="kicker-row kicker-row--cs"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">Context</span></div>
+      <p class="cs-statement">E.ON is one of Europe’s largest energy providers, serving millions of residential customers. Its mobile app is a key service channel for tasks like submitting meter readings, paying bills and contacting support</p>
+    </div>
+    <div class="cs-meta">
+      <div class="cs-meta-row"><span class="cs-meta-k">Programme</span><span class="cs-meta-v">Full app rebuild (multi-MVP)</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Role</span><span class="cs-meta-v">UX &amp; Strategy Lead</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Sector</span><span class="cs-meta-v">Energy &amp; utilities</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Scale</span><span class="cs-meta-v">Multi-million customer base</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Remit</span><span class="cs-meta-v">IA strategy, navigation design<br>and validation</span></div>
+    </div>
+  </section>
+
+  <!-- the business problem ------------------------------------------------ -->
+  <section class="cs-problem">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">The business problem</span></div>
+    <div class="cs-problem-grid">
+      <p class="cs-statement">The app had become harder to navigate and harder to scale</p>
+      <div class="cs-problem-body">
+        <p class="cs-body">Core tasks like meter readings, bill payments and support were buried across multiple sections, forcing customers to backtrack through the app.</p>
+        <p class="cs-body">At the same time, the existing structure couldn’t support E.ON’s 24-month roadmap without adding more layers and duplication.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- my role (section lead only) ----------------------------------------- -->
+  <section class="cs-lead">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">My role</span></div>
+  </section>
+
+  <!-- STEP 01 · Open card sorting (white) --------------------------------- -->
+  <section class="eon-s01">
+    <div class="eon-head">
+      <div>
+        <div class="cs-marker"><span class="cs-marker-n">01.</span><span class="cs-marker-t">Open card sorting</span></div>
+        <h2 class="cs-step-title">Finding the structure customers expected</h2>
+      </div>
+      <div class="eon-head-body">
+        <p class="cs-step-body">I ran an open card sort with 30 participants to understand how customers grouped and labelled app content. The 37 cards were selected using a year of analytics, alongside key features from E.ON’s 24-month roadmap.</p>
+        <p class="cs-step-body">The results showed where the hierarchy could be flattened and which high-frequency tasks needed to be easier to find.</p>
+        <div class="cs-stats eon-s01-stats">
+          <div><div class="cs-stat-n">30</div><div class="cs-stat-l">Customers</div></div>
+          <div><div class="cs-stat-n">37</div><div class="cs-stat-l">Cards</div></div>
+          <div><div class="cs-stat-n">6<span class="cs-stat-u">min</span></div><div class="cs-stat-l">Median time</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card agreement. A 3 x 3 grid on desktop and a two-up carousel on
+         mobile, one markup either way: the nav is hidden on desktop, where the
+         grid does not scroll, and the same cards become the track below 900px.
+         Text, so it reflows with the column rather than taking a zoom. -->
+    <figure class="eon-ca">
+      <div class="eon-ca-head">
+        <span class="eon-lab">Card agreement</span>
+        <div class="eon-nav eon-ca-nav">
+          <button class="eon-arrow" data-carousel-nav="prev" data-carousel-track="[data-carousel-track-el='ca-m']" aria-label="Previous card-agreement page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+          <div class="eon-frac"><span data-carousel-frac="ca-m" class="eon-frac-n">01</span><span class="eon-frac-t" data-carousel-total="ca-m">/ 05</span></div>
+          <button class="eon-arrow" data-carousel-nav="next" data-carousel-track="[data-carousel-track-el='ca-m']" aria-label="Next card-agreement page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></button>
+        </div>
+      </div>
+      <div class="eon-ca-grid ia-track" data-carousel-track-el="ca-m" data-carousel-perview="2">
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">91.5<span class="eon-ca-u">%</span></div><div class="eon-ca-t">Help &amp; Support</div><div class="eon-ca-d">Live chat, Contact us &amp; Message us</div></div>
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">90<span class="eon-ca-u">%</span></div><div class="eon-ca-t">App settings</div><div class="eon-ca-d">App settings &amp; Manage App notifications</div></div>
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">86.5<span class="eon-ca-u">%</span></div><div class="eon-ca-t">Usage &amp; Tariffs</div><div class="eon-ca-d">View your gas usage, View your energy usage &amp; energy usage visualised</div></div>
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">81.6<span class="eon-ca-u">%</span></div><div class="eon-ca-t">My Account</div><div class="eon-ca-d">Provide a relative with access to your account, Update customer details &amp; Reset your password</div></div>
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">74.9<span class="eon-ca-u">%</span></div><div class="eon-ca-t">Bills &amp; Payments</div><div class="eon-ca-d">Latest electricity and gas statement, Make a payment, Previous bills &amp; Download a PDF copy of your bill</div></div>
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">63.2<span class="eon-ca-u">%</span></div><div class="eon-ca-t">Energy efficiency</div><div class="eon-ca-d">Energy efficient products &amp; E.ON’s boilers</div></div>
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">63.2<span class="eon-ca-u">%</span></div><div class="eon-ca-t">Guides &amp; tips</div><div class="eon-ca-d">Find out more about smart meters, Tips and tricks to become energy efficient &amp; E.ON’s clean air measure</div></div>
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">60.4<span class="eon-ca-u">%</span></div><div class="eon-ca-t">Usage &amp; Tariffs</div><div class="eon-ca-d">Your tariffs details &amp; Switch your tariff</div></div>
+        <div class="eon-ca-c" data-carousel-card><div class="eon-ca-n">51.4<span class="eon-ca-u">%</span></div><div class="eon-ca-t">Meters</div><div class="eon-ca-d">Top up a pre-paid meter, Previous meter reads &amp; Submit a meter reading</div></div>
+      </div>
+    </figure>
+  </section>
+
+  <!-- STEP 02 · Information architecture (ivory) -------------------------- -->
+  <section class="eon-s02">
+    <div class="eon-head">
+      <div>
+        <div class="cs-marker"><span class="cs-marker-n">02.</span><span class="cs-marker-t">Information architecture</span></div>
+        <h2 class="cs-step-title">A new architecture grounded in real behaviour and built to scale</h2>
+      </div>
+      <p class="cs-step-body eon-head-body">I used the card sort findings to redesign the app’s tier-one and tier-two structure, reducing depth and grouping content around customer expectations. The new structure also gave E.ON room to add future features without another major rethink.</p>
+    </div>
+
+    <!-- This module takes NO data-fit and no .cs-fig. It is an evidence
+         carousel made of text, not artwork: the cards are IA trees, so under
+         the house rule text inside a figure holds its authored size. Zooming it
+         with the column took the tree labels to 19px and the module read
+         oversized. The cards stay at their authored 308px and the track simply
+         shows more of them as the column grows, which is what a horizontal
+         scroller should do; paging stays 3 at a time, so the 04 total holds. -->
+    <div class="eon-ia">
+      <div class="eon-nav eon-ia-nav">
+        <button class="eon-arrow eon-arrow--lg" data-carousel-nav="prev" data-carousel-track="[data-carousel-track-el='ia']" aria-label="Previous architecture page"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+        <div class="eon-frac eon-frac--lg"><span data-carousel-frac="ia" class="eon-frac-n">01</span><span class="eon-frac-t" data-carousel-total="ia">/ 04</span></div>
+        <button class="eon-arrow eon-arrow--lg" data-carousel-nav="next" data-carousel-track="[data-carousel-track-el='ia']" aria-label="Next architecture page"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></button>
+      </div>
+      <div class="eon-ia-fit">
+        <div class="eon-ia-track ia-track" data-carousel-track-el="ia" data-carousel-perview="3">
+          <!-- the connector hairline is the track's own first child, so it
+               scrolls with the cards instead of sliding against them -->
+          <div class="eon-ia-rail" data-ia-rail></div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">01</span><span class="eon-ia-ht">Meter readings</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-n1"><span class="eon-nn1">1.1</span><span class="eon-nl1">Submit a meter reading</span></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">1.2</span><span class="eon-nl1">My readings</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">1.2.1</span><span class="eon-nl2">[Month] reading</span></div>
+                </div></div>
+                <div class="eon-n1"><span class="eon-nn1">1.3</span><span class="eon-nl1">Top up pre-paid meter</span></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">1.4</span><span class="eon-nl1">How to read your meter tutorial</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">1.4.1</span><span class="eon-nl2">Tutorial 1</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">02</span><span class="eon-ia-ht">Bills &amp; payments</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">2.1</span><span class="eon-nl1">Bills</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">2.1.1</span><span class="eon-nl2">Account balance</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">2.1.1.1</span><span class="eon-nl3">Top up by card</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">2.1.2</span><span class="eon-nl2">My bills</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">2.1.2.1</span><span class="eon-nl3">[Month] bill</span></div>
+                </div></div>
+                <div class="eon-n2"><span class="eon-nn2">2.1.3</span><span class="eon-nl2">Tailor my bills</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">2.2</span><span class="eon-nl1">Payments</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">2.2.1</span><span class="eon-nl2">My payments</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">2.2.1.1</span><span class="eon-nl3">[Month] payment</span></div>
+                </div></div>
+                <div class="eon-n2"><span class="eon-nn2">2.2.2</span><span class="eon-nl2">Make a payment</span></div>
+                <div class="eon-n2"><span class="eon-nn2">2.2.3</span><span class="eon-nl2">Manage my Direct Debit</span></div>
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">2.2.4</span><span class="eon-nl2">Payment methods</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">2.2.4.1</span><span class="eon-nl3">Payment method 1</span></div>
+                <div class="eon-n3"><span class="eon-nn3">2.2.4.2</span><span class="eon-nl3">Add payment method</span></div>
+                </div></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">03</span><span class="eon-ia-ht">Usage</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">3.1</span><span class="eon-nl1">Electricity usage</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">3.1.1</span><span class="eon-nl2">[Month] usage</span></div>
+                <div class="eon-n2"><span class="eon-nn2">3.1.2</span><span class="eon-nl2">Data visualisation</span></div>
+                <div class="eon-n2"><span class="eon-nn2">3.1.3</span><span class="eon-nl2">Similar homes comparison data</span></div>
+                <div class="eon-n2"><span class="eon-nn2">3.1.4</span><span class="eon-nl2">Set energy goals</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">3.2</span><span class="eon-nl1">Gas usage</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">3.2.1</span><span class="eon-nl2">[Month] usage</span></div>
+                <div class="eon-n2"><span class="eon-nn2">3.2.2</span><span class="eon-nl2">Data visualisation</span></div>
+                <div class="eon-n2"><span class="eon-nn2">3.2.3</span><span class="eon-nl2">Similar homes comparison data</span></div>
+                <div class="eon-n2"><span class="eon-nn2">3.2.4</span><span class="eon-nl2">Set energy goals</span></div>
+                </div></div>
+                <div class="eon-n1"><span class="eon-nn1">3.3</span><span class="eon-nl1">Set energy goals</span></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">3.4</span><span class="eon-nl1">Energy efficiency reports</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">3.4.1</span><span class="eon-nl2">Home energy efficiency report</span></div>
+                <div class="eon-n2"><span class="eon-nn2">3.4.2</span><span class="eon-nl2">Top device consumption</span></div>
+                <div class="eon-n2"><span class="eon-nn2">3.4.3</span><span class="eon-nl2">Energy fitness score</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">04</span><span class="eon-ia-ht">Help &amp; Support</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">4.1</span><span class="eon-nl1">FAQs</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">4.1.1</span><span class="eon-nl2">FAQ Category</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">4.1.1.1</span><span class="eon-nl3">Question 1</span></div>
+                </div></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">4.2</span><span class="eon-nl1">Tutorials or guides</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">4.2.1</span><span class="eon-nl2">Tutorial Category</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">4.2.1.1</span><span class="eon-nl3">Tutorial 1</span></div>
+                </div></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">4.3</span><span class="eon-nl1">Contact us</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">4.3.1</span><span class="eon-nl2">Asynchronous chat</span></div>
+                <div class="eon-n2"><span class="eon-nn2">4.3.2</span><span class="eon-nl2">Live chat</span></div>
+                <div class="eon-n2"><span class="eon-nn2">4.3.3</span><span class="eon-nl2">Call us</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">05</span><span class="eon-ia-ht">Tariffs</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-n1"><span class="eon-nn1">5.1</span><span class="eon-nl1">Your current tariff</span></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">5.2</span><span class="eon-nl1">Change my tariff</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">5.2.1</span><span class="eon-nl2">Tariff 1</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">06</span><span class="eon-ia-ht">Sustainable energy</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-n1"><span class="eon-nn1">6.1</span><span class="eon-nl1">E.ON’s green accreditations</span></div>
+                <div class="eon-n1"><span class="eon-nn1">6.2</span><span class="eon-nl1">Clean air measure / CO₂ report</span></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">6.3</span><span class="eon-nl1">Solar</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">6.3.1</span><span class="eon-nl2">Solar 1</span></div>
+                <div class="eon-n2"><span class="eon-nn2">6.3.2</span><span class="eon-nl2">Order Solar</span></div>
+                <div class="eon-n2"><span class="eon-nn2">6.3.3</span><span class="eon-nl2">What is Solar?</span></div>
+                <div class="eon-n2"><span class="eon-nn2">6.3.4</span><span class="eon-nl2">Advantages of Solar</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">6.4</span><span class="eon-nl1">Electric vehicle charging</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">6.4.1</span><span class="eon-nl2">Electric vehicle charger 1</span></div>
+                <div class="eon-n2"><span class="eon-nn2">6.4.2</span><span class="eon-nl2">Clean energy bolt-on</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">07</span><span class="eon-ia-ht">Smart home</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">7.1</span><span class="eon-nl1">Smart home product 1</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">7.1.1</span><span class="eon-nl2">Product function</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">08</span><span class="eon-ia-ht">Product &amp; services</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">8.1</span><span class="eon-nl1">Products</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">8.1.1</span><span class="eon-nl2">Smart meters</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">8.1.1.1</span><span class="eon-nl3">Smart meter 1</span></div>
+                <div class="eon-n3"><span class="eon-nn3">8.1.1.2</span><span class="eon-nl3">Book a smart meter installation</span></div>
+                <div class="eon-n3"><span class="eon-nn3">8.1.1.3</span><span class="eon-nl3">What are smart meters?</span></div>
+                <div class="eon-n3"><span class="eon-nn3">8.1.1.4</span><span class="eon-nl3">Advantages of smart meters</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">8.1.2</span><span class="eon-nl2">Solar</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">8.1.2.1</span><span class="eon-nl3">Solar 1</span></div>
+                <div class="eon-n3"><span class="eon-nn3">8.1.2.2</span><span class="eon-nl3">Order Solar</span></div>
+                <div class="eon-n3"><span class="eon-nn3">8.1.2.3</span><span class="eon-nl3">What is Solar?</span></div>
+                <div class="eon-n3"><span class="eon-nn3">8.1.2.4</span><span class="eon-nl3">Advantages of Solar</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">8.1.3</span><span class="eon-nl2">Smart thermostats</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">8.1.3.1</span><span class="eon-nl3">Smart thermostat 1</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">8.1.4</span><span class="eon-nl2">Boilers</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">8.1.4.1</span><span class="eon-nl3">Boiler 1</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n2"><span class="eon-nn2">8.1.5</span><span class="eon-nl2">Electric vehicle charging</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n3"><span class="eon-nn3">8.1.5.1</span><span class="eon-nl3">Electric vehicle charger 1</span></div>
+                <div class="eon-n3"><span class="eon-nn3">8.1.5.2</span><span class="eon-nl3">Clean energy bolt-on</span></div>
+                </div></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">8.2</span><span class="eon-nl1">Services</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">8.2.1</span><span class="eon-nl2">Book a service / repair</span></div>
+                <div class="eon-n2"><span class="eon-nn2">8.2.2</span><span class="eon-nl2">Manage my bookings</span></div>
+                <div class="eon-n2"><span class="eon-nn2">8.2.3</span><span class="eon-nl2">Government schemes</span></div>
+                <div class="eon-n2"><span class="eon-nn2">8.2.4</span><span class="eon-nl2">Affordable warmth scheme</span></div>
+                <div class="eon-n2"><span class="eon-nn2">8.2.5</span><span class="eon-nl2">Warm home discount</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">09</span><span class="eon-ia-ht">App settings</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-n1"><span class="eon-nn1">9.1</span><span class="eon-nl1">Energy-saving mode</span></div>
+                <div class="eon-n1"><span class="eon-nn1">9.2</span><span class="eon-nl1">Sync with device calendar</span></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">9.3</span><span class="eon-nl1">Notifications</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">9.3.1</span><span class="eon-nl2">Marketing notifications</span></div>
+                <div class="eon-n2"><span class="eon-nn2">9.3.2</span><span class="eon-nl2">E.ON see notifications</span></div>
+                <div class="eon-n2"><span class="eon-nn2">9.3.3</span><span class="eon-nl2">Push notification permissions</span></div>
+                </div></div>
+              </div>
+            </div>
+          </div>
+          <div class="eon-ia-cardwrap" data-carousel-card>
+            <div class="eon-ia-stem"></div>
+            <div class="eon-ia-card">
+              <div class="eon-ia-head"><span class="eon-ia-hn">10</span><span class="eon-ia-ht">My Account</span></div>
+              <div class="iatree iaroot">
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">10.1</span><span class="eon-nl1">My details</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">10.1.1</span><span class="eon-nl2">Name</span></div>
+                <div class="eon-n2"><span class="eon-nn2">10.1.2</span><span class="eon-nl2">Address</span></div>
+                <div class="eon-n2"><span class="eon-nn2">10.1.3</span><span class="eon-nl2">Notify moving home</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">10.2</span><span class="eon-nl1">Provide account access to 3rd party</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">10.2.1</span><span class="eon-nl2">Name 1</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">10.3</span><span class="eon-nl1">Badges</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">10.3.1</span><span class="eon-nl2">Badge 1</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">10.4</span><span class="eon-nl1">Refer a friend to E.ON</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">10.4.1</span><span class="eon-nl2">Refer energy</span></div>
+                <div class="eon-n2"><span class="eon-nn2">10.4.2</span><span class="eon-nl2">Refer solar</span></div>
+                <div class="eon-n2"><span class="eon-nn2">10.4.3</span><span class="eon-nl2">Refer a smart meter</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">10.5</span><span class="eon-nl1">Security</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">10.5.1</span><span class="eon-nl2">Biometrics</span></div>
+                <div class="eon-n2"><span class="eon-nn2">10.5.2</span><span class="eon-nl2">Password</span></div>
+                </div></div>
+                <div class="eon-ia-grp"><div class="eon-n1"><span class="eon-nn1">10.6</span><span class="eon-nl1">Switch account</span></div>
+                <div class="iatree eon-ia-sub">
+                <div class="eon-n2"><span class="eon-nn2">10.6.1</span><span class="eon-nl2">Account 1</span></div>
+                </div></div>
+                <div class="eon-n1"><span class="eon-nn1">10.7</span><span class="eon-nl1">Terms and conditions</span></div>
+                <div class="eon-n1"><span class="eon-nn1">10.8</span><span class="eon-nl1">Log out</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 03 · Tree testing (grey) --------------------------------------- -->
+  <section class="eon-s03">
+    <div class="eon-s03-grid">
+      <div>
+        <div class="cs-marker"><span class="cs-marker-n">03.</span><span class="cs-marker-t">Tree testing</span></div>
+        <h2 class="cs-step-title">Testing the new architecture with 100 customers</h2>
+        <p class="cs-step-body">I ran a tree test with 100 customers across nine priority tasks to test the new architecture without the visual design influencing results.</p>
+        <p class="cs-step-body">It achieved 86.2% task success, giving us confidence customers could find what they needed before moving into UI design.</p>
+      </div>
+      <!-- data-arc is only seeded inside a [data-panelgroup] ancestor, so the
+           ring carries one even though this step has no tabs (CLAUDE.md). -->
+      <div class="eon-tt" data-panelgroup="eon-tt" data-fit="516">
+        <div class="cs-fig">
+          <div class="eon-ring">
+            <svg viewBox="0 0 120 120" class="eon-ring-svg" aria-hidden="true">
+              <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(18,18,16,.10)" stroke-width="7.7"></circle>
+              <circle data-arc data-c="314.2" data-off="43.4" data-delay="0" cx="60" cy="60" r="50" fill="none" stroke="#0f738a" stroke-width="7.7" stroke-linecap="butt" stroke-dasharray="314.2" style="stroke-dashoffset:43.4"></circle>
+            </svg>
+            <div class="eon-ring-c"><div class="eon-ring-n">86.2<span class="eon-ring-u">%</span></div></div>
+            <div class="eon-ring-l">Task success</div>
+          </div>
+        </div>
+        <div class="cs-stats eon-tt-stats">
+          <div><div class="cs-stat-n">100</div><div class="cs-stat-l">Customers</div></div>
+          <div><div class="cs-stat-n">9</div><div class="cs-stat-l">Priority tasks</div></div>
+          <div><div class="cs-stat-n">3<span class="cs-stat-u">min</span></div><div class="cs-stat-l">Median completion</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The bars are a fluid chart, not a zoomed figure: every value is a
+         percentage, so the tracks simply grow with the column and the labels
+         hold their size. -->
+    <div class="eon-bars" data-panelgroup="eon-tt-bars">
+      <div class="eon-bars-head"><span class="eon-lab">Success by task</span><span class="eon-bars-n">100 customers</span></div>
+      <div class="eon-bars-rows">
+        <div class="eon-bar"><div class="eon-bar-l">Submit a meter reading</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="98%" data-delay="0" style="width:98%"></div></div><div class="eon-bar-v">98<span class="eon-bar-u">%</span></div></div>
+        <div class="eon-bar"><div class="eon-bar-l">Manage a Direct Debit</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="95%" data-delay="70" style="width:95%"></div></div><div class="eon-bar-v">95<span class="eon-bar-u">%</span></div></div>
+        <div class="eon-bar"><div class="eon-bar-l">Request a smart meter</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="52%" data-delay="140" style="width:52%"></div></div><div class="eon-bar-v">52<span class="eon-bar-u">%</span></div></div>
+        <div class="eon-bar"><div class="eon-bar-l">View bill details</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="90%" data-delay="210" style="width:90%"></div></div><div class="eon-bar-v">90<span class="eon-bar-u">%</span></div></div>
+        <div class="eon-bar"><div class="eon-bar-l">View gas usage</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="80%" data-delay="280" style="width:80%"></div></div><div class="eon-bar-v">80<span class="eon-bar-u">%</span></div></div>
+        <div class="eon-bar"><div class="eon-bar-l">Pay a bill</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="86%" data-delay="350" style="width:86%"></div></div><div class="eon-bar-v">86<span class="eon-bar-u">%</span></div></div>
+        <div class="eon-bar"><div class="eon-bar-l">View current tariff</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="87%" data-delay="420" style="width:87%"></div></div><div class="eon-bar-v">87<span class="eon-bar-u">%</span></div></div>
+        <div class="eon-bar"><div class="eon-bar-l">Find help / FAQs</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="98%" data-delay="490" style="width:98%"></div></div><div class="eon-bar-v">98<span class="eon-bar-u">%</span></div></div>
+        <div class="eon-bar"><div class="eon-bar-l">Find boiler information</div><div class="eon-bar-track"><div class="eon-bar-f" data-bar data-w="90%" data-delay="560" style="width:90%"></div></div><div class="eon-bar-v">90<span class="eon-bar-u">%</span></div></div>
+      </div>
+      <div class="eon-post">
+        <div class="eon-lab eon-post-l">Post-test changes</div>
+        <p class="eon-post-p">Smart-meter booking was the only weak path, with 52% task success. I added a lateral route into Products &amp; Services, which resolved the issue in the next round of testing.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 04 · Navigation testing (black) -------------------------------- -->
+  <section class="eon-s04">
+    <div class="eon-s04-grid">
+      <div>
+        <div class="cs-marker cs-marker--dark"><span class="cs-marker-n">04.</span><span class="cs-marker-t">Navigation testing</span></div>
+        <h2 class="cs-step-title cs-step-title--dark">Testing three navigation patterns with 60 customers</h2>
+        <p class="cs-step-body cs-step-body--dark">I tested all three against the same nine priority tasks to understand which navigation made the app easiest to use without compromising future growth.</p>
+        <div class="eon-conc-l"><span class="eon-lab eon-lab--dark">The three concepts</span></div>
+        <div class="eon-conc eon-conc--first"><span class="eon-conc-n">01</span><div><div class="eon-conc-t">Burger-only navigation</div><p class="eon-conc-p">Everything sits behind one menu. Simple to scale, but every journey starts a tap deeper.</p></div></div>
+        <div class="eon-conc"><span class="eon-conc-n">02</span><div class="eon-conc-b"><div class="eon-conc-t">Hybrid bottom navigation and burger</div><p class="eon-conc-p">Frequent tasks stay visible in the bottom bar, with secondary journeys in the burger menu.</p></div></div>
+        <div class="eon-conc"><span class="eon-conc-n">03</span><div class="eon-conc-b"><div class="eon-conc-t">Bottom navigation only</div><p class="eon-conc-p">Core journeys stay visible at all times, making frequent tasks quicker and more predictable.</p><div class="eon-tag-w"><span class="eon-tag">Taken to production</span></div></div></div>
+      </div>
+
+      <!-- The prototype is a drawn module, so it scales with the column; the
+           Restart and full-screen controls sit outside .cs-fig and keep their
+           authored size and tap targets. -->
+      <div class="eon-proto" data-fit="516">
+        <div class="cs-fig">
+          <div class="eon-phone-stage">
+            <div class="eon-phone">
+              <div class="eon-phone-body">
+                <div class="eon-phone-screen">
+                  <iframe id="eon-proto-frame" title="E.ON bottom-navigation prototype" src="../../prototypes/eon-bottomnav/index.html" scrolling="no" loading="lazy"></iframe>
+                </div>
+              </div>
+            </div>
+            <div id="eon-cue" class="eon-cue" aria-hidden="true">
+              <span class="eon-cue-r"></span>
+              <span class="eon-cue-p"></span>
+            </div>
+          </div>
+        </div>
+        <div class="eon-proto-cap">
+          <span class="eon-cue-dot" aria-hidden="true"><span class="eon-cue-dot-r"></span><span class="eon-cue-dot-c"></span></span>
+          <span class="eon-proto-cap-t">Explore the interactive prototype</span>
+        </div>
+        <div class="eon-proto-act">
+          <button type="button" id="eon-proto-reset" class="eon-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg><span>Restart</span></button>
+          <a class="eon-proto-full" href="../../prototypes/eon-bottomnav/index.html" target="_blank" rel="noopener"><span>Open full screen</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9 ext9--cs" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- What testing showed: the evidence is nested in a lifted panel so the
+         band reads as one unit (CLAUDE.md). -->
+    <div class="eon-ut">
+      <div class="eon-ut-l"><span class="eon-lab eon-lab--dark">What testing showed</span></div>
+      <!-- The three style strings have to stay in the markup: cs-interactions
+           swaps the whole style attribute on click (CLAUDE.md). min-height:44px
+           comes from the global button rule in styles.css, which the inline
+           styles cannot undercut because they never set it. The panels carry no
+           data-disp, so the engine clears the inline display and the stylesheet
+           decides, and each panel is its own grid. -->
+      <div class="cs-tabs eon-ut-tabs">
+        <div class="cs-tabtrack eon-tabtrack">
+          <button data-tabgroup="eon-ut" data-view="data" data-on="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#1a1a17;background:#ffd400;border:none;border-radius:100px;padding:11px 20px;cursor:pointer" data-off="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#9d9b8f;background:transparent;border:none;border-radius:100px;padding:11px 20px;cursor:pointer" style="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#1a1a17;background:#ffd400;border:none;border-radius:100px;padding:11px 20px;cursor:pointer">The data</button>
+          <button data-tabgroup="eon-ut" data-view="words" data-on="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#1a1a17;background:#ffd400;border:none;border-radius:100px;padding:11px 20px;cursor:pointer" data-off="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#9d9b8f;background:transparent;border:none;border-radius:100px;padding:11px 20px;cursor:pointer" style="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#9d9b8f;background:transparent;border:none;border-radius:100px;padding:11px 20px;cursor:pointer">In their words</button>
+          <button data-tabgroup="eon-ut" data-view="learnings" data-on="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#1a1a17;background:#ffd400;border:none;border-radius:100px;padding:11px 20px;cursor:pointer" data-off="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#9d9b8f;background:transparent;border:none;border-radius:100px;padding:11px 20px;cursor:pointer" style="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#9d9b8f;background:transparent;border:none;border-radius:100px;padding:11px 20px;cursor:pointer"><span class="eon-tab-the">The </span>learnings</button>
+        </div>
+      </div>
+      <div class="eon-ut-p eon-ut-data" data-panelgroup="eon-ut" data-view="data">
+        <div><div class="eon-ut-n">+7<span class="eon-ut-u">%</span></div><div class="eon-ut-lab">Key task completion</div></div>
+        <div><div class="eon-ut-n">-13<span class="eon-ut-u">%</span></div><div class="eon-ut-lab">Time on core tasks</div></div>
+        <div><div class="eon-ut-n">60</div><div class="eon-ut-lab">Customers across three rounds</div></div>
+        <div><div class="eon-ut-n">9</div><div class="eon-ut-lab">Priority tasks tested</div></div>
+      </div>
+      <div class="eon-ut-p eon-ut-words" data-panelgroup="eon-ut" data-view="words" style="display:none">
+        <div><blockquote class="eon-q">“Nice and easy. Really well laid out and you lead the process, which is really nice.”</blockquote><div class="eon-q-a">Lowering direct debit</div></div>
+        <div><blockquote class="eon-q">“It’s handy it tells you on average what you spend, I’ve not seen that with any other provider.”</blockquote><div class="eon-q-a">Lowering direct debit</div></div>
+        <div><blockquote class="eon-q">“That was perfectly logical and clear on what I needed to do.”</blockquote><div class="eon-q-a">Booking a smart meter</div></div>
+        <div><blockquote class="eon-q">“It’s pretty well presented, I like the graphics and the way it’s done.”</blockquote><div class="eon-q-a">Bill breakdown</div></div>
+        <div><blockquote class="eon-q">“The daily cost is pretty unique, I’ve never seen that before but it’s helpful.”</blockquote><div class="eon-q-a">Latest bill</div></div>
+        <div><blockquote class="eon-q">“A plus for the layout and clarity of that page.”</blockquote><div class="eon-q-a">Gas usage</div></div>
+      </div>
+      <div class="eon-ut-p eon-ut-learn" data-panelgroup="eon-ut" data-view="learnings" style="display:none">
+        <div class="eon-learn"><span class="eon-learn-n">01</span><p class="eon-learn-p">One visible navigation system worked better than splitting journeys across a bottom bar and burger menu.</p></div>
+        <div class="eon-learn"><span class="eon-learn-n">02</span><p class="eon-learn-p">Persistent bottom navigation made frequent tasks like readings, bills and payments easier to predict and reach.</p></div>
+        <div class="eon-learn"><span class="eon-learn-n">03</span><p class="eon-learn-p">A more tab gave secondary journeys a clear home without competing with primary navigation.</p></div>
+        <div class="eon-learn"><span class="eon-learn-n">04</span><p class="eon-learn-p">Customers expected tariffs and payment details in my account or on the dashboard.</p></div>
+        <div class="eon-learn"><span class="eon-learn-n">05</span><p class="eon-learn-p">Support, Products and Services overlapped for journeys like smart meters, moving home and boilers.</p></div>
+        <div class="eon-learn"><span class="eon-learn-n">06</span><p class="eon-learn-p">Lateral links helped where customers expected more than one valid route to the same task.</p></div>
+        <div class="eon-learn"><span class="eon-learn-n">07</span><p class="eon-learn-p">Combining Usage and Bills better matched how customers connected consumption with cost.</p></div>
+        <div class="eon-learn"><span class="eon-learn-n">08</span><p class="eon-learn-p">Graphs, comparisons and contextual explanations added value beyond simple task completion.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 05 · Delivery support (white) ---------------------------------- -->
+  <section class="eon-s05">
+    <div class="eon-head">
+      <div>
+        <div class="cs-marker"><span class="cs-marker-n">05.</span><span class="cs-marker-t">Delivery support</span></div>
+        <h2 class="cs-step-title">Turning the new navigation into delivery ready design</h2>
+      </div>
+      <p class="cs-step-body eon-head-body">I worked closely with a UI designer, product, delivery and engineering to turn the new navigation into build-ready designs, schematics and rules that defined how screens connect and behave.</p>
+    </div>
+
+    <!-- The hand-off collage: the hero collage widened to six columns at the
+         identical scale. Every tile is a ratio of --u, the column unit, so the
+         desktop and mobile geometries are one set of numbers and the locked
+         crops cannot drift apart. Do not re-derive them (CLAUDE.md). -->
+    <figure class="eon-hf">
+      <div class="eon-hf-fit" data-fit="1104">
+        <div class="cs-fig">
+          <div class="eon-hf-frame" data-collage-frame data-motion="wipefade">
+            <div class="eon-collage eon-collage--hf">
+              <div class="eon-col">
+                <div class="eon-t eon-t--a" style="--h:156"><img src="../../images/eon-collage/dd-updated.png" alt="Confirmation: monthly Direct Debit updated" style="object-position:center 24.8%"></div>
+                <div class="eon-t eon-t--b"><img src="../../images/eon-collage/dd-adjust.png" alt="Manage your Direct Debit: adjust monthly payment" style="object-position:center 55.6%"></div>
+                <div class="eon-t eon-t--c"><img src="../../images/eon-collage/bills-payments.png" alt="Bills and payments: July bill ready to pay" style="object-position:center 20.1%"></div>
+              </div>
+              <div class="eon-col">
+                <div class="eon-t eon-t--a" style="--h:108"><img src="../../images/eon-collage/dash-home.png" alt="Dashboard: latest bills and meter readings" style="object-position:center 100%"></div>
+                <div class="eon-t eon-t--b"><img src="../../images/eon-collage/usage-breakdown.png" alt="Usage breakdown: electricity and gas split" style="object-position:center 53.7%"></div>
+                <div class="eon-t eon-t--c"><img src="../../images/eon-collage/tariff.png" alt="Your tariff breakdown" style="object-position:center 22.4%"></div>
+              </div>
+              <div class="eon-col">
+                <div class="eon-t eon-t--a" style="--h:216"><img src="../../images/eon-collage/bill-layout.jpg" alt="Personalise your bill: drag-and-drop bill layout" style="object-position:center 35.3%"></div>
+                <div class="eon-t eon-t--b"><img src="../../images/eon-collage/sme-dashboard.jpg" alt="SME dashboard: June bill and smart-meter countdown" style="object-position:center 26.6%"></div>
+                <div class="eon-t eon-t--c"><img src="../../images/eon-collage/select-account.jpg" alt="Select an account" style="object-position:center 15%"></div>
+              </div>
+              <div class="eon-col">
+                <div class="eon-t eon-t--a" style="--h:132"><img src="../../images/eon-collage/readings-prompt.png" alt="We need your readings: enter meter readings" style="object-position:center 17.1%"></div>
+                <div class="eon-t eon-t--b"><img src="../../images/eon-collage/usage-summary.png" alt="Usage summary: spend by month" style="object-position:center 48.2%"></div>
+                <div class="eon-t eon-t--c"><img src="../../images/eon-collage/sme-benefits.jpg" alt="Benefits of personalised billing" style="object-position:center 28.4%"></div>
+              </div>
+              <div class="eon-col">
+                <div class="eon-t eon-t--a" style="--h:180"><img src="../../images/eon-collage/sme-accounting.jpg" alt="Connect your accounts: select your accounting software" style="object-position:center 31.1%"></div>
+                <div class="eon-t eon-t--b"><img src="../../images/eon-collage/sme-energy-bill.jpg" alt="SME energy bill: total for June, split by energy and meter readings" style="object-position:center 4.2%"></div>
+                <div class="eon-t eon-t--c"><img src="../../images/eon-collage/products-services.png" alt="Products and services: smart meters, solar, thermostats and boilers" style="object-position:center 34.6%"></div>
+              </div>
+              <div class="eon-col">
+                <div class="eon-t eon-t--a" style="--h:96"><img src="../../images/eon-collage/usage-breakdown.png" alt="Usage breakdown: daily cost and usage in detail" style="object-position:center 80.5%"></div>
+                <div class="eon-t eon-t--b"><img src="../../images/eon-collage/sme-energy-bill.jpg" alt="SME energy bill in detail: discounts, standing charge and totals" style="object-position:center 75.2%"></div>
+                <div class="eon-t eon-t--c"><img src="../../images/eon-collage/bill-setup.jpg" alt="Your personalised bill is all set up" style="object-position:center 30.1%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </section>
+
+  <!-- outcome (black) ----------------------------------------------------- -->
+  <section class="cs-outcome">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs kicker--dark">The outcome</span></div>
+    <p class="cs-outcome-statement">A scalable app structure that improved core journeys and paved the way for E.ON’s 24-month roadmap<span class="cs-dot">.</span></p>
+    <div class="cs-outcome-grid">
+      <div class="cs-outcome-metric"><div class="cs-outcome-n cs-outcome-n--lead">+7<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Key task completion</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">-13<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Time to complete core tasks</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">86.2<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Tree-test task success</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">190</div><div class="cs-outcome-l">Customers tested</div></div>
+    </div>
+  </section>
+
+  <footer class="cs-footer">
+    <div class="cs-footer-main">
+      <div class="cs-footer-next">Next: HSBC<span class="cs-dot">.</span></div>
+      <a class="cs-footer-link" href="../hsbc-premier/"><span>View the next case study</span></a>
+    </div>
+    <div class="cs-footer-links">
+      <a href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+      <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9 ext9--cs" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+  </footer>
+
+</div>
+</div>
+
+<script src="../../cs-interactions.js"></script>
+<script src="../../hsbc-motion-lab.js"></script>
+<script src="../../ts-carousel.js"></script>
+
+<!-- Mobile menu open state (Nav Options.dc.html, option 2g). A direct child of
+     body, outside .viewport, so a transformed .page can never become its
+     containing block; display:none above 900px. Driven by nav-menu.js. -->
+<div class="nav-menu" id="nav-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="nav-menu-top">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <button class="nav-close" type="button" data-nav-close aria-label="Close menu">
+      <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M1 1l16 16M17 1L1 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+    </button>
+  </div>
+  <nav class="nav-menu-links" aria-label="Site">
+    <a href="../../#work"><span class="nav-menu-u">Work</span></a>
+    <a href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">CV</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></span></a>
+    <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">LinkedIn</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></a>
+    <a href="mailto:hello@thomas-saldanha.com"><span class="nav-menu-u">hello@thomas-saldanha.com</span></a>
+  </nav>
+  <div class="nav-menu-foot">London, United Kingdom</div>
+</div>
+<script src="../../nav-menu.js"></script>
+</body>
+</html>

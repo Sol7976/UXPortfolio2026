@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>End-to-end authentication redesign · Laced · Thomas Saldanha</title>
+<meta name="description" content="Service blueprints and operational design for a sneaker marketplace authenticating up to 3,000 pairs a day.">
+<!-- Canonical and share metadata. These are the only ABSOLUTE urls on the site;
+     every other path is relative. Open Graph requires it: a relative og:image or
+     og:url is ignored by every crawler, so they cannot follow the site's usual
+     convention. This also means the share preview only resolves once the site is
+     live at www.uxtom.co.uk. -->
+<link rel="canonical" href="https://www.uxtom.co.uk/work/laced-authentication/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Thomas Saldanha">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://www.uxtom.co.uk/work/laced-authentication/">
+<meta property="og:title" content="End-to-end authentication redesign · Laced · Thomas Saldanha">
+<meta property="og:description" content="Service blueprints and operational design for a sneaker marketplace authenticating up to 3,000 pairs a day.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="End-to-end authentication redesign · Laced · Thomas Saldanha">
+<meta name="twitter:description" content="Service blueprints and operational design for a sneaker marketplace authenticating up to 3,000 pairs a day.">
+<meta property="og:image" content="https://www.uxtom.co.uk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Thomas Saldanha, UX and product design leader. I help teams find clarity in complex problems.">
+<meta name="twitter:image" content="https://www.uxtom.co.uk/og-image.png">
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<!-- JetBrains Mono sets the [ ui screen ] placeholder tiles in the step 03
+     collage, so it is loaded. Newsreader italic is the site's editorial accent
+     and loads on every case study (CLAUDE.md), though nothing on this page
+     sets a quote in it. The design file also asks for Hanken weight 800 for the
+     // mark; the rest of the site loads 300–700 and strokes the mark, so this
+     page matches them rather than rendering one page's // heavier. -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&amp;family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles.css">
+<script>
+/* Breakpoint contract (SHIP-MANIFEST.md), identical to the homepage and the
+   other case studies:
+     >= 1200px  the desktop design, bands edge to edge, content column capped at
+                1680px (all of that is in styles.css, no JS involved)
+     900–1199px the same desktop design, scaled proportionally to the viewport
+     < 900px    the mobile design, its 440px column growing fluidly
+
+   The 900–1199px band is a geometric scale, not a re-layout: the page is laid
+   out at 1200px, the bottom of the desktop band, and then transformed, so
+   nothing re-wraps and 1199px is continuous with 1200px. 1200px is also where
+   this page's content column is 1104px, the width the desktop design was drawn
+   at, so the build and the design line up there exactly. .viewport carries the
+   resulting height (and clips the layout overflow, `clip` rather than `hidden`
+   so it never becomes a scroll container that could jump on keyboard focus). */
+(function(){
+  var W = 1200, MIN = 900, root = document.documentElement, page, host, last;
+
+  /* Figures scale uniformly with the column. --k is the only thing computed
+     here: a figure cell's current width over data-fit, the width it had at the
+     authored 1200px. The CSS then zooms the cell by it, so everything inside
+     keeps its authored geometry and simply paints larger. It has to be computed
+     in script because CSS cannot divide one length by another.
+
+     Measuring the zoomed element is not circular: zoom scales an element's
+     contents, not the box its parent lays out, so the rect stays the track
+     width whatever --k is. */
+  function figures(w){
+    /* --col is the band content column, 1104px authored and 1584px at the cap.
+       Band statements take five twelfths of it. Measured here for the same
+       reason as the rest: CSS cannot divide one length by another, and a max()
+       written into a child would re-resolve its 100% against the child. */
+    if (page) page.style.setProperty('--col',
+      (Math.min(page.getBoundingClientRect().width, 1680) - 96).toFixed(2) + 'px');
+    document.querySelectorAll('[data-fit]').forEach(function(el){
+      if (w < MIN){ el.style.removeProperty('--k'); return; }
+      var box = el.getBoundingClientRect().width;
+      var cap = parseFloat(el.getAttribute('data-fit-cap'));
+      if (cap) box = Math.min(box, cap);
+      var k = Math.max(1, box / parseFloat(el.getAttribute('data-fit')));
+      el.style.setProperty('--k', k.toFixed(4));
+    });
+  }
+
+  function fit(){
+    page = page || document.querySelector('.page');
+    host = host || document.querySelector('.viewport');
+    /* The breakpoint has to be decided the way the media query decides it.
+       A media query measures innerWidth, which includes a classic scrollbar;
+       documentElement.clientWidth excludes it. Between them the CSS served the
+       desktop design while this script still thought it was mobile, so .page
+       stayed 1200px wide, unscaled, inside a narrower viewport and .viewport
+       clipped the right third away. So: innerWidth picks the design, and
+       clientWidth, the box the page actually has to fit in, sets the scale. */
+    var w = innerWidth || root.clientWidth,
+        s = w >= MIN ? Math.min(1, root.clientWidth / W) : 1;
+    if (s !== last){ root.style.setProperty('--page-scale', String(s)); last = s; }
+    figures(w);
+    if (page && host) host.style.height = s < 1 ? Math.ceil(page.offsetHeight * s) + 'px' : '';
+  }
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('load', fit);
+  document.addEventListener('DOMContentLoaded', function(){
+    fit();
+    /* catches height changes from font/image load and width changes that fire no
+       resize event, such as the scrollbar appearing */
+    if (window.ResizeObserver){
+      var ro = new ResizeObserver(fit);
+      ro.observe(document.querySelector('.page'));
+      ro.observe(root);
+    }
+  });
+})();
+</script>
+<script>
+/* STEP 03 collage fade.
+
+   cs-interactions' data-wf driver takes its progress from the element's CENTRE:
+   it starts when the centre is 70% of the way down the viewport and finishes at
+   48%. That is right for a block of ordinary height, and wrong for this one.
+   The frame is 640px tall at the authored width and 918px at the 1680 cap, so
+   its centre only reaches 70% once nearly the whole frame has scrolled past,
+   and because every column rests at opacity 0 the band reads as roughly 600px
+   of empty black before the first one begins.
+
+   So this frame carries data-la-wf rather than data-wf="reveal", which keeps
+   the shared engine off it, and --p is driven here from the frame's TOP: 0 when
+   the top is at the bottom of the viewport, 1 by the time it is a quarter of
+   the way down. Column 01 is therefore already lit as the frame comes into
+   view, and the last of the five lands with about two thirds of the frame on
+   screen. Pure function of scroll position, so it reverses on the way back up,
+   and pinned to 1 under prefers-reduced-motion.
+
+   Bound straight to scroll rather than coalesced through a frame, which is how
+   cs-interactions binds its own data-wf handler: one rect read and one property
+   write is cheaper than the frame it would wait for, and a throttled
+   requestAnimationFrame leaves the collage behind the scroll. */
+(function(){
+  var el, RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function tick(){
+    el = el || document.querySelector('[data-la-wf]');
+    if (!el) return;
+    if (RM){ el.style.setProperty('--p', '1'); return; }
+    var vh = innerHeight || 800,
+        p  = (vh - el.getBoundingClientRect().top) / (vh * 0.75);
+    el.style.setProperty('--p', (p < 0 ? 0 : p > 1 ? 1 : p).toFixed(3));
+  }
+  addEventListener('scroll', tick, {passive:true, capture:true});
+  addEventListener('resize', tick, {passive:true});
+  addEventListener('load', tick);
+  document.addEventListener('DOMContentLoaded', tick);
+  tick();
+})();
+</script>
+<!-- Microsoft Clarity, project y4a8k7mdho. Session recording and heatmaps.
+     Loads async and injects its own tag, so it cannot block first paint; it sits
+     at the end of <head> so it never competes with the stylesheet or the fonts
+     for the connection. The only third-party request on the site besides Google
+     Fonts. Sets cookies and records behaviour, so it is in scope for GDPR
+     consent: there is no cookie banner on this site, which was a deliberate
+     call, not an oversight. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y4a8k7mdho");
+</script>
+</head>
+<body>
+
+<div class="viewport">
+<div class="page page--cs page--la">
+
+  <header class="nav nav--cs">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <nav class="nav-links">
+      <a href="../../#work"><span>Work</span></a>
+      <a class="nav-cv" href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span>CV</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="dl13" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></a>
+      <a class="nav-linkedin" href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <a class="nav-email" href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+    </nav>
+    <button class="nav-burger" type="button" data-nav-toggle aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span></button>
+  </header>
+
+  <!-- cover -->
+  <section class="cs-cover">
+    <div class="cs-cover-copy">
+      <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">Laced</span></div>
+      <h1 class="cs-title">End-to-end authentication redesign<span class="cs-dot">.</span></h1>
+      <div class="cs-disc">Service blueprints · Operational design · Touch interfaces · User testing</div>
+    </div>
+    <!-- no data-fit: the panel holds its ratio and everything inside the crop is
+         percentage based (object-fit plus a percentage translate/scale), so it
+         is already fluid and needs no zoom. -->
+    <div class="cs-cover-media la-cover-media">
+      <img class="la-cover-img" src="../../images/laced-auth-flow.png" alt="Authentication service flow: every screen, decision point and outcome state mapped end to end">
+    </div>
+  </section>
+
+  <!-- metric strip -->
+  <div class="cs-metrics">
+    <div class="cs-metric"><div class="cs-metric-n">-38<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Average authentication time</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">+26<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Daily authentication capacity</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">£2.4k</div><div class="cs-metric-l">Weekly overtime savings</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">£5.2k</div><div class="cs-metric-l">Weekly savings from fewer lost sneakers</div></div>
+  </div>
+
+  <!-- context -->
+  <section class="cs-context">
+    <div class="cs-context-main">
+      <div class="kicker-row kicker-row--cs"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">Context</span></div>
+      <p class="cs-statement">Laced is a high-growth marketplace for rare, limited-release sneakers. Every pair is manually authenticated in its warehouse before reaching the buyer, with up to 3,000 sneakers processed each day while the business raised its £10m Series A</p>
+    </div>
+    <div class="cs-meta">
+      <div class="cs-meta-row"><span class="cs-meta-k">Programme</span><span class="cs-meta-v">Warehouse operations redesign</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Role</span><span class="cs-meta-v">UX &amp; Strategy Lead</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Sector</span><span class="cs-meta-v">Marketplace &amp; operations</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Scale</span><span class="cs-meta-v">Up to 3,000 sneakers authenticated daily</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Remit</span><span class="cs-meta-v">End-to-end operational redesign</span></div>
+    </div>
+  </section>
+
+  <!-- the business problem -->
+  <section class="cs-problem">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">The business problem</span></div>
+    <div class="cs-problem-grid">
+      <p class="cs-statement">A £660k a day operation that wasn’t built for the volume moving through it</p>
+      <div class="cs-problem-body">
+        <p class="cs-body">Laced had moved into a 6,000 sq ft warehouse, but the operation and software had not scaled with it. Authentication would always require expert, hands-on checks, but the surrounding process was creating daily backlogs, unnecessary handling and staff overtime.</p>
+        <p class="cs-body">With around £660k of stock moving through the warehouse each day and no overnight storage for security, every intake had to clear by close. The operation needed to be redesigned end-to-end to handle the volume reliably.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- my role -->
+  <section class="cs-lead">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">My role</span></div>
+  </section>
+
+  <!-- STEP 01 · Operational alignment (white) -->
+  <section class="la-s01">
+    <div class="la-head">
+      <div class="la-head-t">
+        <div class="cs-marker"><span class="cs-marker-n">01.</span><span class="cs-marker-t">Operational alignment</span></div>
+        <h2 class="cs-step-title">Aligning the operation around one scalable model</h2>
+      </div>
+      <div class="la-head-b">
+        <p class="cs-step-body">Authentication relied on expert judgement, but the surrounding operation had grown inconsistently across teams and desks. I worked day to day with the founder, Head of Authentication and operational teams to align competing views and define a model that could handle more volume with less variance, fewer errors and less pressure on operators.</p>
+      </div>
+    </div>
+
+    <div class="la-cards">
+      <div class="la-card">
+        <div class="la-card-n">6</div>
+        <div class="la-card-t">Competing views aligned</div>
+        <p class="la-card-p">Founder <span class="la-dot"></span> Head of Authentication<br><span class="la-nb">Warehouse operations</span> <span class="la-dot"></span> <span class="la-nb">Customer support <span class="la-dot"></span></span> Product <span class="la-dot"></span> Engineering</p>
+      </div>
+      <div class="la-card">
+        <div class="la-card-n">10+</div>
+        <div class="la-card-t">Journeys mapped</div>
+        <p class="la-card-p">Cutting <span class="la-dot"></span> Authentication <span class="la-dot"></span> Packing <span class="la-dot"></span> Labelling <span class="la-dot"></span> Delivery <span class="la-dot"></span> Minor fixes <span class="la-dot"></span> Returns <span class="la-dot"></span> Customer support <span class="la-dot"></span> Delivery integrations <span class="la-dot"></span> Photography</p>
+      </div>
+      <div class="la-card">
+        <div class="la-card-n">2</div>
+        <div class="la-card-t">Sites blueprinted</div>
+        <p class="la-card-p">London 6,000 sq ft <span class="la-dot"></span><br>Amsterdam 20,000 sq ft</p>
+      </div>
+    </div>
+
+    <!-- the toggle sits outside the evidence and stays at its authored size -->
+    <div class="cs-tabs la-s01-tabs" aria-label="Step 01 evidence">
+      <div class="cs-tabtrack">
+        <button data-tabgroup="la-s01" data-view="flow" data-on="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#1a1a17;background:#ffd400;border:none;border-radius:100px;padding:12px 22px;cursor:pointer" data-off="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#67665f;background:transparent;border:none;border-radius:100px;padding:12px 22px;cursor:pointer" style="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#1a1a17;background:#ffd400;border:none;border-radius:100px;padding:12px 22px;cursor:pointer">Journey map</button>
+        <button data-tabgroup="la-s01" data-view="plan" data-on="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#1a1a17;background:#ffd400;border:none;border-radius:100px;padding:12px 22px;cursor:pointer" data-off="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#67665f;background:transparent;border:none;border-radius:100px;padding:12px 22px;cursor:pointer" style="font:600 10px 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#67665f;background:transparent;border:none;border-radius:100px;padding:12px 22px;cursor:pointer">Floor plan</button>
+      </div>
+    </div>
+
+    <!-- no data-disp: the two designs give these panels the same display value,
+         so the engine clears the inline display and the stylesheet decides -->
+    <div class="la-s01-p la-s01-p--flow" data-panelgroup="la-s01" data-view="flow">
+      <div class="la-flowfr"><img class="la-flow-img" data-reveal="down" src="../../images/laced-authflow-v7.png" alt="Service blueprint: the authentication decision flow, with operator actions, software responses and every defect and failure branch"></div>
+    </div>
+    <div class="la-s01-p la-s01-p--plan" data-panelgroup="la-s01" data-view="plan" style="display:none">
+      <div class="la-planfr"><img class="la-plan-img" data-reveal="down" src="../../images/laced-floorplan-w.png" alt="Authentication centre floor plan drawn to scale: cutting, authentication, labelling and packing desks with racks, pallets and per-desk throughput rates"></div>
+    </div>
+  </section>
+
+  <!-- STEP 02 · Service blueprints (ivory) -->
+  <section class="la-s02">
+    <div class="la-s02-grid">
+      <div class="la-s02-copy">
+        <div class="cs-marker"><span class="cs-marker-n">02.</span><span class="cs-marker-t">Service blueprints</span></div>
+        <h2 class="cs-step-title">Blueprinting the operation end-to-end</h2>
+        <p class="cs-step-body">I translated the agreed model into end-to-end service blueprints covering authentication, returns, customer support, delivery integrations and product photography.</p>
+        <p class="cs-step-body">Each handover, decision point and failure state was mapped so the operation worked as one system, with manual steps automated where it made sense.</p>
+        <div class="cs-stats la-s02-stats">
+          <div class="cs-stat"><div class="cs-stat-n">5</div><div class="cs-stat-l">Operational journeys blueprinted</div></div>
+          <div class="cs-stat"><div class="cs-stat-n">1,000s</div><div class="cs-stat-l">Decision points mapped</div></div>
+        </div>
+      </div>
+      <!-- scaled: 1fr of the authored .82fr 1fr grid. The zoom is on the frame,
+           not the grid cell, so the 80px that opens the band stays 80px while
+           the 628px panel and its baked -234px crop ride the column. -->
+      <div class="la-s02-media" data-fit="659.3407">
+        <div class="la-bird" data-tilewipe data-tw-i="0"><img class="la-bird-img" src="../../images/laced-bp-birdseye-c.png" alt="The authentication operation blueprinted end to end: every stage, branch and screen in one map"></div>
+      </div>
+    </div>
+
+    <!-- a fixed 1560px track centred in a 1200px window and clipped by it, so
+         the outer two tiles are cut at the card edge exactly as drawn -->
+    <div class="la-bp" data-fit="1200" data-fit-cap="1680">
+      <div class="la-bp-stage">
+        <div class="la-bp-track">
+          <div class="la-bptile" data-tilewipe data-tw-i="0"><img class="la-bptile-img la-bptile-img--a" src="../../images/laced-bp-listings-flow.png" alt="Blueprint detail: the seller listings flow and the screens it drives"></div>
+          <div class="la-bptile" data-tilewipe data-tw-i="1"><img class="la-bptile-img la-bptile-img--b" src="../../images/laced-bp-seller-logic-c.png" alt="Seller listing logic blueprint, operator and software side by side"></div>
+          <div class="la-bptile" data-tilewipe data-tw-i="2"><img class="la-bptile-img la-bptile-img--c" src="../../images/laced-bp-rack-logic-c.png" alt="Blueprint detail: rack storage logic"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 03 · Authentication interfaces (black) -->
+  <section class="la-s03">
+    <div class="la-head la-s03-head">
+      <div class="la-head-t">
+        <div class="cs-marker cs-marker--dark"><span class="cs-marker-n">03.</span><span class="cs-marker-t">Authentication interfaces</span></div>
+        <h2 class="cs-step-title cs-step-title--dark">Touch-first interfaces that reduced operator error</h2>
+      </div>
+      <div class="la-head-b">
+        <p class="cs-step-body cs-step-body--dark">I designed touch-first interfaces that guided operators through each step of the process, reducing hesitation and making the next action clear.</p>
+        <p class="cs-step-body cs-step-body--dark">Guidance was built directly into the flow so less experienced staff could work with greater consistency and confidence.</p>
+      </div>
+    </div>
+
+    <figure class="la-floor">
+      <div class="la-floor-fr" data-tilewipe data-tw-i="0"><img class="la-floor-img" src="../../images/laced-warehouse-floor.png" alt="The authentication floor: mobile racks of boxed sneakers feeding operator stations across the 6,000 sq ft warehouse"></div>
+    </figure>
+
+    <!-- STEP 03 diagonal collage. LOCKED geometry (CLAUDE.md): 312px tiles, a
+         17px gutter, a −19° rotation with a uniform 1.04 scale and per-column
+         margin-top stagger, each column fading in off --p at 0 / .08 / .16 /
+         .24 / .32. Nothing here is re-derived: the frame's height and the stage
+         inside it ride --k, so the whole module simply paints larger. -->
+    <figure class="la-wfwrap">
+      <div class="la-wf" data-fit="1104" data-la-wf>
+        <div class="la-wf-stage">
+          <div class="la-wf-track">
+            <div class="la-wf-col" style="--o:0">
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-auth-csnote-crop.png" alt="Authentication station"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-fail-reason-full-crop.png" alt="Select reason for failure"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-delivery-label-crop.png" alt="Delivery label"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-auth-csnote-crop.png" alt="Authentication station"></div>
+            </div>
+            <div class="la-wf-col la-wf-col--2" style="--o:0.08">
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-download-labels-crop.png" alt="Your sale items: download labels"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-need-to-ship-crop.png" alt="Your sale items: you need to ship"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-edit-listing-crop.png" alt="Sneaker details"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-writeoff-crop.png" alt="Write off or resell"></div>
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+            </div>
+            <div class="la-wf-col la-wf-col--3" style="--o:0.16">
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-cancelled-crop.png" alt="Cancelled listing"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-auth-csnote-crop.png" alt="Authentication station"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-fail-reason-crop.png" alt="Reason for failure detail"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-listing-detail-crop.png" alt="Listing detail"></div>
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+            </div>
+            <div class="la-wf-col la-wf-col--4" style="--o:0.24">
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-listing-history-crop.png" alt="Listing history"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-delete-listing-crop.png" alt="Delete this listing"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-labelling-requires-auth-crop.png" alt="Labelling: requires authentication"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-delivery-label-crop.png" alt="Delivery label"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-scan-qa-crop.png" alt="Scan: requires QA"></div>
+            </div>
+            <div class="la-wf-col la-wf-col--5" style="--o:0.32">
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-your-cart-crop.png" alt="Your cart"></div>
+              <div class="la-wf-t"><img src="../../images/laced-ui-login-register-crop.png" alt="Log in or register"></div>
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+              <div class="la-ph"><span class="la-ph-l">[ ui screen ]</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </section>
+
+  <!-- STEP 04 · Usability testing (grey) -->
+  <section class="la-s04">
+    <div class="la-s04-grid">
+      <div class="la-head-t la-s04-title">
+        <div class="cs-marker"><span class="cs-marker-n">04.</span><span class="cs-marker-t">Usability testing</span></div>
+        <h2 class="cs-step-title">Testing the new operation under real warehouse conditions</h2>
+      </div>
+      <div class="la-head-b la-s04-body">
+        <p class="cs-step-body">I tested the revised process with live authenticators on the warehouse floor, iterating the flow around speed, error rate and usability before rollout.</p>
+        <p class="cs-step-body">I then worked with product, engineering and operations through build and launch to make sure the final system balanced expert process, commercial needs and future scale.</p>
+      </div>
+      <!-- authored in mobile reading order: on desktop the photo moves to the
+           foot of the title column and the changes list keeps the body column -->
+      <figure class="la-s04-photo"><img class="la-s04-img" data-reveal="down" src="../../images/laced-station-photo.png" alt="An authenticator working the station in the warehouse"></figure>
+      <div class="la-s04-changes">
+        <div class="la-ch-l">Post-testing changes</div>
+        <div class="la-ch-r"><span class="la-ch-n">01</span><div class="la-ch-b"><div class="la-ch-t">Automated restart</div><p class="la-ch-p">Replaced the finished-state CTA with a timed auto-advance, removing a tap from every completed pair.</p></div></div>
+        <div class="la-ch-r"><span class="la-ch-n">02</span><div class="la-ch-b"><div class="la-ch-t">Larger touch targets</div><p class="la-ch-p">Testing showed fast touch input was imprecise, so CTA targets were made significantly larger.</p></div></div>
+        <div class="la-ch-r"><span class="la-ch-n">03</span><div class="la-ch-b"><div class="la-ch-t">Supervisor escalation</div><p class="la-ch-p">Added a supervisor escalation path for issues the standard flow couldn’t resolve.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- C-suite feedback (grey) -->
+  <section class="la-fb">
+    <div class="kicker-row kicker-row--fb"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">C-suite feedback</span></div>
+    <div class="la-fb-grid">
+      <div class="la-fb-card">
+        <div class="la-fb-l">CEO &amp; Founder</div>
+        <blockquote class="la-fb-q">“Tom led the redesign of our internal authentication experience, turning a complex operational flow across multiple teams into clear blueprints that cut authentication times and reduced mistakes. Commercially focused and pragmatic, he balanced great user experience with what the business needed to move quickly. He was also instrumental in scaling our design and engineering capabilities, hiring and mentoring the team and consistently raising the bar, and I trusted him to own major initiatives from concept to delivery.”</blockquote>
+        <div class="la-fb-by">
+          <div class="avatar avatar--chris"></div>
+          <div>
+            <div class="la-fb-n">Chris Gibbons</div>
+            <div class="la-fb-r">CEO &amp; Founder · Laced</div>
+          </div>
+        </div>
+        <a class="marklink la-fb-link" href="https://www.linkedin.com/in/thomassaldanha/details/recommendations/" target="_blank" rel="noopener"><span>LinkedIn recommendations</span><svg width="8" height="8" viewBox="0 0 10 10" fill="none" class="ext8" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      </div>
+      <div class="la-fb-card">
+        <div class="la-fb-l">Chief of Staff</div>
+        <blockquote class="la-fb-q">“Tom was our inaugural hire within the product team and pivotal in scaling it to over 20 members. Leveraging his expertise we created the first service design blueprints for our warehouse operations, authenticating over 3,000 sneakers daily. What I valued most was his ability to navigate stakeholder relationships and provide clear, valuable insights. Strategically sound, he can go beyond the usual remit and take on the role of an advisor who really impacts an organisation’s efficacy.”</blockquote>
+        <div class="la-fb-by">
+          <div class="avatar avatar--gareth"></div>
+          <div>
+            <div class="la-fb-n">Gareth Olyott</div>
+            <div class="la-fb-r">Chief of Staff · Laced</div>
+          </div>
+        </div>
+        <a class="marklink la-fb-link" href="https://www.linkedin.com/in/thomassaldanha/details/recommendations/" target="_blank" rel="noopener"><span>LinkedIn recommendations</span><svg width="8" height="8" viewBox="0 0 10 10" fill="none" class="ext8" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- the outcome (black) -->
+  <section class="cs-outcome">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs kicker--dark">The outcome</span></div>
+    <p class="cs-outcome-statement">A scalable authentication model that increased throughput, reduced errors, lowered costs and made expert processes easier to follow<span class="cs-dot">.</span></p>
+    <div class="cs-outcome-grid">
+      <div class="cs-outcome-metric"><div class="cs-outcome-n cs-outcome-n--lead">-38<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Average authentication time</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">+26<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Daily authentication capacity</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">£2.4k</div><div class="cs-outcome-l">Weekly overtime savings</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">£5.2k</div><div class="cs-outcome-l">Weekly savings from fewer lost sneakers</div></div>
+    </div>
+  </section>
+
+  <footer class="cs-footer">
+    <div class="cs-footer-main">
+      <div class="cs-footer-next">Next: Laced customer support<span class="cs-dot">.</span></div>
+      <a class="cs-footer-link" href="../laced-customer-support/"><span>View the next case study</span></a>
+    </div>
+    <div class="cs-footer-links">
+      <a href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+      <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9 ext9--cs" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+  </footer>
+
+</div>
+</div>
+
+<script src="../../cs-interactions.js"></script>
+
+<!-- Mobile menu open state (Nav Options.dc.html, option 2g). A direct child of
+     body, outside .viewport, so a transformed .page can never become its
+     containing block; display:none above 900px. Driven by nav-menu.js. -->
+<div class="nav-menu" id="nav-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="nav-menu-top">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <button class="nav-close" type="button" data-nav-close aria-label="Close menu">
+      <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M1 1l16 16M17 1L1 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+    </button>
+  </div>
+  <nav class="nav-menu-links" aria-label="Site">
+    <a href="../../#work"><span class="nav-menu-u">Work</span></a>
+    <a href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">CV</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></span></a>
+    <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">LinkedIn</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></a>
+    <a href="mailto:hello@thomas-saldanha.com"><span class="nav-menu-u">hello@thomas-saldanha.com</span></a>
+  </nav>
+  <div class="nav-menu-foot">London, United Kingdom</div>
+</div>
+<script src="../../nav-menu.js"></script>
+</body>
+</html>

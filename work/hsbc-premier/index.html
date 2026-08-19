@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premier proposition redesign · HSBC · Thomas Saldanha</title>
+<meta name="description" content="Personalisation strategy and user research for HSBC Premier: proving commercial value, testing customer comfort and cutting application time.">
+<!-- Canonical and share metadata. These are the only ABSOLUTE urls on the site;
+     every other path is relative. Open Graph requires it: a relative og:image or
+     og:url is ignored by every crawler, so they cannot follow the site's usual
+     convention. This also means the share preview only resolves once the site is
+     live at www.uxtom.co.uk. -->
+<link rel="canonical" href="https://www.uxtom.co.uk/work/hsbc-premier/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Thomas Saldanha">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://www.uxtom.co.uk/work/hsbc-premier/">
+<meta property="og:title" content="Premier proposition redesign · HSBC · Thomas Saldanha">
+<meta property="og:description" content="Personalisation strategy and user research for HSBC Premier: proving commercial value, testing customer comfort and cutting application time.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Premier proposition redesign · HSBC · Thomas Saldanha">
+<meta name="twitter:description" content="Personalisation strategy and user research for HSBC Premier: proving commercial value, testing customer comfort and cutting application time.">
+<meta property="og:image" content="https://www.uxtom.co.uk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Thomas Saldanha, UX and product design leader. I help teams find clarity in complex problems.">
+<meta name="twitter:image" content="https://www.uxtom.co.uk/og-image.png">
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<!-- Newsreader italic is the editorial accent, used on this page by the step 02
+     questions, the step 04 concept list, the step 05 quotes and the outcome
+     rows. JetBrains Mono is in the design files' font link but nothing on this
+     page uses it, so it is not loaded. The design file also asks for weight 800
+     for the // mark; the homepage and ArcelorMittal load 300–700 and stroke the
+     mark, so this page matches them rather than rendering one page's // heavier
+     than the rest of the site. -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&amp;family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles.css">
+<script>
+/* Breakpoint contract (SHIP-MANIFEST.md), identical to the homepage and
+   ArcelorMittal:
+     >= 1200px  the desktop design, bands edge to edge, content column capped at
+                1680px (all of that is in styles.css, no JS involved)
+     900–1199px the same desktop design, scaled proportionally to the viewport
+     < 900px    the mobile design, its 440px column growing fluidly
+
+   The 900–1199px band is a geometric scale, not a re-layout: the page is laid
+   out at 1200px, the bottom of the desktop band, and then transformed, so
+   nothing re-wraps and 1199px is continuous with 1200px. 1200px is also where
+   this page's content column is 1104px, the width the desktop design was drawn
+   at, so the build and the design line up there exactly. .viewport carries the
+   resulting height (and clips the layout overflow, `clip` rather than `hidden`
+   so it never becomes a scroll container that could jump on keyboard focus). */
+(function(){
+  var W = 1200, MIN = 900, root = document.documentElement, page, host, last;
+
+  /* Figures scale uniformly with the column. --k is the only thing computed
+     here: a figure cell's current width over data-fit, the width it had at the
+     authored 1200px. The CSS then zooms the cell by it, so everything inside
+     keeps its authored geometry and simply paints larger. It has to be computed
+     in script because CSS cannot divide one length by another.
+
+     Measuring the zoomed element is not circular: zoom scales an element's
+     contents, not the box its parent lays out, so the rect stays the track
+     width whatever --k is. */
+  function figures(w){
+    /* --col is the band content column, 1104px authored and 1584px at the cap.
+       Band statements take five twelfths of it. Measured here for the same
+       reason as the rest: CSS cannot divide one length by another, and a max()
+       written into a child would re-resolve its 100% against the child. */
+    if (page) page.style.setProperty('--col',
+      (Math.min(page.getBoundingClientRect().width, 1680) - 96).toFixed(2) + 'px');
+    document.querySelectorAll('[data-fit]').forEach(function(el){
+      if (w < MIN){ el.style.removeProperty('--k'); return; }
+      var box = el.getBoundingClientRect().width;
+      var cap = parseFloat(el.getAttribute('data-fit-cap'));
+      if (cap) box = Math.min(box, cap);
+      var k = Math.max(1, box / parseFloat(el.getAttribute('data-fit')));
+      el.style.setProperty('--k', k.toFixed(4));
+    });
+  }
+
+  function fit(){
+    page = page || document.querySelector('.page');
+    host = host || document.querySelector('.viewport');
+    /* The breakpoint has to be decided the way the media query decides it.
+       A media query measures innerWidth, which includes a classic scrollbar;
+       documentElement.clientWidth excludes it. Between them the CSS served the
+       desktop design while this script still thought it was mobile, so .page
+       stayed 1200px wide, unscaled, inside an 885px viewport and .viewport
+       clipped the right third away. So: innerWidth picks the design, and
+       clientWidth, the box the page actually has to fit in, sets the scale. */
+    var w = innerWidth || root.clientWidth,
+        s = w >= MIN ? Math.min(1, root.clientWidth / W) : 1;
+    if (s !== last){ root.style.setProperty('--page-scale', String(s)); last = s; }
+    figures(w);
+    if (page && host) host.style.height = s < 1 ? Math.ceil(page.offsetHeight * s) + 'px' : '';
+  }
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('load', fit);
+  document.addEventListener('DOMContentLoaded', function(){
+    fit();
+    /* catches height changes from font/image load and width changes that fire no
+       resize event, such as the scrollbar appearing */
+    if (window.ResizeObserver){
+      var ro = new ResizeObserver(fit);
+      ro.observe(document.querySelector('.page'));
+      ro.observe(root);
+    }
+  });
+})();
+</script>
+<script>
+/* STEP 05 segmented toggle. HSBC is the one study built on the bespoke
+   data-tabs / data-tab / data-panel script rather than cs-interactions'
+   data-tabgroup engine (CLAUDE.md: the two systems exist, do not mix them), so
+   it is carried across from the design file's helmet unchanged apart from one
+   thing: the panels no longer carry data-disp. The two designs give the same
+   panel different display values (grid on desktop, flex on mobile), so the
+   script clears the inline display instead of writing one in, and the
+   stylesheet decides. It still replays the donut arcs on every switch. */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-tab]'); if(!b) return;
+  var wrap=b.closest('[data-tabs]'); if(!wrap) return;
+  var name=b.getAttribute('data-tab');
+  wrap.querySelectorAll('[data-tab]').forEach(function(x){
+    var on=x.getAttribute('data-tab')===name;
+    x.style.background=on?(x.getAttribute('data-onbg')||'#ffd400'):(x.getAttribute('data-offbg')||'transparent');
+    x.style.color=on?(x.getAttribute('data-oncolor')||'#1a1a17'):(x.getAttribute('data-offcolor')||'#67665f');
+    x.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  wrap.querySelectorAll('[data-panel]').forEach(function(p){
+    var show=p.getAttribute('data-panel')===name;
+    p.style.display=show?(p.getAttribute('data-disp')||''):'none';
+    if(show){
+      p.querySelectorAll('[data-arc]').forEach(function(c){
+        var full=+c.dataset.c, off=+c.dataset.off, delay=+c.dataset.delay||0;
+        c.getAnimations().forEach(function(a){a.cancel();});
+        c.style.strokeDashoffset=full;
+        c.animate([{strokeDashoffset:full},{strokeDashoffset:off}],{duration:1700,delay:delay,easing:'cubic-bezier(.4,0,.2,1)',fill:'both'});
+      });
+    }
+  });
+});
+</script>
+<!-- Microsoft Clarity, project y4a8k7mdho. Session recording and heatmaps.
+     Loads async and injects its own tag, so it cannot block first paint; it sits
+     at the end of <head> so it never competes with the stylesheet or the fonts
+     for the connection. The only third-party request on the site besides Google
+     Fonts. Sets cookies and records behaviour, so it is in scope for GDPR
+     consent: there is no cookie banner on this site, which was a deliberate
+     call, not an oversight. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y4a8k7mdho");
+</script>
+</head>
+<body>
+
+<div class="viewport">
+<div class="page page--cs page--hsbc">
+
+  <header class="nav nav--cs">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <nav class="nav-links">
+      <a href="../../#work"><span>Work</span></a>
+      <a class="nav-cv" href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span>CV</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="dl13" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></a>
+      <a class="nav-linkedin" href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <a class="nav-email" href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+    </nav>
+    <button class="nav-burger" type="button" data-nav-toggle aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span></button>
+  </header>
+
+  <!-- cover -->
+  <section class="cs-cover">
+    <div class="cs-cover-copy">
+      <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">HSBC Premier</span></div>
+      <h1 class="cs-title">Premier proposition redesign<span class="cs-dot">.</span></h1>
+      <div class="cs-disc">Experience strategy · Personalisation · User research · User testing</div>
+    </div>
+    <div class="cs-cover-media" data-fit="600">
+      <img class="hs-cover-img" src="../../images/hero-workshop.png" alt="Design workshop: sketching Premier wireframes on a whiteboard">
+    </div>
+  </section>
+
+  <!-- metric strip -->
+  <div class="cs-metrics">
+    <div class="cs-metric"><div class="cs-metric-n">-21<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Application completion time</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">+70<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Likelihood to explore targeted products</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">80<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Comfortable with 1st-party personalisation</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">750<span class="cs-metric-u">+</span></div><div class="cs-metric-l">Experience opportunities identified</div></div>
+  </div>
+
+  <!-- context -->
+  <section class="cs-context">
+    <div class="cs-context-main">
+      <div class="kicker-row kicker-row--cs"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">Context</span></div>
+      <p class="cs-statement">HSBC Premier is the bank’s premium proposition for high-net-worth and internationally mobile customers, spanning multiple products, markets and channels</p>
+    </div>
+    <div class="cs-meta">
+      <div class="cs-meta-row"><span class="cs-meta-k">Role</span><span class="cs-meta-v">UX &amp; Strategy Lead</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Sector</span><span class="cs-meta-v">Global banking</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Scale</span><span class="cs-meta-v">Multi-market &amp; regulated</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Remit</span><span class="cs-meta-v">Strategy, research and <br class="hs-m-br">end-to-end experience design</span></div>
+    </div>
+  </section>
+
+  <!-- the business problem -->
+  <section class="cs-problem">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">The business problem</span></div>
+    <div class="cs-problem-grid">
+      <p class="cs-statement">One premium proposition, delivered differently in every region</p>
+      <div class="cs-problem-body">
+        <p class="cs-body">Premier had become complex and inconsistent across regions and channels. Benefits were unclear, eligibility was hard to understand and key journeys were harder than they needed to be.</p>
+        <p class="cs-body">HSBC also had rich customer data, but no shared approach to using it responsibly for personalisation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- my role -->
+  <section class="cs-lead">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">My role</span></div>
+  </section>
+
+  <!-- STEP 01 · Experience review -->
+  <section class="hs-s01">
+    <div class="hs-s01-head">
+      <div class="hs-s01-title">
+        <div class="cs-marker"><span class="cs-marker-n">01.</span><span class="cs-marker-t">Experience review</span></div>
+        <h2 class="cs-step-title">Reviewing the full Premier experience</h2>
+      </div>
+      <p class="cs-step-body hs-s01-body">Over eight weeks I reviewed five core journeys across digital and physical touchpoints, covering different personas, segments and customer states. The review surfaced more than 750 opportunities to improve the experience.</p>
+    </div>
+
+    <div class="hs-eq-wrap">
+      <div class="hs-eq">
+        <div class="hs-eq-i">
+          <div class="hs-eq-n">5</div>
+          <div class="hs-eq-l">Journeys</div>
+          <p class="hs-eq-d">Credit Card, Mortgage, Children’s Account, Bank Account UK &amp; International</p>
+        </div>
+        <div class="hs-eq-op" aria-hidden="true">×</div>
+        <div class="hs-eq-i">
+          <div class="hs-eq-n">3</div>
+          <div class="hs-eq-l">Personas</div>
+          <p class="hs-eq-d">Living in the moment, Prudent saver, Driven achiever</p>
+        </div>
+        <div class="hs-eq-op" aria-hidden="true">×</div>
+        <div class="hs-eq-i">
+          <div class="hs-eq-n">2</div>
+          <div class="hs-eq-l">Segments</div>
+          <p class="hs-eq-d">New-to-bank, New-to-segment</p>
+        </div>
+        <div class="hs-eq-op" aria-hidden="true">×</div>
+        <div class="hs-eq-i">
+          <div class="hs-eq-n">3</div>
+          <div class="hs-eq-l">States</div>
+          <p class="hs-eq-d">Logged out, Logged out with cookies, Logged in</p>
+        </div>
+        <div class="hs-eq-op" aria-hidden="true">×</div>
+        <div class="hs-eq-i">
+          <div class="hs-eq-n">2</div>
+          <div class="hs-eq-l">Channels</div>
+          <p class="hs-eq-d">Digital &amp; in-branch experiences</p>
+        </div>
+        <div class="hs-eq-op" aria-hidden="true">=</div>
+        <div class="hs-eq-t">
+          <div class="hs-eq-tn">750<span class="hs-eq-tu">+</span></div>
+          <div class="hs-eq-l">Opportunities<span class="hs-m"> identified</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hs-ex">
+      <div class="hs-ex-l">An example opportunity</div>
+      <h2 class="hs-ex-t">Spotting mortgage intent before the customer asks</h2>
+      <p class="hs-ex-p hs-d">By utilising rich customer data in bank statements and transaction history, we can spot the data and behavioural triggers that show someone is thinking about a mortgage or is eligible for one, and target them first with a Premier mortgage before another bank does.</p>
+      <p class="hs-ex-p hs-m">Rich data in bank statements and transaction history reveals the triggers that show someone is thinking about a mortgage, so we reach them with a Premier mortgage before another bank does.</p>
+      <div class="hs-sigs" data-carousel-track-el="sig-m" data-carousel-perview="1">
+        <div class="hs-sig" data-carousel-card>
+          <div class="hs-sig-h"><span class="hs-sig-n">01</span><span class="hs-sig-k">Transaction data</span></div>
+          <div class="hs-sig-rule"></div>
+          <div class="hs-sig-b">A regular transfer to a competitor referencing “mortgage” could signal an existing mortgage and trigger a relevant Premier offer.</div>
+        </div>
+        <div class="hs-sig" data-carousel-card>
+          <div class="hs-sig-h"><span class="hs-sig-n">02</span><span class="hs-sig-k">Behavioural</span></div>
+          <div class="hs-sig-rule"></div>
+          <div class="hs-sig-b">A high-value payment leaving for a competitor on the same day each month could indicate a mortgage repayment.</div>
+        </div>
+        <div class="hs-sig" data-carousel-card>
+          <div class="hs-sig-h"><span class="hs-sig-n">03</span><span class="hs-sig-k">Financial data</span></div>
+          <div class="hs-sig-rule"></div>
+          <div class="hs-sig-b">Salary could indicate likely borrowing capacity, while savings of 5–10% of that amount could suggest a deposit being built.</div>
+        </div>
+        <div class="hs-sig" data-carousel-card>
+          <div class="hs-sig-h"><span class="hs-sig-n">04</span><span class="hs-sig-k">Product holding</span></div>
+          <div class="hs-sig-rule"></div>
+          <div class="hs-sig-b">A Help to Buy ISA with HSBC or statements suggesting one held elsewhere, could signal mortgage intent.</div>
+        </div>
+        <div class="hs-sig" data-carousel-card>
+          <div class="hs-sig-h"><span class="hs-sig-n">05</span><span class="hs-sig-k">Behavioural</span></div>
+          <div class="hs-sig-rule"></div>
+          <div class="hs-sig-b">Downloading 3–6 months of statements could indicate someone preparing to apply for a mortgage.</div>
+        </div>
+      </div>
+      <div class="hs-signav">
+        <button class="hs-signav-b" data-carousel-nav="prev" data-carousel-track="[data-carousel-track-el='sig-m']" aria-label="Previous signal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-nav" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+        <div class="hs-signav-f"><span class="hs-signav-n" data-carousel-frac="sig-m">01</span><span class="hs-signav-t">/ 05</span></div>
+        <button class="hs-signav-b" data-carousel-nav="next" data-carousel-track="[data-carousel-track-el='sig-m']" aria-label="Next signal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-nav" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 02 · Opportunity we prioritised (black) -->
+  <section class="hs-s02">
+    <div class="hs-s02-copy">
+      <div class="cs-marker cs-marker--dark"><span class="cs-marker-n">02.</span><span class="cs-marker-t">Opportunity we prioritised</span></div>
+      <h2 class="hs-s02-title">The bank held a wealth of customer data it barely used</h2>
+      <p class="cs-step-body cs-step-body--dark">Hundreds of data points existed on each customer, yet the experience often behaved as if HSBC knew nothing about them. People re-entered information the bank already held, including their products, salary, location and dependants and saw few offers that felt genuinely relevant.</p>
+    </div>
+    <div class="hs-prove">
+      <div class="hs-prove-l">What I had to prove</div>
+      <div class="hs-prove-r"><span class="hs-prove-n">01</span><p class="hs-prove-q">Is there commercial value in personalisation?</p></div>
+      <div class="hs-prove-r"><span class="hs-prove-n">02</span><p class="hs-prove-q">Do customers actually want it?</p></div>
+      <div class="hs-prove-r"><span class="hs-prove-n">03</span><p class="hs-prove-q">Where does helpful personalisation tip into intrusive?</p></div>
+      <div class="hs-prove-r"><span class="hs-prove-n">04</span><p class="hs-prove-q">Can we deliver it, legally and technically?</p></div>
+    </div>
+  </section>
+
+  <!-- STEP 03 · Stakeholder alignment (grey) -->
+  <section class="hs-s03">
+    <div class="hs-s03-grid">
+      <div class="hs-s03-title">
+        <div class="cs-marker"><span class="cs-marker-n">03.</span><span class="cs-marker-t">Stakeholder alignment</span></div>
+        <h2 class="cs-step-title">One shared direction across 11 divisions</h2>
+      </div>
+      <div class="hs-s03-r">
+        <p class="cs-step-body hs-s03-body">I played the findings back to senior stakeholders and agreed which opportunities mattered most for customers and commercially. I then led end-to-end journey concepts and ran a North Star workshop with 30+ senior bankers to align 11 divisions around one shared vision.</p>
+        <div class="cs-stats hs-s03-stats">
+          <div class="cs-stat"><div class="cs-stat-n">30<span class="cs-stat-u">+</span></div><div class="cs-stat-l">Senior bankers<span class="hs-d"> aligned</span></div></div>
+          <div class="cs-stat"><div class="cs-stat-n">11</div><div class="cs-stat-l">Divisions aligned</div></div>
+          <div class="cs-stat"><div class="cs-stat-n">4</div><div class="cs-stat-l">Hour workshop</div></div>
+        </div>
+      </div>
+    </div>
+    <figure class="hs-map">
+      <div class="hs-map-fr" data-reveal="down"><img class="hs-map-img" data-reveal="down" src="../../images/hsbc-journey-map-alt.png" alt="New-to-bank vs existing-to-bank Premier mortgage journey map"></div>
+    </figure>
+  </section>
+
+  <!-- STEP 04 · Concept design (black) -->
+  <section class="hs-s04">
+    <div class="hs-s04-grid">
+      <div class="hs-s04-copy">
+        <div class="cs-marker cs-marker--dark"><span class="cs-marker-n">04.</span><span class="cs-marker-t">Concept design</span></div>
+        <h2 class="cs-step-title cs-step-title--dark">Making the personalisation strategy tangible</h2>
+        <p class="cs-step-body cs-step-body--dark">I led a series of concepts showing how Premier could use first and third-party data to create more relevant experiences at scale, grounded in what the bank could actually deliver. I worked closely with a UI designer to turn the strongest concepts into high-fidelity experiences for testing.</p>
+      </div>
+      <div class="hs-cc">
+        <div class="hs-cc-lw"><span class="hs-cc-l">A few of the concepts explored</span></div>
+        <div class="hs-cc-rows">
+          <div class="hs-cc-r"><span class="hs-cc-n">01</span><div class="hs-cc-t">Complimentary airport lounge access</div><p class="hs-cc-p">Geolocation spots an eligible customer at the airport and surprises them with complimentary lounge access.</p></div>
+          <div class="hs-cc-r"><span class="hs-cc-n">02</span><div class="hs-cc-t">Show the rewards and points they’re missing</div><p class="hs-cc-p">Show the points they could have earned with a Premier credit card, then award them if they upgrade to Premier.</p></div>
+          <div class="hs-cc-r"><span class="hs-cc-n">03</span><div class="hs-cc-t">Turn travel into an upgrade moment</div><p class="hs-cc-p">A flight or currency purchase signals a trip, highlighting Premier’s free travel insurance to encourage an upgrade.</p></div>
+          <div class="hs-cc-r"><span class="hs-cc-n">04</span><div class="hs-cc-t">Pre-fill applications with known data</div><p class="hs-cc-p">HSBC pre-fills applications with information it already holds, so customers can just check and confirm.</p></div>
+          <div class="hs-cc-r"><span class="hs-cc-n">05</span><div class="hs-cc-t">Tailor the homepage to customers</div><p class="hs-cc-p">Use purchase history to surface the Premier rewards most relevant to each customer, such as Amazon or M&amp;S.</p></div>
+          <div class="hs-cc-r"><span class="hs-cc-n">06</span><div class="hs-cc-t">Reach out when they’re mortgage ready</div><p class="hs-cc-p">Monitor Help to Buy ISA savings to spot customers nearing their deposit target and prompt a mortgage conversation.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Twelve real screens. The frame is container-query sized (cqw), so it
+         scales with the column natively and needs no data-fit. Each cell carries
+         its authored desktop height in --dh and its authored mobile height in
+         --mh; the fourth column is the three desktop screens, which the mobile
+         design drops. Motion is hsbc-motion-lab's scroll-scrubbed wipefade. -->
+    <figure class="hs-cl">
+      <div class="hs-cl-fr" data-collage-frame data-motion="wipefade">
+        <div class="hs-cl-in">
+          <div class="hs-cl-col">
+            <div class="hs-cl-t" style="--dh:13cqw;--mh:30cqw"><img class="hs-cl-i" src="../../collage/m2-rates.png" alt="Representative example rates" style="object-position:center 45%"></div>
+            <div class="hs-cl-m" style="--dh:24cqw;--mh:62cqw"><img class="hs-cl-i" src="../../collage/m1-recommend.png" alt="Premier World Elite Mastercard recommendation" style="object-position:center 0%"></div>
+            <div class="hs-cl-b"><img class="hs-cl-i" src="../../collage/m4-notification.jpg" alt="Earn points with Premier notification" style="object-position:center 48.4%"></div>
+          </div>
+          <div class="hs-cl-col">
+            <div class="hs-cl-t" style="--dh:9cqw;--mh:22cqw"><img class="hs-cl-i" src="../../collage/m3-apply.png" alt="How to apply, in branch" style="object-position:center 94.2%"></div>
+            <div class="hs-cl-m" style="--dh:24cqw;--mh:62cqw"><img class="hs-cl-i" src="../../collage/m7-lockscreen.png" alt="Lock-screen notification: Airport Lounge" style="object-position:center 5.8%"></div>
+            <div class="hs-cl-b"><img class="hs-cl-i" src="../../collage/m8-compare.png" alt="Compare credit cards" style="object-position:center 48%"></div>
+          </div>
+          <div class="hs-cl-col">
+            <div class="hs-cl-t" style="--dh:18cqw;--mh:42cqw"><img class="hs-cl-i" src="../../collage/m6-rewards.png" alt="HSBC Premier Rewards Programme" style="object-position:center 0%"></div>
+            <div class="hs-cl-m" style="--dh:24cqw;--mh:62cqw"><img class="hs-cl-i" src="../../collage/m9-form.png" alt="Confirm your details form" style="object-position:center 32.6%"></div>
+            <div class="hs-cl-b"><img class="hs-cl-i" src="../../collage/m5-miles.png" alt="HSBC Premier Rewards for Miles" style="object-position:center 30.4%"></div>
+          </div>
+          <div class="hs-cl-col hs-cl-col--d">
+            <div class="hs-cl-dt"><img class="hs-cl-i" src="../../collage/desktop-expedia.png" alt="Expedia Today’s Top Deals with HSBC Premier" style="object-position:center 100%"></div>
+            <div class="hs-cl-dm"><img class="hs-cl-i" src="../../collage/desktop-continue.jpg" alt="Continue your application page" style="object-position:center 40.6%"></div>
+            <div class="hs-cl-db"><img class="hs-cl-i" src="../../collage/desktop-premier.png" alt="HSBC Premier Credit Card product page" style="object-position:center 75.8%"></div>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </section>
+
+  <!-- STEP 05 · User testing -->
+  <section class="hs-s05">
+    <div class="hs-s05-top">
+      <div class="hs-s05-copy">
+        <div class="cs-marker"><span class="cs-marker-n">05.</span><span class="cs-marker-t">User testing</span></div>
+        <h2 class="cs-step-title">Proving personalisation could feel helpful, not intrusive</h2>
+        <p class="cs-step-body">Senior stakeholders worried personalisation would feel intrusive for a premium audience. I ran moderated testing with 10 participants to understand when it added value and where it started to risk trust.</p>
+      </div>
+      <div class="hs-ut-media" data-fit="600">
+        <img class="hs-ut-img" data-reveal="down" src="../../images/ut-eyetracking.png" alt="A participant in a moderated eye-tracking session, reviewing the Premier credit card application page">
+      </div>
+    </div>
+
+    <div class="hs-ut" data-tabs>
+      <div class="cs-tabs hs-ut-tabs" role="tablist" aria-label="User testing evidence">
+        <div class="cs-tabtrack">
+          <button class="hs-ut-pill" data-tab="data" data-onbg="#ffd400" data-offbg="transparent" data-oncolor="#1a1a17" data-offcolor="#67665f" role="tab" aria-selected="true" style="color:#1a1a17;background:#ffd400">The data</button>
+          <button class="hs-ut-pill" data-tab="said" data-onbg="#ffd400" data-offbg="transparent" data-oncolor="#1a1a17" data-offcolor="#67665f" role="tab" aria-selected="false" style="color:#67665f;background:transparent">In their words</button>
+          <button class="hs-ut-pill" data-tab="learn" data-onbg="#ffd400" data-offbg="transparent" data-oncolor="#1a1a17" data-offcolor="#67665f" role="tab" aria-selected="false" style="color:#67665f;background:transparent">The learnings</button>
+        </div>
+      </div>
+
+      <!-- the donuts are a data-arc module, so they ride the column scale;
+           the pill toggle above sits outside .cs-fig at its authored size -->
+      <div class="cs-fig hs-ut-fig" data-fit="1104">
+        <div class="hs-ut-p hs-ut-p--data" data-panel="data" data-panelgroup="hsbc-ut">
+          <div class="hs-d-i">
+            <div class="hs-d-ring">
+              <svg viewBox="0 0 120 120" class="hs-d-svg" aria-hidden="true">
+                <circle cx="60" cy="60" r="50" class="hs-d-track"></circle>
+                <circle cx="60" cy="60" r="50" class="hs-d-arc" stroke-dasharray="314.159" style="stroke-dashoffset:94.25" data-arc data-c="314.159" data-off="94.25" data-delay="0"></circle>
+              </svg>
+              <div class="hs-d-c"><div class="hs-d-n">+70<span class="hs-d-u">%</span></div></div>
+            </div>
+            <div class="hs-d-l">Likelihood to explore targeted products</div>
+          </div>
+          <div class="hs-d-i">
+            <div class="hs-d-ring">
+              <svg viewBox="0 0 120 120" class="hs-d-svg" aria-hidden="true">
+                <circle cx="60" cy="60" r="50" class="hs-d-track"></circle>
+                <circle cx="60" cy="60" r="50" class="hs-d-arc" stroke-dasharray="314.159" style="stroke-dashoffset:62.83" data-arc data-c="314.159" data-off="62.83" data-delay="140"></circle>
+              </svg>
+              <div class="hs-d-c"><div class="hs-d-n">80<span class="hs-d-u">%</span></div></div>
+            </div>
+            <div class="hs-d-l hs-d">Comfortable with 1st-party personalisation</div>
+            <div class="hs-d-l hs-m">Comfortable being targeted using first-party data</div>
+          </div>
+          <div class="hs-d-i">
+            <div class="hs-d-ring">
+              <svg viewBox="0 0 120 120" class="hs-d-svg" aria-hidden="true">
+                <circle cx="60" cy="60" r="50" class="hs-d-track"></circle>
+                <circle cx="60" cy="60" r="50" class="hs-d-arc" stroke-dasharray="314.159" style="stroke-dashoffset:248.19" data-arc data-c="314.159" data-off="248.19" data-delay="280"></circle>
+              </svg>
+              <div class="hs-d-c"><div class="hs-d-n">-21<span class="hs-d-u">%</span></div></div>
+            </div>
+            <div class="hs-d-l hs-d">Application completion time</div>
+            <div class="hs-d-l hs-m">Faster to complete an application</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hs-ut-p hs-ut-p--said" data-panel="said" style="display:none">
+        <div class="hs-q-i"><p class="hs-q-p">“All this is known by the bank anyway.”</p><div class="hs-q-l">First-party data</div></div>
+        <div class="hs-q-i"><p class="hs-q-p">“I like that you personalised the content to me, it stands out from other banks.”</p><div class="hs-q-l">Personalised content</div></div>
+        <div class="hs-q-i"><p class="hs-q-p">“The application process is very easy and doesn’t take long, it helps that it’s pre-populated.”</p><div class="hs-q-l">Prefilled application</div></div>
+        <div class="hs-q-i"><p class="hs-q-p">“I’d feel more confident about pre-filling if I knew how it worked.”</p><div class="hs-q-l">Pre-filling</div></div>
+        <div class="hs-q-i"><p class="hs-q-p">“It’s very simple, very easy, it makes me think have they missed asking me something.”</p><div class="hs-q-l">Application form</div></div>
+        <div class="hs-q-i"><p class="hs-q-p">“I like it providing recommendations for me, but I’d feel differently if it impacted my children’s accounts.”</p><div class="hs-q-l">Recommendations</div></div>
+      </div>
+
+      <div class="hs-ut-p hs-ut-p--learn" data-panel="learn" style="display:none">
+        <div class="hs-l-i"><span class="hs-l-n">01</span><p class="hs-l-p">Be transparent about how first and third-party data is used.</p></div>
+        <div class="hs-l-i"><span class="hs-l-n">02</span><p class="hs-l-p">Customers expected HSBC to already hold this data.</p></div>
+        <div class="hs-l-i"><span class="hs-l-n">03</span><p class="hs-l-p">Trust in a regulated bank made appropriate data use feel acceptable.</p></div>
+        <div class="hs-l-i"><span class="hs-l-n">04</span><p class="hs-l-p">Subtle personalisation was acceptable in logged-out experiences.</p></div>
+        <div class="hs-l-i"><span class="hs-l-n">05</span><p class="hs-l-p">Overt personalisation, such as pre-filling, should stay within logged-in experiences.</p></div>
+        <div class="hs-l-i"><span class="hs-l-n">06</span><p class="hs-l-p">Never personalise content around a customer’s children.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- the outcome (grey) -->
+  <section class="hs-out">
+    <div class="kicker-row kicker-row--out"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">The outcome</span></div>
+    <h2 class="hs-out-t">Four questions answered</h2>
+    <div class="hs-out-rows">
+      <div class="hs-q"><span class="hs-q-n">01</span><p class="hs-q-q">Is there commercial value in personalisation?</p><p class="hs-q-a">Customers were 70% more likely to explore targeted products, while pre-filling cut application time by 21%.</p></div>
+      <div class="hs-q"><span class="hs-q-n">02</span><p class="hs-q-q">Do customers actually want it?</p><p class="hs-q-a">80% were comfortable with personalisation when HSBC was transparent about how it worked.</p></div>
+      <div class="hs-q"><span class="hs-q-n">03</span><p class="hs-q-q">Where does it tip into intrusive?</p><p class="hs-q-a">Customers were comfortable with subtle personalisation in logged-out experiences, but overt use of their data crossed the line. Anything involving children was ruled out.</p></div>
+      <div class="hs-q"><span class="hs-q-n">04</span><p class="hs-q-q">Can we deliver it, legally and technically?</p><p class="hs-q-a">Legal, commercial, product and engineering all signed off.</p></div>
+    </div>
+
+    <div class="hs-fb">
+      <div class="hs-fb-side">
+        <div class="hs-fb-l">Client feedback</div>
+        <div class="hs-fb-by">
+          <div class="avatar avatar--trina hs-fb-av"></div>
+          <div>
+            <div class="hs-fb-n">Trina Smith</div>
+            <div class="hs-fb-r">Senior Premier Proposition Executive, HSBC</div>
+          </div>
+        </div>
+        <a class="marklink hs-fb-link" href="https://www.linkedin.com/in/thomassaldanha/details/recommendations/" target="_blank" rel="noopener"><span>LinkedIn recommendations</span><svg width="8" height="8" viewBox="0 0 10 10" fill="none" class="ext8" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      </div>
+      <blockquote class="hs-fb-q">“Tom is very skilled at understanding the business challenge and uncovering the pain points that drive satisfaction, personalisation and revenue. He’s a great collaborator, full of energy and ideas, and genuinely a nice person to work with<span class="cs-dot">.</span>”</blockquote>
+    </div>
+  </section>
+
+  <!-- outcome metric strip (black) -->
+  <section class="hs-final">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs kicker--dark">The outcome</span></div>
+    <h2 class="hs-final-t">Leveraging customer data removed friction from key journeys and made Premier’s benefits harder to overlook<span class="cs-dot">.</span></h2>
+    <div class="cs-outcome-grid hs-final-grid">
+      <div class="cs-outcome-metric"><div class="cs-outcome-n cs-outcome-n--lead">-21<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Application completion time</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">+70<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Likelihood to explore targeted products</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">80<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Comfortable with 1st-party personalisation</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">750<span class="cs-outcome-u">+</span></div><div class="cs-outcome-l">Experience opportunities identified</div></div>
+    </div>
+  </section>
+
+  <footer class="cs-footer">
+    <div class="cs-footer-main">
+      <div class="cs-footer-next">Next: Laced<span class="cs-dot">.</span></div>
+      <a class="cs-footer-link" href="../laced-authentication/"><span>View the next case study</span></a>
+    </div>
+    <div class="cs-footer-links">
+      <a href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+      <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9 ext9--cs" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+  </footer>
+
+</div>
+</div>
+
+<script src="../../cs-interactions.js"></script>
+<script src="../../hsbc-motion-lab.js"></script>
+<script src="../../ts-carousel.js"></script>
+
+<!-- Mobile menu open state (Nav Options.dc.html, option 2g). A direct child of
+     body, outside .viewport, so a transformed .page can never become its
+     containing block; display:none above 900px. Driven by nav-menu.js. -->
+<div class="nav-menu" id="nav-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="nav-menu-top">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <button class="nav-close" type="button" data-nav-close aria-label="Close menu">
+      <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M1 1l16 16M17 1L1 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+    </button>
+  </div>
+  <nav class="nav-menu-links" aria-label="Site">
+    <a href="../../#work"><span class="nav-menu-u">Work</span></a>
+    <a href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">CV</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></span></a>
+    <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">LinkedIn</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></a>
+    <a href="mailto:hello@thomas-saldanha.com"><span class="nav-menu-u">hello@thomas-saldanha.com</span></a>
+  </nav>
+  <div class="nav-menu-foot">London, United Kingdom</div>
+</div>
+<script src="../../nav-menu.js"></script>
+</body>
+</html>

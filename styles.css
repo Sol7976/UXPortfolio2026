@@ -1,0 +1,2814 @@
+/* uxtom.co.uk — homepage
+   Built from _design/Homepage Desktop.dc.html (authored 1320px) and
+   _design/Homepage Mobile.dc.html (authored on a 440px column).
+   Every value here is lifted from those two files unchanged.
+
+   Breakpoint contract (SHIP-MANIFEST.md):
+     >= 1320px  desktop design 1:1, centred (1320px is this page's authored width)
+     900–1319px the same desktop design, scaled proportionally by `zoom` (see index.html)
+     < 900px    the mobile design, its 440px column growing fluidly
+   There is no intermediate layout: the only reflow is the single switch at 900px. */
+
+
+/* ============================================================
+   1. Base (from the design helmet, minus the review-board chrome)
+   ============================================================ */
+
+html,body{margin:0}
+/* iOS Safari inflates text it judges too small for its block, which no desktop
+   browser does. On a design tuned to the pixel that is never wanted, and it broke
+   ArcelorMittal step 05: .m-chartfit scales the task-summary chart to zoom:.72,
+   so its 10px task labels paint at 7.2px, iOS grew them, their zoom-scaled 31.7px
+   boxes did not, and "Task 1" wrapped onto two lines on an iPhone while looking
+   correct everywhere else. 100% means "render the size I asked for". */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{background:#ffffff;font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+/* Anchors carry no underline of their own. The case-study design files set this
+   in their helmet; the homepage design file omits it, which is a bug in that
+   file rather than intent: it leaves the browser's dark default underline under
+   every anchor that has not reset it locally, most visibly the hero's Download
+   CV, whose own span already carries the yellow 2px rule the design wants.
+   Underline where the system asks for one, never by default. */
+a{color:#1a1a17;text-decoration:none}
+a:hover{color:#1a1a17}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid #ffd400;outline-offset:3px;border-radius:3px}
+button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+
+@keyframes ts-marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.ts-carousel-track{scrollbar-width:none;-ms-overflow-style:none}
+.ts-carousel-track::-webkit-scrollbar{display:none}
+
+/* Full-bleed bands, capped column (SHIP-MANIFEST.md).
+   Every band spans the viewport. The content inside is capped and centred: each
+   band keeps its authored vertical padding and gains the manifest's computed
+   horizontal one, with the homepage's 60px gutter. Below the cap the calc goes
+   negative and max() falls back to the plain gutter, so no breakpoint is needed.
+   Bands whose content is flush to the column (the hero grid, the marquee, the
+   case-study index) take the same rule with a zero gutter; their own children
+   carry the 60px inset. */
+:root{--cap:1680px;--gutter:60px;--nav-gutter:48px}
+.viewport{overflow:clip}
+/* --auth is the viewport width this page's desktop design was drawn at, and it
+   is where every data-fit number below comes from.
+
+   Figures scale uniformly with the column (SHIP-MANIFEST, "Figures scale
+   uniformly with the column"): each figure cell carries data-fit, the width it
+   had at --auth, the page script divides its current width by that to get --k,
+   and the cell is zoomed by it. Because the zoom is on the cell, everything
+   inside lays out at exactly its authored size and paints --k times larger:
+   padding, fixed heights, percentage crops, tile gaps, stagger offsets, arc
+   geometry and bar widths are all untouched, and the aspect ratio is preserved,
+   so nothing re-crops. This is the .m-chartfit pattern the mobile pages use.
+
+   Interactive controls are not figures. Where a cell holds both a control and
+   the evidence it drives, the cell computes --k but is not itself zoomed: it
+   scales its own padding so the evidence still lands on the same edges, the
+   control sits outside the zoom at its authored size, and .cs-fig wraps the
+   evidence alone. See .am-s03-viz and .am-s05-viz. */
+.page{width:100%;background:#ffffff;color:#201C16;--auth:1320px}
+
+/* 900–1199px: the desktop design is laid out at 1200px, the bottom of its own
+   band, and scaled geometrically, so nothing re-wraps and 1199px is continuous
+   with 1200px. .viewport carries the scaled height (set in index.html) and clips
+   the layout overflow. `clip`, not `hidden`: it must not become a scroll
+   container that could jump on keyboard focus. */
+@media (min-width: 900px) and (max-width: 1199px){
+  .page{width:1200px;margin:0 auto;transform-origin:top left;transform:scale(var(--page-scale,1))}
+}
+
+/* icons */
+.ext9{flex:none;margin-bottom:3px}
+.ext8{flex:none;align-self:center;margin-bottom:6px}
+.icon14{flex:none}
+.icon17{flex:none}
+
+/* shared: yellow // mark + tracked-caps kicker */
+.kicker-row{display:flex;align-items:center;gap:10px}
+.mark{color:#ffd400;font:800 14px/1 'Hanken Grotesk';letter-spacing:0.16em;position:relative;top:-2px;-webkit-text-stroke:0.8px #ffd400}
+.kicker{font:600 11px 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+.kicker--hero{font:600 11px/1 'Hanken Grotesk';letter-spacing:.22em}
+.kicker--work{font:600 11px/1 'Hanken Grotesk';letter-spacing:.2em}
+
+/* elements that exist in one design only */
+.nav-burger,.row-more,.row-artmeta,.tst-frac-t--m{display:none}
+
+
+/* ============================================================
+   2. Nav
+   ============================================================ */
+
+.nav{display:flex;justify-content:space-between;align-items:center;padding:24px 48px;border-bottom:1px solid rgba(18,18,16,.16);padding-inline:max(var(--nav-gutter), calc((100% - var(--cap)) / 2 + var(--nav-gutter)))}
+.brand{font:500 15px/1 'Hanken Grotesk';letter-spacing:.24em;text-transform:uppercase;padding-left:.24em;text-decoration:none}
+.brand,.brand:hover{color:#201C16}
+.brand-dot{color:#ffd400;font-size:24px;font-weight:700;letter-spacing:0;margin-left:-.04em}
+
+/* 12px, up from the authored 11px (17 Aug 2026; 16, 14 and 10px were tried on the
+   way). Site-wide: one rule serves the homepage and all five case studies. Mobile
+   is unaffected, the links sit behind the burger. */
+.nav-links{display:flex;gap:40px;align-items:center;font:600 12px/1 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f}
+.nav-links a{display:inline-flex;align-items:center;color:#67665f;transition:color .18s ease}
+.nav-links a:hover{color:#1a1a17}
+.nav-links a > span{padding-bottom:3px;margin-bottom:-3px;border-bottom:2px solid transparent;transition:border-color .18s ease}
+.nav-links a:hover > span{border-bottom-color:#ffd400}
+.nav-linkedin{gap:7px}
+/* CV, with the download glyph. 13px against the external arrow's 9px because the
+   two shapes carry differently: the arrow is a single diagonal that reads at any
+   size, this is an arrow over a baseline and needs the height or it looks
+   undersized beside it. At 11px it did. stroke-width 2.3 on its 24-unit viewBox
+   draws at 1.25px, matching the arrow's 1.26px, so the two sit at the same
+   visual weight rather than the same nominal size. */
+.nav-cv{gap:6px}
+.dl13{flex:none;margin-bottom:2px}
+.nav-email{letter-spacing:.13em}
+
+/* a real button now that it opens the menu: it has to be reachable by keyboard,
+   which the aria-hidden div it replaced was not */
+.nav-burger{flex-direction:column;justify-content:center;gap:5px;width:26px;height:26px;align-items:flex-end;cursor:pointer;background:none;border:0;padding:0;margin-right:-1px}
+.nav-burger span{width:24px;height:2px;background:#201C16;border-radius:2px;display:block}
+
+
+/* ============================================================
+   2b. Mobile menu open state
+   Nav Options.dc.html, option 2g. Mobile only; above 900px the panel is
+   display:none and the burger is already hidden, so neither can be reached.
+
+   The panel sits outside .viewport as a direct child of body (see nav-menu.js for
+   why) so it inherits nothing from .page: box-sizing is therefore declared here
+   rather than relied on, since only .page--cs sets it globally.
+
+   BUILD notes:
+   · The header row takes the nav bar's own 10px/24px/16px padding, not 2g's
+     14/24/18, so the brand does not shift when the menu opens over it.
+   · The brand and its dot reuse .brand, again so the two states line up exactly.
+     2g draws it at 500 weight / .22em; the built mobile nav is 600 / .2em.
+   · The closing line is 16px, not 2g's 15px: the accessibility contract sets 16px
+     as the body floor, and this is the only running copy in the panel.
+   · The mocked phone status bar in the design file is not built (SHIP-MANIFEST).
+   ============================================================ */
+
+.nav-menu{display:none}
+
+@media (max-width: 899px){
+  .nav-menu{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;background:#ffffff;opacity:0;transition:opacity .18s cubic-bezier(.4,0,.2,1)}
+  .nav-menu.is-open{opacity:1}
+  /* wins over the display:flex above, so the closed panel is out of the layout,
+     the tab order and the accessibility tree */
+  .nav-menu[hidden]{display:none}
+  .nav-menu,.nav-menu *{box-sizing:border-box}
+
+  .nav-menu-top{display:flex;justify-content:space-between;align-items:center;padding:10px 24px 16px;border-bottom:1px solid rgba(18,18,16,.10)}
+  /* The 44px tap target must not set the row height: the burger it replaces is
+     26px, so at 44 the open header stood 18px taller than the closed nav and the
+     brand jumped as the menu opened. -9px top and bottom takes the layout box
+     back to 26 while the hit area stays 44, the same trick .cs-footer-links uses. */
+  .nav-close{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin:-9px -10px -9px 0;background:none;border:0;padding:0;color:#1a1a17;cursor:pointer}
+
+  .nav-menu-links{display:flex;flex-direction:column;padding:8px 24px 34px}
+  /* 26px top and bottom on a 13px line is a 65px target, comfortably over the 44 */
+  .nav-menu-links a{display:flex;align-items:center;justify-content:space-between;padding:26px 0;border-bottom:1px solid rgba(18,18,16,.10);font:600 13px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#1a1a17}
+  .nav-menu-links a:last-child{border-bottom:0;letter-spacing:.13em}
+  /* the yellow rule sits at rest here, unlike the desktop bar where it is a hover
+     state, and it never runs under the trailing arrow: it is on the label span */
+  .nav-menu-u{padding-bottom:4px;margin-bottom:-4px;border-bottom:2px solid #ffd400}
+  .nav-menu-li{display:inline-flex;align-items:center;gap:9px}
+  /* 2px, not 4: the label's margin box runs 2px below its text (4px padding and
+     the 2px yellow rule, less the -4px margin), so an inline-flex centre lands
+     the glyph 1px high. 2px is the exact correction, and it is exact for both
+     glyph sizes, the 16px download and the 10px arrow, because the label is the
+     taller box in one case and the shorter in the other. */
+  .nav-menu-li svg{flex:none;margin-bottom:2px}
+
+  .nav-menu-foot{padding:0 24px 40px;font:400 16px/1.6 'Hanken Grotesk',system-ui,sans-serif;color:#4c4b45}
+}
+
+
+/* ============================================================
+   3. Hero
+   ============================================================ */
+
+.hero{display:grid;grid-template-columns:1.12fr 0.88fr;padding-inline:max(0px, calc((100% - var(--cap)) / 2))}
+.hero-copy{padding:80px 60px 68px;display:flex;flex-direction:column;justify-content:center}
+.kicker-row--hero{margin-bottom:34px}
+/* Measures are the build values from SHIP-MANIFEST.md, not the authored ones:
+   hero h1 24ch -> 26ch, hero body 52ch -> 62ch. They rescale with the column. */
+.hero-title{font:300 60px/1.04 'Hanken Grotesk';letter-spacing:-.03em;margin:0;max-width:26ch;text-wrap:balance}
+.hero-lede{font:400 21px/1.6 'Hanken Grotesk';color:#4c4b45;max-width:62ch;margin:32px 0 0}
+.hero-cta{display:flex;gap:16px;margin-top:42px}
+/* scaled: 0.88fr of the authored grid */
+.hero-media{border-left:1px solid rgba(18,18,16,.14);position:relative;min-height:520px;overflow:hidden;zoom:var(--k,1)}
+/* The design file carries touch-action:none, user-select:none and
+   -webkit-user-drag:none on this image. They are authoring-tool artifacts that
+   let the image be dragged around the canvas, and each one blocks a default
+   browser gesture: scrolling over the image on a touchscreen, selecting across
+   it, and dragging it out. Dropped. The mobile design file, which was never
+   dragged, does not carry them. */
+.hero-media img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+
+/* outline pill (Download CV, light surface) */
+/* Solid black (19 Aug 2026), where this was an outline button. It is the only
+   CTA in the hero, so it carries the whole page's first call to action and the
+   outline read as secondary. Black, not the system's yellow .btn-solid: yellow
+   is punctuation here and a yellow pill under a yellow // kicker would put two
+   of them in the same eyeful. Hover keeps the house move of flipping to a light
+   fill with a yellow rule, so it behaves like every other button on the site. */
+.btn-outline{display:inline-flex;align-items:center;gap:9px;background:#201C16;border:1px solid #201C16;font:600 12px 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;padding:15px 26px;border-radius:100px;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease}
+.btn-outline{color:#f1f0ec}
+/* no rule at rest, yellow on hover: the same behaviour as .btn-ghost, the
+   Download CV in the footer, so the site's two CV buttons act alike */
+.btn-outline-label{line-height:1;text-decoration:underline;text-decoration-color:var(--tk-ul,transparent);text-decoration-thickness:2px;text-underline-offset:4px;transition:text-decoration-color .2s ease}
+/* On hover the pill fills yellow and the label's rule turns white. Both design
+   files and the toolkit set --tk-ul:transparent here, i.e. the underline
+   disappears into the fill; white instead is Thomas's call (14 Aug), so the
+   underline survives the hover rather than vanishing. */
+.btn-outline:hover{background:#ffffff;border-color:#201C16;color:#201C16;--tk-ul:#ffd400}
+
+
+/* ============================================================
+   4. Client marquee
+   ============================================================ */
+
+.marquee-band{border-top:1px solid rgba(18,18,16,.12);padding:88px 0;position:relative;background:#f4f4f2;padding-inline:max(0px, calc((100% - var(--cap)) / 2))}
+.kicker-row--marquee{padding:0 60px 22px}
+/* drawn to run off both page edges, so the track and its edge fades extend to
+   the viewport rather than stopping at the capped column */
+.marquee{position:relative;overflow:hidden;margin-inline:calc(-1 * var(--bleed,0px))}
+.marquee-track{display:flex;width:max-content;animation:ts-marq 46s linear infinite}
+.marquee-track:hover{animation-play-state:paused}
+.mq-half{display:contents}
+.mq-item{display:inline-flex;align-items:flex-start;gap:20px;padding:8px 30px}
+.mq-col{display:inline-flex;flex-direction:column;align-items:flex-start;gap:6px;white-space:nowrap}
+.mq-name{font:500 28px/1 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17;text-transform:uppercase}
+.mq-name::after{content:'.';color:#ffd400;font-weight:600;font-size:32px;margin-left:2px}
+.mq-sector{font:600 10px/1 'Hanken Grotesk';letter-spacing:.18em;text-transform:uppercase;color:#67665f}
+.marquee-fade{position:absolute;top:0;bottom:0;width:90px;pointer-events:none}
+.marquee-fade--l{left:0;background:linear-gradient(90deg,#f4f4f2,rgba(244,244,242,0))}
+.marquee-fade--r{right:0;background:linear-gradient(270deg,#f4f4f2,rgba(244,244,242,0))}
+
+
+/* ============================================================
+   5. Case-study index
+   ============================================================ */
+
+.work{border-top:1px solid rgba(18,18,16,.22);padding:0 0 88px;padding-inline:max(0px, calc((100% - var(--cap)) / 2))}
+.work-head{display:flex;align-items:baseline;padding:88px 60px 30px}
+
+.row{display:grid;grid-template-columns:56px 1fr auto;gap:32px;align-items:center;padding:28px 60px;position:relative;text-decoration:none}
+.row,.row:hover{color:inherit}
+.row + .row::before{content:'';position:absolute;top:0;left:60px;right:60px;height:1px;background:rgba(18,18,16,.12)}
+@media (min-width: 900px){.row:hover{background:rgba(255,212,0,.16)}}
+
+.row-num{font:400 14px 'Hanken Grotesk';color:#a6a49d}
+.row-title{font:500 26px/1.12 'Hanken Grotesk';letter-spacing:-.01em}
+.row-sub{color:#a6a49d;font-weight:400}
+.row-disc{font:600 11px/1.55 'Hanken Grotesk';letter-spacing:.13em;text-transform:uppercase;color:#67665f;margin-top:11px}
+.row--article .row-disc{line-height:1.4}
+.row-tag{margin-top:12px}
+.tag{font:600 10px/1 'Hanken Grotesk';letter-spacing:.13em;text-transform:uppercase;color:#201C16;background:#ffd400;padding:5px 9px;border-radius:5px}
+
+.row-metrics{display:flex;gap:36px;justify-content:flex-end;text-align:right}
+.metric-n{font:300 30px/1 'Hanken Grotesk';letter-spacing:-.02em}
+.metric-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.1em;text-transform:uppercase;color:#67665f;margin-top:8px;white-space:nowrap}
+.metric-unit{font-size:17px;color:#201C16;margin-left:5px}
+
+.row-more{align-items:center;gap:7px;margin-top:20px;font:600 11px 'Hanken Grotesk';letter-spacing:.13em;text-transform:uppercase;color:#201C16}
+.row-more > span{border-bottom:2px solid #ffd400;padding-bottom:4px}
+.row-artmeta{align-items:center;gap:14px;margin-top:16px}
+.read{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#67665f}
+.read-unit{margin-left:4px}
+
+
+/* ============================================================
+   6. Mentoring & upskilling
+   ============================================================ */
+
+.mentoring{padding:88px 60px;border-top:1px solid rgba(18,18,16,.22);background:#f3eee3;padding-inline:max(var(--gutter), calc((100% - var(--cap)) / 2 + var(--gutter)))}
+.mentor-grid{display:grid;grid-template-columns:1.05fr 1fr;grid-template-rows:1fr auto;column-gap:64px;align-items:stretch}
+.mentor-intro{grid-column:1;grid-row:1}
+.mentor-res{grid-column:1;grid-row:2;padding-top:28px}
+/* scaled: 1fr of the authored mentoring grid (60px gutters, 64px column gap) */
+.mentor-media{grid-column:2;grid-row:1 / span 2;min-height:340px;border:1px solid rgba(18,18,16,.12);border-radius:14px;overflow:hidden;zoom:var(--k,1)}
+.mentor-media img{width:100%;height:100%;object-fit:cover;display:block}
+.kicker-row--mentor{margin-bottom:24px}
+/* Section heading 38ch -> 44ch. The paragraph under it is the homepage's other
+   body measure and carries the same authored 52ch, so it takes the same build
+   value as the hero body, 62ch. */
+.mentor-title{font:300 34px/1.2 'Hanken Grotesk';letter-spacing:-.02em;margin:0;max-width:44ch;text-wrap:balance}
+.mentor-lede{font:400 18px/1.6 'Hanken Grotesk';color:#4c4b45;margin:18px 0 0;max-width:62ch}
+.mentor-res-label{font:600 10px 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f;margin-bottom:20px}
+
+.pills{display:flex;flex-wrap:wrap;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#201C16;border:1px solid #201C16;border-radius:100px;padding:14px 22px;text-decoration:none;color:#f0ede3;font:600 11px 'Hanken Grotesk';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .18s ease,border-color .18s ease}
+.pill--2{transition:background .2s ease,border-color .2s ease,color .2s ease}
+.pill-label{line-height:1;text-decoration:underline;text-decoration-color:var(--tk-ul,#ffffff);text-decoration-thickness:1.5px;text-underline-offset:4px;transition:text-decoration-color .18s ease}
+.pill--2 .pill-label{transition:text-decoration-color .2s ease}
+.pill:hover{background:#ffffff;border-color:#201C16;color:#201C16;--tk-ul:#ffd400}
+
+.mentor-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px}
+
+/* white testimonial / mentoring card */
+.card{background:#ffffff;border:1px solid rgba(18,18,16,.12);border-radius:16px;padding:30px;display:flex;flex-direction:column}
+.card-label{font:600 10px 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f;margin-bottom:16px}
+.card-label--faint{color:#a6a49d}
+.quote{font:300 17px/1.5 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17;flex:1}
+.byline{display:flex;align-items:center;gap:13px;margin-top:22px}
+.byline--mentor{gap:12px}
+.byline-name{font:500 15px 'Hanken Grotesk'}
+.byline-role{font:400 13px 'Hanken Grotesk';color:#67665f}
+.byline-role--mentor{margin-top:2px}
+
+.avatar{width:44px;height:44px;border-radius:50%;background-position:center;background-size:cover;background-repeat:no-repeat;border:1px solid rgba(18,18,16,.12);flex:none}
+.avatar--steven{background-image:url("./steven-mr3m9lf8.jpeg");background-origin:border-box}
+.avatar--daniel{background-image:url("./daniel-mr3m7co8.jpeg");background-origin:border-box;overflow:hidden}
+.avatar--chris{background-image:url('./chris.jpeg')}
+.avatar--trina{background-image:url('./trina---senior-premier-digital-propositi-mr3m6vbs.jpeg')}
+.avatar--gareth{background-image:url('./gareth-mr3m62wu.jpeg')}
+.avatar--borja{background-image:url('./borja-mr3mcri1.jpeg')}
+.avatar--alex{background-image:url('./alex.png')}
+
+
+/* ============================================================
+   7. Testimonials
+   ============================================================ */
+
+.testimonials{padding:88px 60px;border-top:1px solid rgba(18,18,16,.22);background:#f4f4f2;padding-inline:max(var(--gutter), calc((100% - var(--cap)) / 2 + var(--gutter)))}
+.tst-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px}
+
+.marklink{font:600 11px 'Hanken Grotesk';text-transform:uppercase;text-decoration:none;cursor:pointer}
+.marklink,.marklink:hover{color:#201C16}
+.marklink > span{border-bottom:2px solid var(--tk-ul,#ffd400);padding-bottom:4px;background:var(--tk-mark,transparent);transition:background .18s ease,border-color .18s ease}
+.marklink:hover{--tk-mark:linear-gradient(to top, rgba(255,212,0,.55) 44%, transparent 44%);--tk-ul:transparent}
+.tst-link{display:inline-flex;align-items:center;gap:8px;padding:14px 0;letter-spacing:.14em}
+.card-link{margin-top:4px;padding:15px 0;align-self:flex-start;letter-spacing:.13em}
+
+.tst-track{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x proximity;scroll-behavior:smooth;padding:4px 4px 4px 0;-webkit-overflow-scrolling:touch}
+.tst-card{box-sizing:border-box;flex:0 0 calc((100% - 48px)/3);scroll-snap-align:start;padding:32px;min-height:340px}
+.tst-card .card-label{margin-bottom:18px}
+.tst-spacer{flex:0 0 calc((100% - 48px)/3)}
+
+.tst-nav{display:flex;justify-content:flex-end;align-items:center;gap:22px;margin-top:30px}
+.tst-btn{width:46px;height:46px;border-radius:50%;border:1px solid rgba(18,18,16,.3);background:transparent;color:#201C16;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:background .18s ease,border-color .18s ease}
+.tst-btn:hover{background:#ffd400;border-color:#ffd400}
+.tst-frac{display:flex;align-items:baseline;gap:7px}
+.tst-frac-n{font:300 30px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17}
+.tst-frac-t{font:500 13px 'Hanken Grotesk';letter-spacing:.06em;color:#a6a49d}
+
+
+/* ============================================================
+   8. Footer
+   ============================================================ */
+
+.footer{background:#201C16;color:#f1f0ec;padding:88px 60px;display:flex;justify-content:space-between;align-items:flex-end;padding-inline:max(var(--gutter), calc((100% - var(--cap)) / 2 + var(--gutter)))}
+.footer-line{font:300 46px/1.05 'Hanken Grotesk';letter-spacing:-.02em;max-width:16ch;text-wrap:balance}
+.footer-cta{display:flex;gap:16px;margin-top:34px}
+
+.btn-solid{background:#ffd400;border:1px solid #ffd400;font:600 12px 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;padding:15px 26px;border-radius:100px;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease}
+.btn-solid,.btn-solid:hover{color:#201C16}
+.btn-solid:hover{background:#ffffff;border-color:#ffd400;text-decoration:underline;text-decoration-color:#ffd400;text-decoration-thickness:2px;text-underline-offset:4px}
+
+.btn-ghost{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(241,240,236,.35);color:#f1f0ec;font:600 12px 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;padding:15px 26px;border-radius:100px;cursor:pointer;transition:all .18s ease}
+.btn-ghost-label{text-decoration:underline;text-decoration-color:var(--tk-ul,transparent);text-decoration-thickness:2px;text-underline-offset:4px;transition:text-decoration-color .18s ease}
+.btn-ghost:hover{background:#ffffff;color:#201C16;border-color:#ffffff;--tk-ul:#ffd400}
+
+.footer-links{display:flex;gap:28px;font:600 11px 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#a4a29a}
+.footer-links a{display:inline-flex;align-items:center;gap:7px;padding:15px 0;margin:-15px 0;color:#a4a29a;cursor:pointer;transition:color .18s ease}
+.footer-links a:hover{color:#f0ede3}
+.footer-links a > span{padding-bottom:3px;margin-bottom:-3px;border-bottom:2px solid transparent;transition:border-color .18s ease}
+.footer-links a:hover > span{border-bottom-color:#ffd400}
+
+
+/* ============================================================
+   9. Mobile design (< 900px) — Homepage Mobile.dc.html
+   440px column, 24px side padding, grown fluidly. No other change.
+   ============================================================ */
+
+@media (max-width: 899px){
+
+  .page{width:100%}
+
+  /* shared */
+  .kicker-row{gap:9px}
+  .mark{font:800 13px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em;-webkit-text-stroke:.8px #ffd400}
+  .kicker,.kicker--hero,.kicker--work{font:600 10px/1.3 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em}
+
+  /* nav · sticks to the top and gets out of the way on the way down.
+     The case studies are eight or nine screens tall, so without this the menu is
+     only reachable from the very top. z-index sits under the menu panel's 60. */
+  .nav{padding:10px 24px 16px;position:sticky;top:0;z-index:50;background:#ffffff;transition:transform .25s cubic-bezier(.4,0,.2,1)}
+  .nav--up{transform:translateY(-100%)}
+  .brand{font:600 13px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;padding-left:.2em}
+  .brand-dot{font-size:20px}
+  .nav-links{display:none}
+  .nav-burger{display:flex}
+
+  /* hero */
+  .hero{display:block}
+  .hero-copy{padding:60px 24px 64px;display:block}
+  .kicker-row--hero{margin-bottom:24px}
+  /* the measures and text-wrap of the wide-screen rules are desktop only: the
+     mobile design is signed off as authored, with no caps */
+  .hero-title{font:300 38px/1.06 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em;max-width:none;text-wrap:balance}
+  /* Both homepage ledes are 16px on mobile (18 Aug 2026). The mentoring lede was
+     15px, under the 16px body floor the accessibility contract sets, and the two
+     ledes disagreed with each other. 18px was tried first, to match the case
+     studies, and read too heavy on a page whose job is to be scanned: the
+     homepage stays a step quieter than a case study by design. */
+  .hero-lede{font:400 16px/1.6 'Hanken Grotesk',system-ui,sans-serif;margin:22px 0 0;max-width:none}
+  .hero-cta{display:block;margin-top:30px}
+  .btn-outline{justify-content:center;width:100%;box-sizing:border-box;font:600 12px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.14em;padding:16px 26px}
+  .hero-media{height:300px;min-height:0;border-left:0;border-top:1px solid rgba(18,18,16,.14);border-bottom:1px solid rgba(18,18,16,.14)}
+
+  /* marquee */
+  .marquee-band{border-top:0;padding:64px 0}
+  .kicker-row--marquee{padding:0 24px 22px}
+  .mq-item{padding:8px 26px}
+  .mq-name{font:500 28px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em}
+  .mq-sector{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.18em}
+  .marquee-fade{width:48px}
+
+  /* case-study index */
+  .work{padding:64px 0 44px}
+  .work-head{display:block;padding:0 24px 4px}
+  .row{display:block;padding:26px 24px}
+  .row:active{background:rgba(255,212,0,.16)}
+  .row + .row{border-top:4px solid #ededeb}
+  .row + .row::before{content:none}
+  .row-num{display:block;font:300 18px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;color:#a6a49d}
+  .row-title{font:500 21px/1.16 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;margin-top:8px}
+  .row-sub{display:block;font:400 21px/1.16 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;color:#a6a49d;margin-top:2px}
+  .row-disc,.row--article .row-disc{font:600 10px/1.75 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.13em;margin-top:12px}
+  .row-metrics{gap:44px;justify-content:flex-start;text-align:left;margin-top:18px}
+  .metric-n{font:300 30px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em}
+  .metric-l{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.1em;margin-top:7px;white-space:normal}
+  .row-tag,.row-metrics--single{display:none}
+  .row-artmeta{display:flex}
+  .row-more{display:inline-flex}
+
+  /* mentoring */
+  .mentoring{padding:64px 24px}
+  .mentor-grid{display:block}
+  .kicker-row--mentor{margin-bottom:22px}
+  .mentor-title{font:300 27px/1.22 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;max-width:none;text-wrap:balance}
+  .mentor-lede{font:400 16px/1.6 'Hanken Grotesk',system-ui,sans-serif;margin:16px 0 0;max-width:none}
+  .mentor-media{height:200px;min-height:0;margin-top:24px}
+  .mentor-res{padding-top:0}
+  .mentor-res-label{font:600 10px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em;margin:26px 0 20px}
+  .pills{gap:10px}
+  .pill{padding:14px 20px;font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.1em}
+  .desk-tail{display:none}
+
+  .mentor-cards{display:flex;flex-direction:column;gap:16px;margin-top:28px}
+  .card{padding:26px}
+  .card-label{font:600 10px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em;margin-bottom:14px}
+  .quote{font:300 17px/1.5 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em}
+  .byline,.byline--mentor{gap:12px;margin-top:20px}
+  .byline-name{font:500 15px 'Hanken Grotesk',system-ui,sans-serif}
+  .byline-role{font:400 13px 'Hanken Grotesk',system-ui,sans-serif}
+  .avatar{background-origin:padding-box}
+
+  /* testimonials */
+  .testimonials{padding:64px 24px}
+  .tst-head{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:0}
+  .kicker-row--tst{margin-bottom:14px}
+  .tst-link{margin-bottom:28px;font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.14em}
+  .tst-track{gap:14px;padding:2px 2px 2px 0}
+  .tst-card{box-sizing:content-box;flex:0 0 86%;padding:28px;min-height:300px}
+  .tst-card .card-label{margin-bottom:16px}
+  .card-link{font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.13em}
+  .tst-spacer{display:none}
+  .tst-nav{margin-top:22px}
+  .tst-btn{width:44px;height:44px}
+  .tst-frac-n{font:300 26px/1 'Hanken Grotesk';letter-spacing:-.02em}
+  .tst-frac-t--d{display:none}
+  .tst-frac-t--m{display:inline}
+
+  /* footer */
+  .footer{padding:64px 24px 56px;display:block}
+  .footer-line{font:300 40px/1.05 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;max-width:none;text-wrap:balance}
+  .footer-cta{display:flex;flex-direction:column;gap:12px;margin-top:28px}
+  .btn-solid{display:inline-flex;align-items:center;justify-content:center;font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em;padding:16px 22px}
+  .btn-ghost{justify-content:center;font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em;padding:16px 22px}
+  .footer-links{gap:24px;margin-top:44px;font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em}
+}
+
+
+/* ============================================================
+   10. Case studies — shared components
+   Built from _design/Restore - ArcelorMittal Case Study.dc.html (authored on a
+   1200px card, 48px gutter, so a 1104px content column) and
+   _design/Restore - ArcelorMittal Case Study Mobile v2.dc.html (440px column,
+   24px side padding). Every value is lifted from those two files unchanged
+   except the type measures, which take the build column of the table in
+   SHIP-MANIFEST.md, and the three notes marked BUILD below.
+
+   The 1200px viewport is where this page's content column is 1104px, so that
+   is where the build and the desktop design line up 1:1.
+   ============================================================ */
+
+/* Full-bleed bands at the case-study 48px gutter (SHIP-MANIFEST.md). --csb
+   insets the content by the gutter; --csb0 by nothing, for bands whose own
+   children carry the 48px (the cover, the metric strip, the step grids).
+   Declared here rather than inline on every band; `100%` inside a custom
+   property resolves against the element that uses it, so each band still
+   measures its own containing block. */
+.page{--csb:max(48px, calc((100% - var(--cap)) / 2 + 48px));--csb0:max(0px, calc((100% - var(--cap)) / 2))}
+
+/* Top alignment for two-column steps ("the imaginary line").
+
+   In a two-column step the right column's first line must sit on the same line
+   as the step title. The step title starts 26px below the row top (a 12px
+   marker plus its own 14px margin), so the right column's offset is 26px plus
+   the difference in CAP INSET between the two: the distance from an element's
+   line-box top down to the top of its capitals. Bigger type carries more space
+   above its caps, so aligning the boxes leaves the smaller partner sitting low.
+   That is the whole bug, and it was 14px, 18px and 29px out on the three HSBC
+   steps before this.
+
+   These are the pairings that occur. Use the token, never a fresh number, and
+   if a study needs a pairing that is not here, MEASURE it (the method is in
+   CLAUDE.md) and add it, rather than eyeballing a value. */
+.page--cs{--auth:1200px;
+  --cs-top-body:17px;            /* 28px step title  ->  18px body */
+  --cs-top-label:22px;           /* 28px step title  ->  10px tracked-caps label */
+  --cs-top-label-display:34px}   /* 44px display title -> 10px tracked-caps label */
+.page--cs,.page--cs *,.page--cs *::before,.page--cs *::after{box-sizing:border-box}
+.page--cs a{text-decoration:none}
+
+/* Modifiers on classes the homepage also uses. Fenced inside the desktop query
+   so they cannot outrank the homepage's mobile block in section 9, which both
+   designs share unchanged: the case-study nav, mark and kicker are identical to
+   the homepage's at mobile size. */
+@media (min-width: 900px){
+  .nav--cs{border-bottom-color:rgba(18,18,16,.10)}
+  .mark--sm{font-size:13px}
+  .kicker--cs{font:600 11px/1 'Hanken Grotesk';letter-spacing:.2em}
+}
+.kicker--dark{color:#9d9b8f}
+.cs-dot{color:#ffd400}
+
+/* --- cover ------------------------------------------------------------- */
+.cs-cover{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;background:#fff;padding-inline:var(--csb0)}
+.cs-cover-copy{padding:48px;align-self:center}
+/* measure: cover title 15ch -> 24ch (SHIP-MANIFEST.md) */
+.cs-title{font:300 48px/1.02 'Hanken Grotesk';letter-spacing:-.035em;color:#1a1a17;margin:18px 0 0;max-width:24ch;text-wrap:balance}
+.cs-disc{font:600 10px/1.6 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#67665f;margin-top:18px}
+/* scaled: half the authored cover grid */
+.cs-cover-media{position:relative;overflow:hidden;background:#fff;display:flex;align-items:center;zoom:var(--k,1)}
+.cs-cover-frame{position:relative;width:100%;aspect-ratio:1256/704;overflow:hidden}
+.cs-cover-video{position:absolute;top:-9px;left:0;height:calc(100% + 18px);width:auto;max-width:none;display:block}
+
+/* --- metric strip (no kicker above it) --------------------------------- */
+.cs-metrics{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(18,18,16,.12);border-bottom:1px solid rgba(18,18,16,.12);padding-inline:var(--csb0)}
+.cs-metric{padding:30px;border-right:1px solid rgba(18,18,16,.12)}
+.cs-metric:first-child{padding:30px 30px 34px 48px}
+.cs-metric:last-child{border-right:0}
+.cs-metric-n{font:300 44px/1 'Hanken Grotesk';letter-spacing:-.025em;color:#1a1a17}
+.cs-metric-u{font-size:24px}
+.cs-metric-l{font:600 10px/1.5 'Hanken Grotesk';letter-spacing:.11em;text-transform:uppercase;color:#67665f;margin-top:11px}
+
+/* --- context + meta table ---------------------------------------------- */
+/* Band rhythm: every full content band opens and closes on 80px (56px on
+   mobile). The only exceptions are the ones the design dictates: an edge that
+   bleeds into imagery closes on 0, and My role -> step 01 stays tucked because
+   the lead introduces the step sequence rather than sitting apart from it. */
+.cs-context{background:#ffffff;padding:80px 48px;display:grid;grid-template-columns:1fr 320px;gap:72px;align-items:start;padding-inline:var(--csb)}
+.kicker-row--cs{margin-bottom:22px}
+/* measure: a band statement is five twelfths of the content column, 460px of the
+   authored 1104 and 660 at the 1680 cap. One shared measure for the context
+   statement and the business problem statement. --col is set by the page script. */
+.cs-statement{font:300 32px/1.4 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17;margin:0;max-width:calc(var(--col,1104px) * 5 / 12);text-wrap:balance}
+.cs-meta{margin-top:20px}
+.cs-meta-row{display:flex;justify-content:space-between;align-items:baseline;gap:24px;padding:15px 0;border-bottom:1px solid rgba(18,18,16,.12)}
+.cs-meta-row:last-child{border-bottom:0}
+.cs-meta-k{font:600 10px/1.7 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f}
+/* right-aligned, so a value that wraps sits ragged-left off the right edge */
+.cs-meta-v{font:500 14px/1.4 'Hanken Grotesk';color:#1a1a17;text-align:right}
+
+/* --- the business problem ---------------------------------------------- */
+.cs-problem{background:#f3eee3;padding:80px 48px;border-top:1px solid rgba(18,18,16,.1);padding-inline:var(--csb)}
+/* The body column is the step 01 copy cell, 1fr of that grid's 1.1fr 1fr less
+   its 48px padding, so this paragraph starts on the same vertical as the step 01
+   body. --col + 96px is the band width the step grids run edge to edge in.
+   The 63ch cap belongs on the paragraph, not on this column: capping the column
+   would shorten the last track and push the whole paragraph right, off the
+   step's left edge, which is what it did at the 1680 cap. */
+.cs-problem-grid{display:grid;grid-template-columns:1fr calc((var(--col,1104px) + 96px) / 2.1 - 96px);gap:72px;margin-top:34px;align-items:start}
+.cs-problem-body{padding-top:8px}
+.cs-body{font:400 18px/1.7 'Hanken Grotesk';color:#4c4b45;margin:0}
+/* the step body measure, so both paragraphs share both edges at every width */
+.cs-problem-body .cs-body{max-width:63ch}
+
+/* --- my role (section lead only) --------------------------------------- */
+/* bottom stays tucked: this lead introduces the numbered steps */
+.cs-lead{background:#fff;padding:80px 48px 8px;border-top:1px solid rgba(18,18,16,.1);padding-inline:var(--csb)}
+
+/* --- numbered process steps -------------------------------------------- */
+.cs-step{display:grid;padding-inline:var(--csb0)}
+.cs-step-copy{padding:72px 48px;align-self:center}
+.cs-marker{display:flex;align-items:center;gap:7px}
+.cs-marker-n,.cs-marker-t{font:400 12px/1 'Hanken Grotesk';letter-spacing:.14em;color:#726f68}
+.cs-marker-t{text-transform:uppercase}
+.cs-marker--dark .cs-marker-n,.cs-marker--dark .cs-marker-t{color:#8b897e}
+/* measures: step title -> 48ch, step body -> 63ch, step body on black -> 55ch */
+.cs-step-title{font:400 28px/1.14 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17;margin:16px 0 0;max-width:48ch;text-wrap:balance}
+.cs-step-title--dark{color:#f0ede3}
+.cs-step-body{font:400 18px/1.7 'Hanken Grotesk';color:#4c4b45;margin:16px 0 0;max-width:63ch}
+.cs-step-body--dark{color:rgba(240,237,227,.82);max-width:55ch}
+/* A stat row sitting directly under a step body takes 44px, site-wide. The
+   five design files each hand-spaced this one role (30, 32, 34, 36 and 40px
+   across the seven instances), and the per-step overrides that carried that
+   drift into the build are gone: only the gutters, which genuinely differ by
+   how many stats a row holds, are still set per step. .eon-tt-stats keeps its
+   own margin because a figure sits above it, not a paragraph. Mobile is
+   untouched and still carries its own values in the blocks below. */
+.cs-stats{display:flex;gap:40px;margin-top:44px}
+.cs-stats--s04{gap:44px}
+.cs-stat-n{font:300 36px/1 'Hanken Grotesk';letter-spacing:-.025em;color:#1a1a17}
+.cs-stat-u{font-size:20px}
+.cs-stat-l{font:600 10px/1.5 'Hanken Grotesk';letter-spacing:.11em;text-transform:uppercase;color:#67665f;margin-top:10px}
+.cs-stat-l--wide{letter-spacing:.13em}
+/* a stat row on a black band (Laced customer support step 04) */
+.cs-stat-n--dark{color:#f0ede3}
+.cs-stat-l--dark{color:#9d9b8f}
+
+/* --- segmented pill toggle (data-tabgroup) ------------------------------
+   The buttons keep their inline style plus data-on / data-off: cs-interactions
+   swaps the whole style attribute on click, so those three strings have to stay
+   in the markup. */
+/* A figure cell must not let its own contents size its grid track: a zoomed
+   cell, or one whose padding rides --k, otherwise feeds its width back into the
+   fr distribution and --k creeps above 1 at the authored width. */
+[data-fit]{min-width:0}
+
+/* Wraps the evidence a control drives, and nothing else. A segmented toggle, a
+   carousel's arrows and its fraction counter all stay outside it. */
+.cs-fig{zoom:var(--k,1)}
+/* Belt and braces for the other four studies: E.ON step 04's toggle and its two
+   IA carousels, and Laced customer support step 01 sit in the same shape. If a
+   control ever ends up inside a figure, it divides the zoom back out and still
+   paints at its authored size, so tap targets cannot drift with the column. */
+.cs-fig .cs-tabs,.cs-fig [data-carousel-nav],.cs-fig .cs-frac{zoom:calc(1 / var(--k,1))}
+
+/* Only type MEASURES rescale with the column, never type SIZES. Figcaptions sit
+   outside .cs-fig entirely, alongside the controls. Text that has to live inside
+   a chart, because it is part of its layout, divides the zoom back out instead
+   and holds its authored size at every width. .cs-noscale is the handle for it,
+   and it is what the mono FIG. NN tags and caption chips on any placeholder
+   block should use when those pages are built.
+
+   The one exception the manifest carries: the number inside a data-arc ring
+   rides the zoom, because a donut is a single drawn composition and its number
+   has to hold its proportion against the ring. Same for data-bar label type. */
+.cs-noscale,
+.cs-fig .am-tt-lab,.cs-fig .am-leg,
+.cs-fig .am-bar-l,.cs-fig .am-axis-l,.cs-fig .am-tsleg{zoom:calc(1 / var(--k,1))}
+
+.cs-tabs{display:flex;justify-content:flex-start}
+.cs-tabtrack{display:inline-flex;border:1px solid rgba(18,18,16,.18);border-radius:100px;padding:3px;gap:2px;background:#fff}
+
+/* --- outcome (black) ---------------------------------------------------- */
+.cs-outcome{background:#201C16;color:#f0ede3;padding:80px 48px;padding-inline:var(--csb)}
+/* measure: outcome statement 26ch -> 40ch (authored here as 28ch) */
+.cs-outcome-statement{font:300 34px/1.28 'Hanken Grotesk';letter-spacing:-.02em;margin:28px 0 44px;max-width:40ch;text-wrap:balance}
+.cs-outcome-grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(240,237,227,.18)}
+.cs-outcome-metric{padding:32px 24px 0 30px;border-right:1px solid rgba(240,237,227,.16)}
+.cs-outcome-metric:first-child{padding:32px 24px 0 0}
+.cs-outcome-metric:last-child{padding-right:0;border-right:0}
+.cs-outcome-n{font:300 52px/1 'Hanken Grotesk';letter-spacing:-.03em}
+.cs-outcome-n--lead{color:#ffd400}
+.cs-outcome-u{font-size:28px}
+.cs-outcome-l{font:600 10px/1.5 'Hanken Grotesk';letter-spacing:.11em;text-transform:uppercase;color:#9d9b8f;margin-top:12px}
+
+/* --- case-study footer (Next: chain) ------------------------------------ */
+.cs-footer{background:#201C16;color:#f1f0ec;padding:44px 48px;border-top:1px solid rgba(240,237,227,.14);display:flex;justify-content:space-between;align-items:flex-end;gap:40px;padding-inline:var(--csb)}
+.cs-footer-next{font:300 32px/1.08 'Hanken Grotesk';letter-spacing:-.02em}
+.cs-footer-link{display:inline-flex;align-items:center;gap:8px;margin-top:4px;padding:16px 0;font:600 11px 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase}
+.cs-footer-link,.cs-footer-link:hover{color:#f1f0ec}
+.cs-footer-link > span{border-bottom:2px solid #ffd400;padding-bottom:4px}
+.cs-footer-links{display:flex;gap:24px;font:600 11px 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#a4a29a}
+.cs-footer-links a{display:inline-flex;align-items:center;gap:7px;padding:16px 0;color:#a4a29a;transition:color .18s ease}
+.cs-footer-links a:hover{color:#f0ede3}
+.cs-footer-links a > span{padding-bottom:4px;border-bottom:2px solid transparent;transition:border-color .18s ease}
+.cs-footer-links a:hover > span{border-bottom-color:#ffd400}
+.ext9--cs{margin-bottom:6px}
+
+
+/* ============================================================
+   11. ArcelorMittal · Global website rebuild
+   ============================================================ */
+
+/* --- STEP 01 · Data analysis -------------------------------------------- */
+.am-s01{background:#ffffff;grid-template-columns:1.1fr 1fr}
+/* scaled: 1.1fr of the authored grid. The zoom is on the cell, so its padding
+   and min-height come with it and the two tiles keep their overlap exactly. */
+.am-s01-media{position:relative;background:#ffffff;overflow:hidden;min-height:430px;display:flex;align-items:center;justify-content:center;padding:40px 48px;order:-1;zoom:var(--k,1)}
+.am-s01-figs{position:relative;width:100%;max-width:600px;height:420px}
+.am-fig{position:absolute;aspect-ratio:16/10;border:1px solid rgba(18,18,16,.12);border-radius:10px}
+.am-fig--ga{top:0;left:0;width:76%;background:#fff url('images/ga-path-exploration.png') left top/116% no-repeat;z-index:1}
+.am-fig--clarity{bottom:0;right:0;width:64%;background:#fff url('images/clarity-dashboard.png') left top/112% no-repeat;z-index:2}
+.am-cols{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:32px}
+.am-col-l{font:600 10px 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f}
+.am-list{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+.am-list-i{display:flex;align-items:center;gap:12px}
+.am-dash{width:14px;height:1px;background:#c3c1ba;flex:none}
+.am-list-t{font:400 15px/1.35 'Hanken Grotesk';letter-spacing:-.005em;color:#4c4b45}
+
+/* --- STEP 02 · Stakeholder interviews ----------------------------------- */
+.am-s02{background:#f3eee3;border-top:1px solid rgba(18,18,16,.1)}
+.am-s02-grid{display:grid;grid-template-columns:1fr 1.1fr;padding-inline:var(--csb0)}
+/* scaled: 1.1fr of the authored grid. The 1080px wall inside is cropped by the
+   cell exactly as drawn, just larger.
+
+   The wall runs past this cell on both sides and the cell clips it, at the
+   content column's edge, the same edge every other band's content stops on. */
+.am-s02-media{position:relative;overflow:hidden;background:#f3eee3;min-height:500px;border-left:1px solid rgba(18,18,16,.1);zoom:var(--k,1)}
+/* the wall is a fixed 1080px grid centred in the cell and clipped by it, so its
+   outer columns are cut about two thirds at the column boundary. It rides the
+   cell's zoom and nothing else: the crop is the authored one at every width. */
+.am-s02-wall{position:absolute;top:50%;left:50%;width:1080px;transform:translate(-50%,-50%)}
+.am-s02-thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.am-thumb{aspect-ratio:16/10;border-radius:14px;overflow:hidden;background:#0e0d0b}
+.am-thumb img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.am-flip{transform:scaleX(-1)}
+
+.am-s02-out{background:#f3eee3;border-top:1px solid rgba(18,18,16,.1);padding:56px 48px 64px;padding-inline:var(--csb)}
+.am-out-label{display:flex;align-items:center;width:max-content;font:600 11px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+/* measure: same Light-300 band statement role as .cs-statement, so 40ch. The
+   line renders 580px, so the cap never breaks it at any width. */
+.am-out-title{font:300 32px/1.12 'Hanken Grotesk';letter-spacing:-.025em;color:#1a1a17;margin:16px 0 40px;max-width:40ch;text-wrap:balance}
+.am-out-grid{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:48px;align-items:start}
+.am-out-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.18em;text-transform:uppercase;color:#67665f}
+.am-out-p{margin:16px 0 0}
+.am-quote{margin:0;padding-left:24px;border-left:2px solid #ffd400}
+.am-quote-p{font:400 20px/1.5 'Newsreader',serif;font-style:italic;color:#1a1a17;margin:0;text-wrap:pretty}
+.am-quote-a{font:600 10px/1 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f;margin-top:16px}
+
+/* --- STEP 03 · Open card sort ------------------------------------------- */
+.am-s03{background:#f4f4f2;grid-template-columns:1.05fr 1fr;border-top:1px solid rgba(18,18,16,.1)}
+.am-s03 .cs-step-copy{padding:64px 48px}
+/* copy is first in the markup because that is the mobile reading order; the
+   desktop design puts the evidence in column one. */
+/* the cell scales its padding so the evidence keeps the same edges, but only
+   .cs-fig inside it is zoomed: the toggle above stays at its authored size */
+.am-s03-viz{background:#f4f4f2;padding:calc(44px * var(--k,1));display:flex;flex-direction:column;justify-content:center;order:-1}
+.am-panelbox{height:352px;margin-top:16px}
+.am-panel{height:100%}
+.am-chart{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:8px}
+.am-chart-inner{width:100%;height:100%;display:grid;place-items:center}
+/* the chart is a transparent axis layer under a data layer; only the data layer
+   carries data-reveal, so the numbers wipe in over a static frame. */
+.am-chart-img{grid-area:1/1;width:100%;height:100%;object-fit:contain;display:block}
+.am-chart-img--fit{width:auto;height:auto;max-width:100%;max-height:100%}
+.am-cap{margin-top:14px}
+.am-cap-p{font:400 13.5px/1.6 'Hanken Grotesk';color:#67665f;margin:0;max-width:56ch}
+
+/* --- STEP 04 · Revised IA ------------------------------------------------ */
+.am-s04{background:#ffffff;grid-template-columns:1fr 1.15fr;border-top:1px solid rgba(18,18,16,.1)}
+.am-s04 .cs-step-copy{padding:64px 48px}
+/* scaled: 1.15fr of the authored grid; the map's two baked crops ride it */
+.am-s04-media{position:relative;background:#ffffff;overflow:hidden;min-height:460px;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(18,18,16,.1);zoom:var(--k,1)}
+.am-ia{position:relative;width:100%;aspect-ratio:1.36}
+.am-ia-close{position:absolute;inset:0;background:#ffffff url('images/ia-closeup-white.png') left 34px/100% no-repeat;z-index:1}
+.am-ia-ctx{position:absolute;bottom:52px;left:28px;width:32%;aspect-ratio:2/1;background:#ffffff url('images/ia-context-white.png') center/100% no-repeat;border:1px solid rgba(18,18,16,.14);border-radius:8px;z-index:2}
+
+/* --- STEP 05 · Tree testing ---------------------------------------------- */
+.am-s05{background:#f4f4f2;grid-template-columns:1.05fr 1fr;border-top:1px solid rgba(18,18,16,.1)}
+.am-s05 .cs-step-copy{padding:52px 48px}
+/* as step 03: the donut rings, their label type and the task-summary bars ride
+   the zoom on .am-tt-panels, so r, the circumference, data-c, data-off,
+   stroke-width and every data-w stay exactly as authored and the animation
+   engine still seeds from the right numbers. The toggle sits outside it. */
+.am-s05-viz{background:#f4f4f2;padding:calc(52px * var(--k,1)) calc(44px * var(--k,1));display:flex;flex-direction:column;justify-content:center;order:-1}
+/* the four wrappers are real boxes only on mobile, where the task-summary chart
+   is scaled to fit the column; on desktop they get out of the way so the panel
+   is a direct child of the 300px box and its height:100% resolves. */
+.am-tt-panels{height:300px;margin-top:24px}
+.am-tt-ovwrap,.am-tt-tswrap,.m-chartfit,.am-tt-tsinner{display:contents}
+.am-tt-ov{height:100%;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:38px}
+.am-donuts{display:flex;align-items:center;justify-content:flex-start;gap:48px}
+.am-donut{display:flex;flex-direction:column;align-items:flex-start}
+.am-ring{position:relative;width:140px;height:140px}
+.am-ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.am-ring-track{fill:none;stroke:#b3614a;stroke-width:11}
+.am-ring-arc{fill:none;stroke:#356b66;stroke-width:11;stroke-linecap:butt}
+.am-ring-c{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.am-ring-n{font:300 28px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17}
+.am-ring-u{font-size:14px}
+/* desktop stacks label and legend under the ring, mobile sets them beside it */
+.am-tt-meta{display:contents}
+.am-tt-lab{font:600 11px/1.4 'Hanken Grotesk';letter-spacing:.15em;text-transform:uppercase;color:#67665f;margin-top:20px;text-align:left;max-width:240px}
+.am-legend{display:flex;gap:16px;margin-top:16px}
+.am-leg{display:flex;align-items:center;gap:6px;font:500 13px 'Hanken Grotesk';color:#1a1a17}
+.am-leg--mut{color:#67665f}
+.am-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.am-dot--ds{background:#356b66}
+.am-dot--is{background:#8fb5af}
+.am-dot--df{background:#b3614a}
+.am-dot--if{background:#dba892}
+.am-tt-div{width:1px;height:140px;background:rgba(18,18,16,.12)}
+
+.am-tt-ts{height:100%;display:flex;flex-direction:column;justify-content:center;padding:8px}
+.am-bars-wrap{position:relative}
+.am-bars{display:flex;flex-direction:column;gap:6px}
+.am-bar-row{display:flex;align-items:center;gap:12px}
+/* nowrap as well as the text-size-adjust fix above: the label is a two-word
+   fixed-width row header and must never break, whatever a browser decides to do
+   with its size. 34px of text in a 44px box, so there is room to spare. */
+.am-bar-l{font:600 10px 'Hanken Grotesk';letter-spacing:.08em;text-transform:uppercase;color:#67665f;width:44px;flex:none;white-space:nowrap}
+.am-bar-track{flex:1;height:11px;border-radius:2px;overflow:hidden;display:flex;background:rgba(18,18,16,.06)}
+/* the inline width on each segment is its resting value; cs-interactions seeds
+   it to 0% and grows it back over 1150ms off data-w / data-delay. */
+.am-seg--ds{background:#356b66}
+.am-seg--is{background:#8fb5af}
+.am-seg--df{background:#b3614a}
+.am-seg--if{background:#dba892}
+.am-grid{position:absolute;left:56px;right:0;top:0;bottom:0;pointer-events:none}
+.am-gridline{position:absolute;top:0;bottom:0;width:1px;background:rgba(18,18,16,.10)}
+.am-gridline--25{left:25%}
+.am-gridline--50{left:50%}
+.am-gridline--75{left:75%}
+.am-gridline--100{left:100%;transform:translateX(-1px)}
+.am-axis{display:flex;gap:12px;margin-top:9px}
+.am-axis-sp{width:44px;flex:none}
+.am-axis-t{flex:1;position:relative;height:12px}
+.am-axis-l{position:absolute;transform:translateX(-50%);font:600 10px 'Hanken Grotesk';letter-spacing:.06em;color:#a6a49d}
+.am-axis-l--25{left:25%}
+.am-axis-l--50{left:50%}
+.am-axis-l--75{left:75%}
+.am-axis-l--100{left:100%}
+.am-tslegend{display:flex;gap:18px;flex-wrap:wrap;margin-top:30px}
+.am-tsleg{display:flex;align-items:center;gap:6px;font:500 13px 'Hanken Grotesk';color:#4c4b45}
+
+/* --- STEP 06 · Wireframes (black) ----------------------------------------
+   The collage is a hand-set module: 460px tiles, a 26px gutter, a −19° rotation
+   and a scale tuned so it bleeds off both sides at the authored width. It is
+   not re-derived here. Each tile's two heights ride --p, the scroll progress
+   cs-interactions writes on the frame: the wireframe layer fades out as the
+   design layer fades in and the tile grows to fit it. */
+.am-s06{background:#fff;border-top:1px solid rgba(18,18,16,.1)}
+.am-s06-copy{padding:74px 48px 56px;background:#201C16;padding-inline:var(--csb)}
+/* scaled: the black surface still spans the viewport, and the collage plus its
+   wipe-to-ivory occupy the capped column, scaled. The band height rides --k so
+   the whole module grows in both axes; the stage inside then lays out at the
+   authored 1200 x 600 and the tiles bleed off its edges exactly as drawn. */
+.am-wf{position:relative;height:calc(600px * var(--k,1));background:#201C16;overflow:hidden}
+/* The collage is drawn to bleed, and the capped column is where it is cut: at
+   k the authored 15px and 71px overruns scale with it, so clipping here is the
+   design's own crop. A viewport-wide window would show the whole collage
+   floating in black instead, which is not what was drawn. */
+.am-wf-cap{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:min(100%, var(--cap))}
+.am-wf-stage{position:absolute;inset:0;overflow:hidden;zoom:var(--k,1)}
+.am-wf-overlay{position:absolute;inset:0;background:#e7e4dd;opacity:var(--p,0);pointer-events:none}
+.am-wf-track{position:absolute;left:50%;top:50%;display:flex;flex-direction:row;gap:26px;align-items:flex-start;transform:translate(-47%,-53%) rotate(-19deg) scale(1.2);transform-origin:center}
+.am-wf-col{display:flex;flex-direction:column;gap:26px;align-items:flex-start}
+.am-wf-tile{flex:0 0 auto;width:460px;height:calc((var(--h0) + (var(--h1) - var(--h0))*var(--p,0))*1px);border:1px solid rgba(18,18,16,.12);border-radius:6px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.14);background:#e7e4dd;position:relative}
+.am-wf-img{position:absolute;left:0;top:0;width:460px;object-fit:cover;display:block}
+.am-wf-img--wf{height:calc(var(--h0)*1px);opacity:calc(1 - var(--p,0))}
+.am-wf-img--d{height:calc(var(--h1)*1px);opacity:var(--p,0)}
+
+/* --- STEP 07 · Build support --------------------------------------------- */
+.am-s07{background:#f4f4f2;grid-template-columns:1.1fr 1fr;border-top:1px solid rgba(18,18,16,.1)}
+/* scaled: 1.1fr of the authored grid, so the video keeps the band's padding */
+.am-s07-media{position:relative;background:#f4f4f2;overflow:hidden;min-height:460px;display:flex;align-items:center;justify-content:center;order:-1;zoom:var(--k,1)}
+.am-s07-frame{width:86%;aspect-ratio:1280/700;overflow:hidden;border:1px solid rgba(18,18,16,.12);border-radius:12px;box-shadow:0 22px 48px rgba(32,28,22,.14)}
+/* oversized inside an overflow:hidden frame to crop the recording's chrome */
+.am-s07-video{width:calc(100% + 30px);height:calc(100% + 22px);object-fit:cover;object-position:top left;display:block}
+
+
+/* ============================================================
+   12. Case study — mobile design (< 900px)
+   Restore - ArcelorMittal Case Study Mobile v2.dc.html, 440px column grown
+   fluidly. The design file's mocked phone status bar is not built
+   (SHIP-MANIFEST.md).
+   ============================================================ */
+
+@media (max-width: 899px){
+
+  /* cover: on mobile the white belongs to the copy block, the media band below
+     it is its own dark band */
+  .cs-cover{display:block;padding-inline:0;background:none}
+  .cs-cover-copy{padding:52px 24px 40px;background:#fff}
+  .cs-title{font:300 40px/1.04 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.03em;margin:20px 0 0;max-width:none}
+  .cs-disc{font:600 10px/1.7 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.13em;margin-top:20px}
+  .cs-cover-media{display:block;height:236px;background:#0e0d0b;border-top:1px solid rgba(18,18,16,.14);border-bottom:1px solid rgba(18,18,16,.12)}
+  .cs-cover-frame{height:100%;aspect-ratio:auto}
+  .cs-cover-video{position:static;top:auto;width:100%;height:100%;object-fit:cover;object-position:center}
+
+  /* metric strip · 2×2 */
+  .cs-metrics{grid-template-columns:1fr 1fr;border-top:0;padding-inline:0}
+  .cs-metric,.cs-metric:first-child{padding:26px 24px}
+  .cs-metric:nth-child(-n+2){border-bottom:1px solid rgba(18,18,16,.12)}
+  .cs-metric:nth-child(2){border-right:0}
+  .cs-metric-n{font:300 38px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em}
+  .cs-metric-u{font-size:20px}
+  .cs-metric-l{font:600 10px/1.4 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.1em;margin-top:10px}
+
+  /* context */
+  .cs-context{display:block;padding:56px 24px}
+  .kicker-row--cs{margin-bottom:20px}
+  .cs-statement{font:300 25px/1.34 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;max-width:none}
+  .cs-meta{margin-top:32px}
+  .cs-meta-row{display:flex;justify-content:space-between;align-items:baseline;gap:20px;border-top:1px solid rgba(18,18,16,.12);border-bottom:0;padding:16px 0}
+  .cs-meta-row:last-child{border-bottom:1px solid rgba(18,18,16,.12)}
+  .cs-meta-k{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em}
+  .cs-meta-v{font:500 15px/1.3 'Hanken Grotesk',system-ui,sans-serif;text-align:right}
+
+  /* problem */
+  .cs-problem{padding:56px 24px}
+  .cs-problem-grid{display:block;margin-top:0}
+  .cs-problem .cs-statement{margin:22px 0 0}
+  .cs-problem-body{padding-top:0}
+  .cs-problem-body .cs-body{font:400 18px/1.68 'Hanken Grotesk',system-ui,sans-serif;margin:26px 0 0;max-width:none}
+
+  /* my role */
+  .cs-lead{padding:56px 24px 4px}
+
+  /* steps: one column, copy first, evidence below */
+  .cs-step{display:block;padding-inline:0}
+  .cs-step-copy{padding:0}
+  .cs-step-title{font:400 24px/1.14 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;margin:14px 0 0;max-width:none}
+  .cs-step-body{font:400 18px/1.68 'Hanken Grotesk',system-ui,sans-serif;margin:16px 0 0;max-width:none}
+  .cs-step-body--dark{max-width:none}
+  /* 30px is the mobile counterpart of the desktop 44px: one value for every
+     stat row sitting directly under a step body. E.ON 01 (32px) and Laced 02
+     (28px) used to override it and no longer do. .eon-tt-stats keeps its own,
+     as on desktop, because a figure sits above it rather than a paragraph. */
+  .cs-stats,.cs-stats--s02,.cs-stats--s03,.cs-stats--s04,.cs-stats--s05{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:30px}
+  .cs-stats--s04{grid-template-columns:repeat(2,1fr)}
+  .cs-stat-n{font:300 32px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em}
+  .cs-stat-u{font-size:18px}
+  .cs-stat-l,.cs-stat-l--wide{font:600 10px/1.4 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.11em;margin-top:10px}
+  .cs-tabs{margin-top:32px}
+
+  /* step 01 */
+  .am-s01{padding:30px 24px 52px}
+  .am-s01-media{position:static;display:block;min-height:0;padding:0;overflow:visible;background:transparent}
+  .am-s01-figs{position:static;width:auto;max-width:none;height:auto;display:flex;flex-direction:column;gap:14px;margin-top:30px}
+  .am-fig{position:static;width:auto}
+  .am-fig--ga{background:#fff url('images/ga-path-exploration.png') left top/cover no-repeat}
+  .am-fig--clarity{background:#fff url('images/clarity-dashboard.png') left top/cover no-repeat}
+  .am-cols{gap:26px;margin-top:30px}
+  .am-list-i{gap:11px}
+  .am-dash{width:9px}
+
+  /* step 02 */
+  .am-s02{padding:52px 24px 56px}
+  .am-s02-grid{display:block;padding-inline:0}
+  .am-s02-media{position:static;min-height:0;border-left:0;overflow:visible;background:transparent}
+  .am-s02-wall{position:static;width:auto;transform:none}
+  .am-s02-thumbs{grid-template-columns:1fr 1fr;gap:12px;margin-top:30px}
+  .am-thumb{border-radius:12px}
+  .am-s02-out{background:transparent;margin-top:40px;padding:36px 0 0;border-top:1px solid rgba(18,18,16,.12)}
+  .am-out-label{display:block;width:auto;font-size:10px}
+  .am-out-title{font:300 24px/1.18 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em;margin:16px 0 0;max-width:none}
+  .am-out-grid{display:block}
+  .am-out-col{margin-top:30px}
+  .am-out-col + .am-out-col{margin-top:26px}
+  .am-out-p{margin:14px 0 0;font:400 18px/1.68 'Hanken Grotesk',system-ui,sans-serif}
+  .am-quote{margin:30px 0 0;padding-left:22px}
+
+  /* step 03 */
+  .am-s03{padding:52px 24px 56px}
+  .am-s03 .cs-step-copy{padding:0}
+  .am-s03-viz{display:block;padding:0;background:transparent}
+  .am-panelbox{height:300px;margin-top:18px}
+
+  /* step 04 */
+  .am-s04{padding:52px 24px 56px}
+  .am-s04 .cs-step-copy{padding:0}
+  .am-s04-media{position:static;display:block;min-height:0;border-left:0;margin:30px -24px 0;overflow:hidden}
+  .am-ia{aspect-ratio:1.28}
+  .am-ia-close{background:#ffffff url('images/ia-closeup-white.png') center top/104% no-repeat}
+  .am-ia-ctx{bottom:14px;left:24px;width:42%;border-radius:6px}
+
+  /* step 05 */
+  .am-s05{padding:52px 24px 56px}
+  .am-s05 .cs-step-copy{padding:0}
+  .am-s05-viz{display:block;padding:0;background:transparent}
+  .am-tt-panels{height:auto;margin-top:0}
+  .am-tt-ovwrap{display:block;margin-top:30px}
+  .am-tt-ov{height:auto;align-items:stretch;justify-content:flex-start;gap:0}
+  .am-donuts{flex-direction:column;align-items:stretch;gap:48px}
+  .am-donut{flex-direction:row;align-items:center;gap:22px}
+  .am-ring{width:118px;height:118px;flex:none}
+  .am-tt-meta{display:flex;flex-direction:column;gap:12px}
+  .am-tt-lab{font:600 11px/1.45 'Hanken Grotesk';letter-spacing:.11em;margin-top:0;max-width:none}
+  .am-legend{margin-top:0}
+  .am-tt-div{display:none}
+  /* the task-summary chart keeps its full layout and is scaled into the column */
+  .am-tt-tswrap{display:block;margin-top:8px;overflow:hidden}
+  .m-chartfit{display:block;zoom:.72;transform-origin:top left}
+  /* The chart is drawn at desktop scale and shrunk to zoom:.72 to fit the column,
+     so its type paints at 72% of whatever is declared: the authored 10px labels
+     landed at 7.2px, under the 10px floor the accessibility contract sets for
+     tracked caps. 14px declared paints at 10.1px, which meets it.
+     "Task 14" is 60px at that size, so the label column and the axis spacer that
+     tracks it go to 64px, and the gridline origin follows at 64 + the 12px gap.
+     Mobile only: desktop is not zoomed and its 10px is already 10px. */
+  .am-bar-l{font-size:14px;width:64px}
+  .am-axis-sp{width:64px}
+  .am-grid{left:76px}
+  .am-axis-l{font-size:14px}
+  .am-tt-tsinner{display:block;margin-top:24px}
+  .am-tt-ts{height:auto;justify-content:flex-start;padding:8px 8px 4px}
+  .am-tslegend{display:grid;grid-template-columns:1fr 1fr;gap:16px 26px;margin-top:34px}
+  .am-tsleg{gap:8px;font:500 18px 'Hanken Grotesk'}
+  .am-tsleg .am-dot{width:11px;height:11px}
+
+  /* step 06 */
+  .am-s06{background:#201C16}
+  .am-s06-copy{padding:52px 24px 40px;background:none}
+  .am-wf{height:430px}
+  .am-wf-track{transform:translate(-47%,-53%) rotate(-19deg) scale(0.82)}
+
+  /* step 07 */
+  .am-s07{padding:52px 24px 56px}
+  .am-s07 .cs-step-copy{padding:0}
+  .am-s07-media{position:static;display:block;min-height:0;overflow:visible;background:transparent}
+  .am-s07-frame{width:auto;margin-top:30px;box-shadow:0 18px 40px rgba(32,28,22,.14)}
+  .am-s07-video{width:100%;height:100%}
+
+  /* outcome */
+  .cs-outcome{padding:56px 24px;border-top:1px solid rgba(240,237,227,.14)}
+  .cs-outcome-statement{font:300 27px/1.28 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;margin:24px 0 36px;max-width:none}
+  .cs-outcome-grid{grid-template-columns:1fr 1fr;gap:0 28px}
+  .cs-outcome-metric,.cs-outcome-metric:first-child,.cs-outcome-metric:last-child{padding:26px 0 0;border-right:0}
+  .cs-outcome-n{font:300 42px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.03em;color:#f0ede3}
+  .cs-outcome-n--lead{color:#ffd400}
+  .cs-outcome-u{font-size:22px}
+  .cs-outcome-l{font:600 10px/1.4 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.11em;margin-top:11px}
+
+  /* footer */
+  .cs-footer{display:block;padding:44px 24px}
+  .cs-footer-next{font:300 28px/1.08 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em}
+  .cs-footer-link{margin-top:2px;font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.14em}
+  .cs-footer-links{gap:24px;margin-top:26px;font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em}
+  .cs-footer-links a{margin:-16px 0}
+  .cs-footer-links a > span{padding-bottom:3px;margin-bottom:-3px}
+  .ext9--cs{margin-bottom:3px}
+}
+
+
+/* ============================================================
+   13. HSBC Premier · Premier proposition redesign
+   Built from _design/Restore - HSBC Premier Case Study.dc.html (authored on a
+   1200px card, 48px gutter, so a 1104px content column) and
+   _design/Restore - HSBC Premier Case Study Mobile.dc.html (440px column,
+   24px side padding). Every value is lifted from those two files unchanged
+   except the type measures, which take the build column of the table in
+   SHIP-MANIFEST.md, and the notes marked BUILD below.
+
+   The two designs are written as two complete blocks rather than a base plus
+   mobile overrides. This page's step layouts differ between the designs far
+   more than ArcelorMittal's do (an equation row becomes a list, a five-up card
+   grid becomes a carousel, a two-column concept table becomes a stacked one),
+   so each block reads as its own design and neither can leak into the other.
+   Both are fenced, which is also what keeps section 9's homepage mobile rules
+   intact underneath them.
+   ============================================================ */
+
+/* breakpoint-independent: the business problem's second paragraph sits 16px
+   under the first in both designs */
+.cs-problem-body .cs-body + .cs-body{margin-top:16px}
+
+
+/* --- desktop design (>= 900px) ------------------------------------------ */
+@media (min-width: 900px){
+
+  /* carried by the mobile design alone */
+  .hs-m,.hs-signav,.hs-m-br{display:none}
+
+  /* --- cover ------------------------------------------------------------ */
+  .page--hsbc .cs-cover-copy{padding:72px 48px}
+  .page--hsbc .cs-title{font:300 52px/1.03 'Hanken Grotesk';letter-spacing:-.035em;margin:20px 0 0}
+  .page--hsbc .cs-disc{font:600 10px/1.7 'Hanken Grotesk';letter-spacing:.14em;margin-top:20px}
+  /* scaled: half the authored cover grid. Everything inside the crop is
+     percentage based (object-fit plus a percentage translate/scale), so the
+     composition holds at any cell size; the zoom is what carries the authored
+     360px height, and with it the cell's aspect ratio, up with the column. */
+  .page--hsbc .cs-cover-media{display:block;min-height:360px;border-left:1px solid rgba(18,18,16,.10)}
+  .hs-cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;transform-origin:center center;transform:translate(-6.5%,-2.72%) scale(1.16)}
+
+  /* --- context ---------------------------------------------------------- */
+  .page--hsbc .cs-context{grid-template-columns:1fr 340px}
+  .page--hsbc .cs-meta{margin-top:32px}
+
+  /* --- the business problem --------------------------------------------- */
+  /* The body column IS the step 01 body cell, so the two paragraphs share both
+     vertical edges at every width (SHIP-MANIFEST.md). Step 01 here is a
+     full-width two-up on a `1fr 1fr` grid with a 64px gap rather than a padded
+     copy cell, so the cell is (--col - 64px) / 2 and the first track takes the
+     rest. Column for position, ch for measure: the 63ch cap stays on the
+     paragraph, never on the track. */
+  .page--hsbc .cs-problem-grid{grid-template-columns:1fr calc((var(--col,1104px) - 64px) / 2)}
+
+  /* --- my role ---------------------------------------------------------- */
+  .page--hsbc .cs-lead{padding-bottom:40px}
+
+  /* --- shared step type ------------------------------------------------- */
+  /* every step title on this page sits 14px under its marker; the wrap comes
+     from the shared .cs-step-title, which balances */
+  .page--hsbc .cs-step-title{margin-top:14px}
+
+  /* --- STEP 01 · Experience review -------------------------------------- */
+  /* top stays tucked under My role */
+  .hs-s01{background:#ffffff;padding:8px 48px 80px;padding-inline:var(--csb)}
+  .hs-s01-head{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start}
+  .hs-s01-body{margin-top:var(--cs-top-body)}
+
+  /* the 5 × 3 × 2 × 3 × 2 = 750+ equation */
+  .hs-eq-wrap{margin-top:48px;border-top:1px solid rgba(18,18,16,.14);padding-top:40px}
+  .hs-eq{display:flex;align-items:flex-start;gap:18px}
+  .hs-eq-i{flex:1 1 0;min-width:0}
+  .hs-eq-n{font:300 42px/1 'Hanken Grotesk';letter-spacing:-.03em;color:#1a1a17}
+  .hs-eq-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f;margin-top:14px}
+  .hs-eq-d{font:400 13.5px/1.5 'Hanken Grotesk';color:#4c4b45;margin:12px 0 0}
+  .hs-eq-op{flex:none;font:400 16px/1 'Hanken Grotesk';color:#ffd400;padding-top:20px}
+  .hs-eq-t{flex:0 0 132px}
+  .hs-eq-tn{font:300 52px/1 'Hanken Grotesk';letter-spacing:-.035em;color:#1a1a17}
+  .hs-eq-tu{font-size:26px}
+
+  /* the example opportunity card */
+  .hs-ex{margin-top:48px;background:#f4f4f2;border-radius:16px;padding:40px 44px 44px}
+  .hs-ex-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+  /* measure: a Light-300 display heading opening a block, so the outcome
+     statement row of SHIP-MANIFEST.md, 30ch -> 40ch */
+  .hs-ex-t{font:300 30px/1.2 'Hanken Grotesk';letter-spacing:-.025em;color:#1a1a17;margin:16px 0 0;max-width:40ch;text-wrap:balance}
+  /* measure: a step body paragraph spanning the card, so 63ch */
+  .hs-ex-p{font:400 18px/1.7 'Hanken Grotesk';color:#4c4b45;margin:16px 0 0;max-width:63ch}
+  .hs-sigs{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:28px}
+  .hs-sig{background:#fff;border:1px solid rgba(18,18,16,.1);border-radius:12px;padding:22px;box-shadow:0 10px 26px rgba(32,28,22,.06)}
+  .hs-sig-h{display:flex;justify-content:space-between;align-items:baseline;min-height:26px}
+  .hs-sig-n{font:500 14px 'Hanken Grotesk';letter-spacing:.04em;color:#1a1a17}
+  .hs-sig-k{font:600 10px/1.3 'Hanken Grotesk';letter-spacing:.13em;text-transform:uppercase;color:#67665f;text-align:right}
+  .hs-sig-rule{width:20px;height:2px;background:#ffd400;margin:12px 0 14px}
+  .hs-sig-b{font:400 13.5px/1.5 'Hanken Grotesk';color:#4c4b45}
+
+  /* --- STEP 02 · Opportunity we prioritised (black) --------------------- */
+  .hs-s02{background:#201C16;padding:80px 48px;border-top:1px solid rgba(240,237,227,.14);display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;padding-inline:var(--csb)}
+  /* measure: step title -> 48ch */
+  .hs-s02-title{font:300 44px/1.14 'Hanken Grotesk';letter-spacing:-.03em;color:#f0ede3;margin:16px 0 0;max-width:48ch;text-wrap:balance}
+  .hs-s02 .cs-step-body--dark{margin-top:22px}
+  .hs-prove{padding-top:var(--cs-top-label-display)}
+  .hs-prove-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#9d9b8f;margin-bottom:10px}
+  .hs-prove-r{display:grid;grid-template-columns:28px 1fr;gap:16px;padding:22px 0;border-bottom:1px solid rgba(240,237,227,.16)}
+  .hs-prove-r:last-child{border-bottom:0}
+  .hs-prove-n{font:500 12px/1.7 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#9d9b8f}
+  .hs-prove-q{font:400 28px/1.28 'Newsreader',serif;font-style:italic;color:#f0ede3;margin:0}
+
+  /* --- STEP 03 · Stakeholder alignment (grey) --------------------------- */
+  .hs-s03{background:#f4f4f2;padding:80px 48px;border-top:1px solid rgba(18,18,16,.1);padding-inline:var(--csb)}
+  .hs-s03-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+  .hs-s03-r{padding-top:var(--cs-top-body)}
+  .hs-s03-body{margin-top:0}
+  .hs-s03-stats{gap:44px}
+  .hs-map{margin:44px 0 0}
+  .hs-map-fr{position:relative;overflow:hidden;border-top:1px solid rgba(18,18,16,.12)}
+  .hs-map-img{display:block;width:100%;height:auto;margin-top:32px}
+
+  /* --- STEP 04 · Concept design (black) --------------------------------- */
+  /* bottom is 0: the collage bleeds to the band edge */
+  .hs-s04{background:#201C16;padding:80px 48px 0;border-top:1px solid rgba(240,237,227,.14);padding-inline:var(--csb)}
+  .hs-s04-grid{display:grid;grid-template-columns:1fr 1.55fr;gap:64px;align-items:start}
+  .hs-s04 .cs-step-body--dark{margin-top:22px}
+  .hs-cc-lw{padding-top:var(--cs-top-label);margin-bottom:16px}
+  .hs-cc-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#9d9b8f}
+  .hs-cc-r{display:grid;grid-template-columns:38px 280px 1fr;gap:22px;align-items:baseline;padding:17px 0}
+  .hs-cc-r + .hs-cc-r{border-top:1px solid rgba(240,237,227,.16)}
+  .hs-cc-n{font:500 12px/1 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#9d9b8f}
+  .hs-cc-t{font:500 24px/1.3 'Newsreader',serif;font-style:italic;color:#f0ede3}
+  .hs-cc-p{font:400 16px/1.55 'Hanken Grotesk';color:rgba(240,237,227,.72);margin:0}
+
+  /* The collage bleeds off the band's 48px gutter, so it occupies the content
+     column exactly: below 1680px that is the viewport, and at the cap it stops
+     on the same keyline every other band's content stops on. It is sized in
+     cqw throughout, so it scales with the column natively and takes no
+     data-fit; the twelve crops are percentage object-positions and never
+     re-derive. */
+  .hs-cl{margin:64px -48px 0;border-top:1px solid rgba(240,237,227,.14)}
+  .hs-cl-fr{width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;container-type:inline-size}
+  .hs-cl-in{position:absolute;inset:0;background:#201C16;overflow:hidden;display:flex;gap:2cqw;padding:0 5cqw}
+  .hs-cl-col{flex:0 0 12cqw;min-width:0;display:flex;flex-direction:column;gap:1.8cqw}
+  .hs-cl-col--d{flex:1;margin-left:3.5cqw}
+  .hs-cl-t,.hs-cl-m,.hs-cl-b,.hs-cl-dt,.hs-cl-dm,.hs-cl-db{overflow:hidden;background:#201C16}
+  .hs-cl-t{height:var(--dh);border-radius:0 0 10px 10px}
+  .hs-cl-m{height:var(--dh);border-radius:10px}
+  .hs-cl-b{flex:1;min-height:0;border-radius:10px 10px 0 0}
+  .hs-cl-dt{flex:1;min-height:0;border-radius:0 0 10px 10px}
+  .hs-cl-dm{flex:1.8;min-height:0;border-radius:10px}
+  .hs-cl-db{flex:1.2;min-height:0;border-radius:10px 10px 0 0}
+  .hs-cl-i{width:100%;height:100%;object-fit:cover;display:block;background:#fff;border-radius:inherit}
+
+  /* --- STEP 05 · User testing ------------------------------------------- */
+  .hs-s05{background:#ffffff;border-top:1px solid rgba(18,18,16,.1);padding-top:80px;padding-inline:var(--csb0)}
+  .hs-s05-top{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+  .hs-s05-copy{padding:8px 48px 46px}
+  /* scaled: half the authored grid, so the authored 340px cell height and with
+     it the crop's aspect ratio ride the column */
+  .hs-ut-media{background:#ffffff;overflow:hidden;min-height:340px;zoom:var(--k,1)}
+  .hs-ut-img{width:100%;height:100%;object-fit:cover;object-position:center 28%;display:block}
+
+  /* this block closes the step 05 band, so its bottom is the band's 80 */
+  .hs-ut{padding:52px 48px 80px}
+  .hs-ut-tabs{margin-bottom:44px}
+  .hs-ut-pill{font:600 10px 'Hanken Grotesk';letter-spacing:.07em;text-transform:uppercase;border:none;border-radius:100px;padding:13px 20px;cursor:pointer}
+  .hs-ut-p--data{display:grid;grid-template-columns:repeat(3,1fr);gap:56px}
+  .hs-ut-p--said,.hs-ut-p--learn{display:grid;grid-template-columns:repeat(3,1fr);gap:44px 48px}
+
+  .hs-d-i{display:flex;flex-direction:column;align-items:flex-start}
+  .hs-d-ring{position:relative;width:142px;height:142px}
+  .hs-d-svg{width:142px;height:142px;transform:rotate(-90deg);display:block}
+  .hs-d-track{fill:none;stroke:#e6e4df;stroke-width:11}
+  .hs-d-arc{fill:none;stroke:#282868;stroke-width:11;stroke-linecap:butt}
+  .hs-d-c{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  /* 28px, down from the design's 34px (18 Aug 2026). At 34px in a 142px ring the
+     number was 24% of the ring, the largest ratio on the site: ArcelorMittal and
+     E.ON both sit at 28px, and the ring read as heavier than E.ON's, which is
+     actually 18px wider. The % follows it down at the same 1:2 proportion. */
+  .hs-d-n{font:300 28px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#282868}
+  .hs-d-u{font-size:14px}
+  .hs-d-l{font:600 10px/1.5 'Hanken Grotesk';letter-spacing:.13em;text-transform:uppercase;color:#67665f;margin-top:22px;max-width:24ch}
+
+  .hs-q-i{padding:0}
+  .hs-ut-p--said .hs-q-i:last-child{padding:20px 0}
+  .hs-q-p{font:400 20px/1.5 'Newsreader',serif;font-style:italic;color:#1a1a17;margin:0;text-wrap:pretty}
+  .hs-q-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f;margin-top:12px}
+
+  .hs-l-i{display:grid;grid-template-columns:30px 1fr;gap:18px;align-items:baseline;padding:0}
+  .hs-l-n{font:500 12px/1.5 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#a6a49d}
+  .hs-l-p{font:400 18px/1.6 'Hanken Grotesk';color:#1a1a17;margin:0}
+
+  /* --- the outcome (grey) ----------------------------------------------- */
+  .hs-out{background:#f4f4f2;padding:80px 48px;border-top:1px solid rgba(18,18,16,.1);padding-inline:var(--csb)}
+  .kicker-row--out{margin-bottom:20px}
+  /* measure: outcome statement 26ch -> 40ch */
+  .hs-out-t{font:300 38px/1.12 'Hanken Grotesk';letter-spacing:-.03em;color:#1a1a17;margin:0;max-width:40ch;text-wrap:balance}
+  .hs-out-rows{margin-top:40px}
+  .hs-q{display:grid;grid-template-columns:34px 1fr 1.25fr;gap:36px;align-items:baseline;padding:20px 0}
+  .hs-q + .hs-q{border-top:1px solid rgba(18,18,16,.14)}
+  .hs-q-n{font:500 12px/1.7 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#67665f}
+  .hs-q-q{font:500 21px/1.28 'Newsreader',serif;font-style:italic;color:#1a1a17;margin:0}
+  .hs-q-a{font:400 15px/1.5 'Hanken Grotesk';color:#4c4b45;margin:0}
+
+  /* client feedback card: the two designs order it differently, so the four
+     pieces are authored in the mobile order and the desktop lays them out with
+     a two-column grid; .hs-fb-side is the column. */
+  .hs-fb{margin-top:44px;padding:36px 40px;background:#ffffff;border:1px solid rgba(18,18,16,.1);border-radius:14px;box-shadow:0 18px 40px -28px rgba(18,18,16,.3);display:grid;grid-template-columns:.66fr 1.34fr;gap:56px;align-items:start}
+  .hs-fb-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f;margin-bottom:22px}
+  .hs-fb-by{display:flex;align-items:center;gap:14px}
+  .hs-fb-av{width:52px;height:52px}
+  .hs-fb-n{font:500 16px/1.3 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17}
+  .hs-fb-r{font:400 13px/1.35 'Hanken Grotesk';color:#67665f;max-width:22ch;margin-top:2px}
+  .hs-fb-link{display:inline-flex;align-items:center;gap:8px;padding:12px 0;margin-top:40px;letter-spacing:.14em}
+  .hs-fb-link,.hs-fb-link:hover{color:#1a1a17}
+  .hs-fb-q{margin:0;font:300 26px/1.4 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17;text-wrap:pretty}
+
+  /* --- outcome metric strip (black) ------------------------------------- */
+  .hs-final{background:#201C16;color:#f0ede3;padding:80px 48px;padding-inline:var(--csb)}
+  /* measure: outcome statement 30ch -> 40ch */
+  .hs-final-t{font:300 38px/1.12 'Hanken Grotesk';letter-spacing:-.03em;color:#f0ede3;margin:22px 0 0;max-width:40ch;text-wrap:balance}
+  .hs-final-grid{margin-top:48px}
+  .hs-final-grid .cs-outcome-l{margin-top:14px}
+}
+
+
+/* ============================================================
+   14. HSBC Premier — mobile design (< 900px)
+   Restore - HSBC Premier Case Study Mobile.dc.html, 440px column grown
+   fluidly. The design file's mocked phone status bar is not built
+   (SHIP-MANIFEST.md).
+   ============================================================ */
+
+@media (max-width: 899px){
+
+  /* carried by the desktop design alone */
+  .hs-d,.hs-eq-d,.hs-eq-op,.hs-q-n{display:none}
+
+  /* --- cover ------------------------------------------------------------ */
+  .page--hsbc .cs-cover-media{border-left:0}
+  .hs-cover-img{width:100%;height:100%;object-fit:cover;object-position:center 32%;display:block}
+
+  /* --- context: separators between the meta rows only ------------------- */
+  .page--hsbc .cs-meta-row,.page--hsbc .cs-meta-row:last-child{border-top:0;border-bottom:0}
+  .page--hsbc .cs-meta-row + .cs-meta-row{border-top:1px solid rgba(18,18,16,.12)}
+
+  /* --- my role ---------------------------------------------------------- */
+  .page--hsbc .cs-lead{padding:56px 24px 34px}
+
+  /* --- STEP 01 · Experience review -------------------------------------- */
+  .hs-s01{background:#ffffff;padding:8px 24px 56px}
+  .hs-s01-body{margin-top:16px}
+
+  .hs-eq-wrap{margin-top:30px;border-top:1px solid rgba(18,18,16,.14);padding-top:26px}
+  .hs-eq{background:#f4f4f2;border-radius:16px;padding:4px 24px 24px}
+  .hs-eq-i{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:14px;padding:15px 0}
+  .hs-eq-i ~ .hs-eq-i{border-top:1px solid rgba(18,18,16,.1)}
+  .hs-eq-n{font:300 30px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em;color:#1a1a17}
+  .hs-eq-l{font:600 10px/1.4 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#67665f}
+  .hs-eq-t{display:flex;align-items:center;gap:14px;padding-top:18px;margin-top:2px;border-top:2px solid rgba(18,18,16,.16)}
+  .hs-eq-tn{font:300 44px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.03em;color:#1a1a17}
+  .hs-eq-tu{font-size:22px}
+
+  .hs-ex{margin-top:26px;background:#f4f4f2;border-radius:16px;padding:32px 24px}
+  .hs-ex-l{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+  .hs-ex-t{font:300 22px/1.22 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em;color:#1a1a17;margin:14px 0 0;max-width:none;text-wrap:balance}
+  .hs-ex-p{font:400 15px/1.6 'Hanken Grotesk',system-ui,sans-serif;color:#4c4b45;margin:14px 0 0;max-width:none}
+
+  /* the five signals are a one-up carousel here (ts-carousel.js) */
+  .hs-sigs{display:flex;gap:12px;margin-top:22px;overflow-x:auto;scroll-snap-type:x proximity;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;padding-bottom:2px;scrollbar-width:none}
+  .hs-sigs::-webkit-scrollbar{display:none}
+  .hs-sig{flex:0 0 100%;scroll-snap-align:start;align-self:stretch;background:#fff;border:1px solid rgba(18,18,16,.1);border-radius:12px;padding:18px}
+  .hs-sig-n{display:block;font:500 13px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.04em;color:#1a1a17}
+  .hs-sig-k{display:block;font:600 10px/1.3 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.11em;text-transform:uppercase;color:#67665f;margin-top:7px}
+  .hs-sig-rule{width:20px;height:2px;background:#ffd400;margin:11px 0 12px}
+  .hs-sig-b{font:400 13.5px/1.5 'Hanken Grotesk',system-ui,sans-serif;color:#4c4b45}
+  .hs-signav{display:flex;justify-content:flex-end;align-items:center;gap:20px;margin-top:22px}
+  .hs-signav-b{width:44px;height:44px;border-radius:50%;border:1px solid rgba(18,18,16,.3);background:transparent;color:#201C16;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:background .18s ease,border-color .18s ease}
+  .hs-signav-b:hover{background:#ffd400;border-color:#ffd400}
+  .hs-signav-f{display:flex;align-items:baseline;gap:6px}
+  .hs-signav-n{font:300 24px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17}
+  .hs-signav-t{font:500 12px 'Hanken Grotesk';letter-spacing:.06em;color:#a6a49d}
+  .icon-nav{flex:none}
+
+  /* --- STEP 02 · Opportunity we prioritised (black) --------------------- */
+  .hs-s02{background:#201C16;border-top:1px solid rgba(240,237,227,.14);padding:56px 24px}
+  .hs-s02-title{font:300 27px/1.2 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em;color:#f0ede3;margin:18px 0 0;text-wrap:balance}
+  .hs-s02 .cs-step-body--dark{margin-top:18px}
+  .hs-prove{margin-top:46px}
+  .hs-prove-l{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#9d9b8f}
+  .hs-prove-r{display:grid;grid-template-columns:26px 1fr;gap:14px;align-items:baseline;padding:20px 0;border-bottom:1px solid rgba(240,237,227,.16)}
+  .hs-prove-r:last-child{border-bottom:0}
+  .hs-prove-n{font:500 12px/1.6 'Hanken Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#9d9b8f}
+  .hs-prove-q{font:500 21px/1.32 'Newsreader',serif;font-style:italic;color:#f0ede3;margin:0}
+
+  /* --- STEP 03 · Stakeholder alignment (grey) --------------------------- */
+  .hs-s03{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1);padding:56px 24px}
+  .hs-s03-body{margin-top:16px}
+  .hs-map{margin:34px 0 0}
+  .hs-map-fr{position:relative;overflow:hidden;border-top:1px solid rgba(18,18,16,.12)}
+  .hs-map-img{display:block;width:100%;height:auto;margin-top:24px}
+
+  /* --- STEP 04 · Concept design (black) --------------------------------- */
+  .hs-s04{background:#201C16;border-top:1px solid rgba(240,237,227,.14);padding:56px 24px 0}
+  .hs-cc-lw{margin-top:32px}
+  .hs-cc-l{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#9d9b8f}
+  .hs-cc-rows{margin-top:6px}
+  .hs-cc-r{display:grid;grid-template-columns:26px 1fr;gap:0 14px;align-items:baseline;padding:16px 0}
+  .hs-cc-r + .hs-cc-r{border-top:1px solid rgba(240,237,227,.16)}
+  .hs-cc-n{grid-column:1;grid-row:1;font:500 12px/1.4 'Hanken Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#9d9b8f}
+  .hs-cc-t{grid-column:2;grid-row:1;font:500 20px/1.3 'Newsreader',serif;font-style:italic;color:#f0ede3}
+  .hs-cc-p{grid-column:2;grid-row:2;font:400 15px/1.55 'Hanken Grotesk',system-ui,sans-serif;color:rgba(240,237,227,.7);margin:6px 0 0}
+
+  .hs-cl{margin:40px -24px 0;border-top:1px solid rgba(240,237,227,.14)}
+  .hs-cl-fr{width:100%;aspect-ratio:10/13;overflow:hidden;position:relative;container-type:inline-size;background:#201C16}
+  .hs-cl-in{position:absolute;inset:0;display:flex;gap:3cqw;padding:0 4cqw}
+  .hs-cl-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:3cqw}
+  .hs-cl-col--d{display:none}
+  .hs-cl-t,.hs-cl-m,.hs-cl-b{overflow:hidden;background:#201C16}
+  .hs-cl-t{height:var(--mh);border-radius:0 0 8px 8px}
+  .hs-cl-m{height:var(--mh);border-radius:8px}
+  .hs-cl-b{flex:1;min-height:0;border-radius:8px 8px 0 0}
+  .hs-cl-i{width:100%;height:100%;object-fit:cover;display:block;background:#fff;border-radius:inherit}
+
+  /* --- STEP 05 · User testing ------------------------------------------- */
+  .hs-s05{background:#ffffff;border-top:1px solid rgba(18,18,16,.1)}
+  .hs-s05-copy{padding:56px 24px 40px}
+  .hs-ut-media{background:#ededeb;overflow:hidden;height:240px}
+  .hs-ut-img{width:100%;height:100%;object-fit:cover;object-position:center 28%;display:block}
+
+  .hs-ut{padding:40px 24px 56px}
+  .hs-ut-tabs{margin-top:0;margin-bottom:34px}
+  .hs-ut-pill{font:600 10px 'Hanken Grotesk';letter-spacing:.07em;text-transform:uppercase;border:none;border-radius:100px;padding:11px 13px;cursor:pointer}
+  .hs-ut-p--data{display:flex;flex-direction:column;gap:48px}
+  .hs-ut-p--said,.hs-ut-p--learn{display:flex;flex-direction:column;gap:0}
+
+  .hs-d-i{display:flex;align-items:center;gap:22px}
+  .hs-d-ring{position:relative;width:118px;height:118px;flex:none}
+  .hs-d-svg{width:118px;height:118px;transform:rotate(-90deg);display:block}
+  .hs-d-track{fill:none;stroke:#e6e4df;stroke-width:11}
+  .hs-d-arc{fill:none;stroke:#282868;stroke-width:11;stroke-linecap:butt}
+  .hs-d-c{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .hs-d-n{font:300 28px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17}
+  .hs-d-u{font-size:14px}
+  .hs-d-l{font:600 11px/1.45 'Hanken Grotesk';letter-spacing:.11em;text-transform:uppercase;color:#67665f}
+
+  .hs-q-i{padding:18px 0;border-bottom:1px solid rgba(18,18,16,.1)}
+  .hs-q-i:last-child{border-bottom:0}
+  .hs-q-p{font:400 19px/1.5 'Newsreader',serif;font-style:italic;color:#1a1a17;margin:0;text-wrap:pretty}
+  .hs-q-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f;margin-top:12px}
+
+  .hs-l-i{display:grid;grid-template-columns:26px 1fr;gap:14px;align-items:baseline;padding:18px 0;border-bottom:1px solid rgba(18,18,16,.1)}
+  .hs-l-n{font:500 12px/1.5 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#a6a49d}
+  .hs-l-p{font:400 15.5px/1.55 'Hanken Grotesk';color:#1a1a17;margin:0}
+
+  /* --- the outcome (grey) ----------------------------------------------- */
+  .hs-out{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1);padding:56px 24px}
+  .kicker-row--out{margin-bottom:18px}
+  .hs-out-t{font:300 30px/1.12 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.03em;color:#1a1a17;margin:0;text-wrap:balance}
+  .hs-out-rows{margin-top:30px}
+  .hs-q{padding:18px 0;border-top:1px solid rgba(18,18,16,.14)}
+  .hs-q:first-child{padding:0 0 18px;border-top:0}
+  .hs-q-q{font:500 19px/1.32 'Newsreader',serif;font-style:italic;color:#1a1a17;margin:0}
+  .hs-q-a{font:400 15px/1.6 'Hanken Grotesk';color:#4c4b45;margin:10px 0 0}
+
+  /* the four pieces run in DOM order here: label, quote, byline, link */
+  .hs-fb{margin-top:32px;padding:28px 24px;background:#ffffff;border:1px solid rgba(18,18,16,.1);border-radius:16px;box-shadow:0 18px 40px -28px rgba(18,18,16,.3)}
+  .hs-fb-side{display:contents}
+  .hs-fb-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+  .hs-fb-q{margin:16px 0 0;font:300 20px/1.42 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17;text-wrap:pretty}
+  .hs-fb-by{display:flex;align-items:center;gap:12px;margin-top:22px}
+  .hs-fb-av{width:46px;height:46px}
+  .hs-fb-n{font:500 15px/1.3 'Hanken Grotesk';color:#1a1a17}
+  .hs-fb-r{font:400 12.5px/1.35 'Hanken Grotesk';color:#67665f;margin-top:2px}
+  .hs-fb-link{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:14px 0;letter-spacing:.13em}
+
+  /* --- outcome metric strip (black) ------------------------------------- */
+  .hs-final{background:#201C16;color:#f0ede3;padding:56px 24px}
+  .hs-final .kicker{line-height:1}
+  .hs-final-t{font:300 30px/1.12 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.03em;color:#f0ede3;margin:18px 0 34px;text-wrap:balance}
+  .hs-final-grid{grid-template-columns:1fr 1fr;gap:0;border-top:0;margin-top:0}
+  .hs-final-grid .cs-outcome-metric:nth-child(1){padding:0 20px 24px 0;border-right:1px solid rgba(240,237,227,.16);border-bottom:1px solid rgba(240,237,227,.16)}
+  .hs-final-grid .cs-outcome-metric:nth-child(2){padding:0 0 24px 20px;border-right:0;border-bottom:1px solid rgba(240,237,227,.16)}
+  .hs-final-grid .cs-outcome-metric:nth-child(3){padding:24px 20px 0 0;border-right:1px solid rgba(240,237,227,.16)}
+  .hs-final-grid .cs-outcome-metric:nth-child(4){padding:24px 0 0 20px;border-right:0}
+  .hs-final-grid .cs-outcome-n{font:300 38px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em}
+  .hs-final-grid .cs-outcome-u{font-size:20px}
+  .hs-final-grid .cs-outcome-l{letter-spacing:.1em;margin-top:10px}
+}
+
+
+/* ============================================================
+   15. E.ON · App IA & navigation redesign
+   Built from _design/Restore - E.ON Case Study.dc.html (authored on a 1200px
+   card, 48px gutter, so a 1104px content column) and
+   _design/Restore - E.ON Case Study Mobile.dc.html (440px column, 24px side
+   padding). Every value is lifted from those two files unchanged except the
+   type measures, which take the build column of the table in SHIP-MANIFEST.md,
+   and the notes marked BUILD below.
+
+   As with HSBC the two designs are written as two complete blocks rather than a
+   base plus mobile overrides: the card-agreement module is a 3 x 3 grid on
+   desktop and a two-up carousel on mobile, the IA carousel goes from three-up
+   to one-up, and the hand-off collage is full bleed on mobile and a radius-14
+   card on desktop. Both blocks are fenced, which is also what keeps section 9's
+   homepage mobile rules intact underneath them.
+
+   BUILD notes (the design file and the build differ here on purpose):
+   · Step markers are 12px for BOTH the number and the label. The design leaves
+     the label at 11px, which the shared .cs-marker-* corrects.
+   · Cover title keeps the design's 52px but takes the shared 24ch measure, not
+     the design's 15ch. Only measures rescale with the column, never sizes.
+   · Both band statements drop max-width:552px and text-wrap:pretty for the
+     shared five-twelfths-of-the-column measure and balance.
+   · Step and problem bodies go 16px -> 18px and gain the 63ch measure; on black
+     they take 55ch and the shared .82 cream rather than the design's .74.
+   · Step titles take 48ch and balance in place of the design's 22ch/24ch.
+   · The outcome statement takes 40ch, not 26ch.
+   · Band rhythm is normalised to 80px top and bottom. The design carries 64px
+     under context, 88px under steps 01/04/05 and 72px over steps 02/05. The
+     two design-dictated exceptions stay: My role -> step 01 is tucked (40/8),
+     and on mobile the step 05 collage bleeds, so that band closes on 0.
+   · The card-agreement item run goes 12px -> 13.5px, the supporting size the
+     rest of the site uses (.hs-sig-b, .am-cap-p).
+   ============================================================ */
+
+/* Both collages are ONE markup and one set of numbers. Every tile height is a
+   ratio of --u, the column unit, so the desktop board (144px tiles, 21.6px
+   gaps, a 600px band) and the mobile one (105.6px, 15.84px, 440px) are the same
+   geometry at two scales and the locked crops cannot drift apart. The measured
+   ratio between the two designs is exactly 0.7333. Never re-derive these
+   (CLAUDE.md): the object-position on every tile is hand-set against them. */
+.eon-collage{display:flex;justify-content:center}
+.eon-col{min-width:0;display:flex;flex-direction:column}
+.eon-t{overflow:hidden;background:#201C16}
+.eon-t--a{border-radius:0 0 10px 10px}
+.eon-t--b{border-radius:10px}
+.eon-t--c{flex:1;min-height:0;border-radius:10px 10px 0 0}
+.eon-t img{width:100%;height:100%;object-fit:cover;background:#fff;display:block;border-radius:inherit}
+/* hero: sized in cqw against its own container, so it is already fluid and
+   needs no data-fit. The three --a heights are inline, one per column, as --h
+   multipliers rather than lengths so they can take the scale below.
+
+   --s scales the whole collage uniformly: the columns, the gaps, every tile
+   height and the panel's own aspect ratio are all multiples of it, so the
+   composition and every hand-set object-position crop survive untouched and
+   only the panel gets shorter. The authored design is --s:1; the desktop block
+   sets .82 so the metric strip clears the fold on a laptop, where the panel's
+   height comes from its width and a wide screen therefore made a TALLER hero.
+   Mobile has no --s and so runs the design at full size in its 440px band.
+   The side padding stays 10cqw: justify-content:center already centres the
+   collage in what is left, at any scale. */
+.eon-collage--hero{position:absolute;inset:0;padding:0 10cqw;gap:calc(3.6 * var(--s,1) * 1cqw)}
+.eon-collage--hero .eon-col{flex:0 0 calc(24 * var(--s,1) * 1cqw);gap:calc(3.6 * var(--s,1) * 1cqw)}
+.eon-collage--hero .eon-t--a{height:calc(var(--h) * var(--s,1) * 1cqw)}
+.eon-collage--hero .eon-t--b{height:calc(48 * var(--s,1) * 1cqw)}
+/* hand-off: the hero collage widened to six columns at the identical scale */
+.eon-collage--hf{gap:calc(var(--u) * 21.6 / 144)}
+.eon-collage--hf .eon-col{flex:0 0 var(--u);gap:calc(var(--u) * 21.6 / 144)}
+.eon-collage--hf .eon-t--a{height:calc(var(--h) / 144 * var(--u))}
+.eon-collage--hf .eon-t--b{height:calc(var(--u) * 288 / 144)}
+
+/* the IA trees' connector hairlines, and hiding the carousel scrollbars */
+.ia-track{scrollbar-width:none;-ms-overflow-style:none}
+.ia-track::-webkit-scrollbar{display:none}
+.iatree{display:flex;flex-direction:column}
+.iatree > *{position:relative}
+.iatree > *::before{content:"";position:absolute;left:-13px;top:-3px;bottom:0;width:1px;background:rgba(18,18,16,.14)}
+.iatree > *::after{content:"";position:absolute;left:-13px;top:13px;width:8px;height:1px;background:rgba(18,18,16,.14)}
+.iatree > *:last-child::before{bottom:auto;height:16px}
+.iaroot > *:first-child::before{top:-16px}
+
+/* the step 04 prototype's tap cue (the global damper in section 1 stops it
+   under prefers-reduced-motion) */
+@keyframes ptRing{0%{transform:scale(.55);opacity:.7}100%{transform:scale(1.7);opacity:0}}
+
+
+/* --- desktop design (>= 900px) ------------------------------------------ */
+@media (min-width: 900px){
+
+  /* --- cover ------------------------------------------------------------ */
+  .page--eon .cs-cover-copy{padding:72px 48px}
+  .page--eon .cs-title{font:300 52px/1.03 'Hanken Grotesk';letter-spacing:-.035em;margin:20px 0 0}
+  .page--eon .cs-disc{font:600 10px/1.7 'Hanken Grotesk';letter-spacing:.14em;margin-top:20px}
+  /* The panel's 1.0865 ratio is held by aspect-ratio + align-self:start, NOT a
+     fixed min-height: the rows are cqw-based, so a fixed height dumps all the
+     surplus into the bleeding bottom row whenever the card renders narrower
+     than 1200px. Changing this re-crops every bottom screen (CLAUDE.md). */
+  .eon-hero{--s:.82;display:block;background:#201C16;border-left:1px solid rgba(18,18,16,.10);aspect-ratio:600 / calc(652 * var(--s));align-self:start;container-type:inline-size}
+
+  /* --- context ---------------------------------------------------------- */
+  .page--eon .cs-context{grid-template-columns:1fr 340px}
+  .page--eon .cs-meta{margin-top:8px}
+
+  /* --- the business problem --------------------------------------------- */
+  /* The body column IS the step 01 body cell, so the two paragraphs share both
+     vertical edges at every width (SHIP-MANIFEST.md). Step 01 here is a
+     full-width two-up on a 1fr 1fr grid with a 72px gap, so the cell is
+     (--col - 72px) / 2 and the first track takes the rest. Column for
+     position, ch for measure: the cap stays on the paragraph, never the
+     track, because capping the track slides the whole paragraph right. */
+  .page--eon .cs-problem-grid{grid-template-columns:1fr calc((var(--col,1104px) - 72px) / 2)}
+
+  /* --- my role ---------------------------------------------------------- */
+  .page--eon .cs-lead{padding-bottom:40px}
+
+  /* --- shared step scaffolding ------------------------------------------ */
+  .eon-head{display:grid;grid-template-columns:1fr 1fr;align-items:start}
+  /* The right column's first line sits with the step title, not the marker.
+     --cs-top-body is the measured offset for this exact pairing (28px step
+     title -> 18px body) and is what HSBC step 01 ships; use the token, never a
+     fresh number (CLAUDE.md). The +2px is the only difference between the two
+     studies: E.ON's step titles carry the shared 16px margin above them, HSBC's
+     an overridden 14px, so E.ON's title starts 2px lower and its body follows.
+     The design's own 46px was drawn against a 16px body and is 27px out here.
+     Step 05 is authored at 31px rather than 46px, which is drift in the design
+     file: its head is the same marker + title over body as steps 01 and 02, so
+     it takes the same offset. */
+  .eon-head-body{margin-top:0;padding-top:calc(var(--cs-top-body) + 2px)}
+  .eon-head-body .cs-step-body:first-child{margin-top:0}
+  .eon-lab{font:600 10px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+  .eon-lab--dark{color:#9d9b8f}
+  .eon-nav{display:flex;align-items:center}
+  .eon-arrow{width:44px;height:44px;border-radius:50%;border:1px solid rgba(18,18,16,.3);background:transparent;color:#201C16;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;transition:background .18s ease,border-color .18s ease}
+  .eon-arrow--lg{width:46px;height:46px}
+  .eon-arrow:hover{background:#ffd400;border-color:#ffd400}
+  .eon-frac{display:flex;align-items:baseline;gap:6px}
+  .eon-frac--lg{gap:7px}
+  .eon-frac-n{font:300 22px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17}
+  .eon-frac--lg .eon-frac-n{font-size:30px}
+  .eon-frac-t{font:500 12px 'Hanken Grotesk';letter-spacing:.06em;color:#a6a49d}
+  .eon-frac--lg .eon-frac-t{font-size:13px}
+
+  /* --- STEP 01 · Open card sorting -------------------------------------- */
+  /* top stays tucked under My role */
+  .eon-s01{background:#ffffff;padding:8px 48px 80px;padding-inline:var(--csb)}
+  .eon-s01 .eon-head{gap:72px}
+  .eon-s01-stats{gap:72px}
+
+  /* card agreement: a 3 x 3 grid here, the carousel nav belongs to mobile */
+  .eon-ca{margin:40px 0 0}
+  .eon-ca-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:12px;margin-bottom:24px}
+  .eon-ca-nav{display:none}
+  .eon-ca-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .eon-ca-c{background:#f4f4f2;border:1px solid rgba(18,18,16,.08);border-radius:12px;padding:22px 22px 20px}
+  .eon-ca-n{font:300 26px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17;font-variant-numeric:tabular-nums}
+  .eon-ca-u{font-size:13px}
+  .eon-ca-t{font:500 18px/1.2 'Hanken Grotesk';letter-spacing:-.015em;color:#1a1a17;margin-top:14px}
+  /* BUILD: 12px in the design; 13.5px is the supporting size the rest of the
+     site uses, and this run is the only place E.ON went below it */
+  .eon-ca-d{font:400 13.5px/1.5 'Hanken Grotesk';color:#67665f;margin-top:9px;text-wrap:pretty}
+
+  /* --- STEP 02 · Information architecture -------------------------------- */
+  .eon-s02{background:#f3eee3;padding:80px 48px;border-top:1px solid rgba(18,18,16,.1);padding-inline:var(--csb)}
+  .eon-s02 .eon-head{gap:64px}
+  .eon-ia{margin-top:40px}
+  /* Nothing in this module scales with the column: the cards are IA trees, so
+     they are text, and text inside a figure holds its authored size. The 308px
+     card and its 13.5px labels are fixed at every width and the track just
+     shows more cards as the column grows, roughly four at 1440 and five at the
+     cap, still paging three at a time. Zooming it (which the other three E.ON
+     figures do, because they are artwork) took the labels to 19px. */
+  .eon-ia-nav{justify-content:flex-end;gap:20px}
+  .eon-ia-fit{margin-top:48px}
+  .eon-ia-track{position:relative;display:flex;gap:24px;overflow-x:auto;overflow-y:hidden;align-items:flex-start;scroll-snap-type:x proximity;scroll-behavior:smooth;padding:0 0 20px;transition:height .32s cubic-bezier(.4,0,.2,1)}
+  .eon-ia-rail{position:absolute;left:0;top:0;width:0;height:1px;background:rgba(18,18,16,.16)}
+  .eon-ia-cardwrap{flex:none;display:flex;flex-direction:column;align-items:center;scroll-snap-align:start}
+  .eon-ia-stem{width:1px;height:26px;background:rgba(18,18,16,.16);flex:none}
+  .eon-ia-card{width:308px;background:#fff;border:1px solid rgba(18,18,16,.10);border-radius:14px;padding:20px 22px}
+  .eon-ia-head{display:flex;align-items:baseline;gap:10px;margin:-20px -22px 16px;padding:13px 22px;border-bottom:1px solid rgba(18,18,16,.12)}
+  .eon-ia-hn{font:500 11px/1 'Hanken Grotesk';letter-spacing:.04em;font-variant-numeric:tabular-nums;color:#a6a49d}
+  .eon-ia-ht{font:600 15px/1.2 'Hanken Grotesk';color:#1a1a17}
+  .iaroot{padding-left:14px}
+  .eon-ia-sub{padding-left:13px;margin-top:3px;margin-left:2px}
+  .eon-ia-grp{display:flex;flex-direction:column}
+  .eon-n1,.eon-n2,.eon-n3{display:flex;gap:10px;align-items:baseline}
+  .eon-n1{padding:6px 0 11px}
+  .eon-n2{padding:5px 0}
+  .eon-n3{padding:4px 0}
+  .eon-nn1,.eon-nn2{font:500 11px/1.55 'Hanken Grotesk';letter-spacing:.02em;font-variant-numeric:tabular-nums;color:#a6a49d;flex:none}
+  .eon-nn1{min-width:26px}
+  .eon-nn2{min-width:40px}
+  .eon-nn3{font:500 10px/1.6 'JetBrains Mono',monospace;color:#a6a49d;flex:none;min-width:54px}
+  .eon-nl1{font:600 13.5px/1.3 'Hanken Grotesk';color:#1a1a17}
+  .eon-nl2{font:500 13px/1.35 'Hanken Grotesk';color:#4c4b45}
+  .eon-nl3{font:400 12.5px/1.35 'Hanken Grotesk';color:#67665f}
+
+  /* --- STEP 03 · Tree testing -------------------------------------------- */
+  .eon-s03{background:#f4f4f2;padding:80px 48px;border-top:1px solid rgba(18,18,16,.1);padding-inline:var(--csb)}
+  .eon-s03-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+  .eon-tt{display:flex;flex-direction:column;align-items:center}
+  /* the ring is one drawn composition, so its number and its label ride the
+     zoom with it; the three stats below sit outside .cs-fig at authored size */
+  .eon-ring{position:relative;width:160px;height:160px}
+  .eon-ring-svg{width:160px;height:160px;transform:rotate(-90deg);display:block}
+  .eon-ring-c{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  /* BUILD: 34px in the design file. The ring is a drawn composition, so its
+     number rides the figure's zoom (CLAUDE.md) and 34px was rendering near
+     41px on a laptop and 50px at the 1680 cap, which read oversized against
+     the ring. 28px is ArcelorMittal's ring-number size and leaves the hole
+     room for the label underneath, which E.ON's ring carries and AM's does
+     not. The label offset closes by the same amount. */
+  .eon-ring-n{font:300 28px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#1a1a17}
+  .eon-ring-u{font-size:14px}
+  .eon-ring-l{position:absolute;left:0;right:0;top:calc(50% + 18px);font:600 10px/1.4 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#67665f;text-align:center}
+  .eon-tt-stats{justify-content:center;gap:48px;margin-top:36px}
+
+  /* the bars are a fluid chart, not a zoomed figure: every value is a
+     percentage, so the tracks grow with the column and the labels hold */
+  .eon-bars{margin-top:56px;border-top:1px solid rgba(18,18,16,.12);padding-top:40px}
+  .eon-bars-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:28px}
+  /* The chart header is a matched PAIR: the count takes the kicker's whole
+     treatment, not just its 10px. Set at the same size but left in sentence
+     case it still read smaller, because caps fill the cap height while
+     lowercase only reaches the x-height, so the two never optically match at
+     one font-size. Matching the case and tracking settles it, and lines the
+     header up with the stat labels above (.cs-stat-l, PRIORITY TASKS). */
+  .eon-bars-n{font:600 10px/1.5 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+  .eon-bars-rows{display:flex;flex-direction:column;gap:23px}
+  .eon-bar{display:grid;grid-template-columns:196px 1fr 54px;gap:18px;align-items:center}
+  .eon-bar-l{font:500 16px/1.3 'Hanken Grotesk';color:#1a1a17}
+  .eon-bar-track{height:7px;border-radius:100px;background:rgba(18,18,16,.12);overflow:hidden}
+  .eon-bar-f{height:100%;border-radius:100px;background:#0f738a}
+  .eon-bar-v{font:500 16px/1 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#1a1a17;text-align:right}
+  .eon-bar-u{font-size:13px}
+  /* BUILD: 520px in the design file, which read small under a chart running
+     the full column. The ceiling is the pull-out's own 70ch measure: past
+     roughly 810px the paragraph stops at its cap and the rest of the card is
+     empty, so the card is widened to just inside that and the text still fills
+     it. This is why it does not scale with the column, unlike the figures. */
+  .eon-post{margin:40px 0 0;max-width:780px;background:#ffffff;border:1px solid rgba(18,18,16,.12);border-radius:14px;padding:32px 36px}
+  .eon-post-l{display:block;margin-bottom:14px}
+  /* the pull-out line takes the 70ch measure (SHIP-MANIFEST.md) */
+  .eon-post-p{font:300 22px/1.5 'Hanken Grotesk';letter-spacing:-.015em;color:#1a1a17;margin:0;max-width:70ch;text-wrap:pretty}
+
+  /* --- STEP 04 · Navigation testing (black) ------------------------------ */
+  .eon-s04{background:#201C16;padding:80px 48px;padding-inline:var(--csb)}
+  .eon-s04-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+  /* 56px above the label, up from the design's 28px: it opens a new block under
+     the step body and was sitting close enough to read as part of that
+     paragraph. 56px is what Laced's post-testing changes list puts above its
+     own caps label (.la-s04-changes), so the two modules now open identically.
+
+     display:flex is what makes the two actually equal. .eon-lab sets 10px/1 on
+     the SPAN, but this wrapper has no font of its own, so its line box took the
+     inherited 16px strut and centred the span in it, adding 6px: the padding
+     rendered 6px larger than it read. Laced has no such gap because its label is
+     the text element itself. Flex drops the strut, so the box is the text.
+     Padding-bottom carries the 6px the strut used to contribute, leaving the
+     space under the label exactly where it was. */
+  .eon-conc-l{display:flex;padding:56px 0 14px}
+  .eon-conc{display:grid;grid-template-columns:34px 1fr;gap:22px}
+  .eon-conc--first{padding:24px 0}
+  .eon-conc-n{font:500 12px/1.5 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:rgba(240,237,227,.42)}
+  .eon-conc:not(.eon-conc--first) .eon-conc-n{padding-top:24px}
+  .eon-conc-b{padding:24px 0;border-top:1px solid rgba(240,237,227,.16)}
+  .eon-conc-t{font:500 18px/1.25 'Hanken Grotesk';letter-spacing:-.01em;color:#f0ede3}
+  .eon-conc-p{font:400 15px/1.6 'Hanken Grotesk';color:rgba(240,237,227,.74);margin:7px 0 0}
+  .eon-tag-w{margin:14px 0 0}
+  .eon-tag{display:inline-block;font:600 10px/1 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#f0ede3;background:rgba(240,237,227,.12);padding:7px 12px;border-radius:100px}
+
+  /* the phone is a drawn module and scales; its controls sit outside .cs-fig */
+  .eon-proto{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:41px}
+  .eon-phone-stage{position:relative;width:240px;height:502px;flex:none}
+  .eon-phone{width:240px;height:502px;overflow:hidden;border-radius:29px;filter:drop-shadow(0 22px 40px rgba(0,0,0,.5))}
+  .eon-phone-body{width:399px;background:#3b342c;border-radius:48px;padding:12px;box-shadow:0 0 0 1.6px rgba(240,237,227,.22),0 40px 80px -28px rgba(0,0,0,.75);transform:scale(.6);transform-origin:top left}
+  .eon-phone-screen{width:375px;height:812px;border-radius:36px;overflow:hidden;background:#fff}
+  .eon-phone-screen iframe{width:375px;height:812px;border:0;display:block}
+  .eon-cue{position:absolute;left:120px;top:453px;transform:translate(-50%,-50%);width:68px;height:68px;pointer-events:none}
+  .eon-cue-r{position:absolute;inset:0;border:2px solid #ffd400;border-radius:50%;box-shadow:0 0 0 1px rgba(255,255,255,.35),0 6px 16px -6px rgba(32,28,22,.5)}
+  .eon-cue-p{position:absolute;inset:0;border:2px solid #ffd400;border-radius:50%;animation:ptRing 1.8s ease-out infinite}
+  .eon-proto-cap{display:flex;align-items:center;justify-content:center;gap:11px;margin-top:48px}
+  .eon-cue-dot{position:relative;display:inline-block;width:16px;height:16px;flex:none}
+  .eon-cue-dot-r{position:absolute;inset:0;border:1.5px solid #ffd400;border-radius:50%;animation:ptRing 1.8s ease-out infinite}
+  .eon-cue-dot-c{position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#ffd400}
+  .eon-proto-cap-t{font:300 20px/1.3 'Hanken Grotesk';letter-spacing:-.01em;color:#f0ede3}
+  .eon-proto-act{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:28px}
+  .eon-btn{display:inline-flex;align-items:center;gap:9px;border:1px solid #ffffff;background:#ffffff;color:#201C16;font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;padding:15px 16px;border-radius:100px;cursor:pointer;min-height:44px;transition:background .18s ease,border-color .18s ease,color .18s ease}
+  .eon-btn:hover{background:#ffd400;border-color:#ffd400;color:#201C16}
+  .eon-proto-full{display:inline-flex;align-items:center;gap:8px;padding:16px 0;font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase}
+  .eon-proto-full,.eon-proto-full:hover{color:#f0ede3}
+  .eon-proto-full > span{border-bottom:2px solid #ffd400;padding-bottom:4px}
+
+  /* the evidence is nested in a lifted panel so the band reads as one unit */
+  .eon-ut{margin:64px 0 0;background:#2c271f;border:1px solid rgba(240,237,227,.16);border-radius:16px;padding:48px 44px 52px}
+  .eon-ut-l{margin-bottom:30px}
+  .eon-ut-tabs{margin-bottom:44px}
+  .eon-tabtrack{border-color:rgba(240,237,227,.24);background:transparent}
+  .eon-ut-data{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+  .eon-ut-n{font:300 52px/1 'Hanken Grotesk';letter-spacing:-.03em;color:#f0ede3}
+  .eon-ut-u{font-size:26px}
+  /* no measure on these: the design's 22ch broke three of the four labels
+     over two lines, and the longest, CUSTOMERS ACROSS THREE ROUNDS, still
+     fits one line in the narrowest desktop column (233px at the authored
+     width). Mobile keeps no cap either and wraps naturally in its 2-up. */
+  .eon-ut-lab{font:600 10px/1.5 'Hanken Grotesk';letter-spacing:.12em;text-transform:uppercase;color:#9d9b8f;margin-top:14px}
+  /* BUILD: the two reading panels are set larger than the design file, which
+     had the quotes at 18px and the learnings at 14.5px. The learnings are full
+     sentences, so 14.5px sat under the 16px body floor; they take 16px/1.6.
+     The quotes go to 21px, the Newsreader pull-quote size ArcelorMittal uses,
+     because Newsreader italic reads smaller than Hanken at the same size. */
+  .eon-ut-words{display:grid;grid-template-columns:repeat(3,1fr);gap:44px}
+  .eon-q{margin:0;font:400 21px/1.45 'Newsreader',serif;font-style:italic;color:#f0ede3;text-wrap:pretty}
+  .eon-q-a{font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#9d9b8f;margin-top:13px}
+  .eon-ut-learn{display:grid;grid-template-columns:1fr 1fr;gap:26px 44px}
+  /* the numeral sits on the body's first baseline; aligned by the grid rather
+     than by a hand-tuned line-height, so it survives a change of either size */
+  .eon-learn{display:grid;grid-template-columns:26px 1fr;gap:14px;align-items:baseline}
+  .eon-learn-n{font:500 14px/1.6 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#9d9b8f}
+  .eon-learn-p{margin:0;font:400 18px/1.6 'Hanken Grotesk';color:rgba(240,237,227,.74)}
+
+  /* --- STEP 05 · Delivery support ---------------------------------------- */
+  .eon-s05{background:#ffffff;padding:80px 48px;border-top:1px solid rgba(18,18,16,.1);padding-inline:var(--csb)}
+  .eon-s05 .eon-head{gap:64px}
+  /* --u is declared on the figure, not on the collage: the frame's own height
+     is derived from it and a parent cannot read a child's custom property */
+  .eon-hf{margin:40px 0 0;--u:144px}
+  .eon-hf-frame{position:relative;overflow:hidden;height:calc(var(--u) * 600 / 144);background:#201C16;border:1px solid rgba(18,18,16,.10);border-radius:14px}
+  .eon-hf .eon-collage--hf{position:absolute;inset:0}
+}
+
+
+/* ============================================================
+   16. E.ON: mobile design (< 900px)
+   Restore - E.ON Case Study Mobile.dc.html, 440px column grown fluidly. The
+   design file's mocked phone status bar is not built (SHIP-MANIFEST.md).
+   ============================================================ */
+
+@media (max-width: 899px){
+
+  /* cover: the collage is its own full-bleed dark band under the copy */
+  .page--eon .cs-cover-copy{padding:52px 24px 40px}
+  .eon-hero{display:block;height:440px;background:#201C16;border-top:1px solid rgba(18,18,16,.14);border-bottom:1px solid rgba(18,18,16,.12);container-type:inline-size}
+
+  /* --- shared step scaffolding ------------------------------------------ */
+  .eon-head{display:block}
+  .eon-head-body{padding-top:0}
+  .eon-lab{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+  .eon-lab--dark{color:#9d9b8f}
+  .eon-nav{display:flex;align-items:center;gap:12px}
+  .eon-arrow{width:44px;height:44px;border-radius:50%;border:1px solid rgba(18,18,16,.3);background:transparent;color:#201C16;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+  .eon-arrow:active{background:#ffd400;border-color:#ffd400}
+  .eon-frac{display:flex;align-items:baseline;gap:6px}
+  .eon-frac-n{font:300 22px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;color:#1a1a17}
+  .eon-frac-t{font:500 12px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.06em;color:#a6a49d}
+
+  /* --- my role -> STEP 01, tucked ---------------------------------------- */
+  .page--eon .cs-lead{padding:56px 24px 34px}
+  .eon-s01{background:#ffffff;padding:8px 24px 56px}
+  .eon-s01-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+
+  /* card agreement becomes a two-up carousel */
+  .eon-ca{margin:80px 0 0}
+  .eon-ca-head{display:flex;justify-content:space-between;align-items:center;gap:16px}
+  /* flex-start, NOT the design's stretch, and the equal-height look comes back
+     via min-height on the card instead.
+
+     Under stretch a card's grey box IS the track's height, while its text is
+     laid out from its own content, so the two are set by different things and
+     any lag between them shows as text arriving before its box. That is a
+     structural defect, not a timing one: it cannot be fixed by updating the
+     height sooner. The IA track has always used flex-start, which is why only
+     this module ever showed it.
+
+     With flex-start the box is the card's own content, so it always contains
+     its text at every instant; min-height:100% then pads every card up to the
+     track's height, so a settled page still reads as equal cards. The height
+     eases only when shrinking (see fitTrack), which is why the transition is
+     safe to keep here. */
+  .eon-ca-grid{display:flex;align-items:flex-start;gap:16px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-behavior:smooth;margin-top:20px;padding-bottom:4px;transition:height .32s cubic-bezier(.4,0,.2,1)}
+  /* min-height, not stretch: the card is at least as tall as the page's
+     tallest, so a settled page reads as equal cards, but it grows past that
+     for its own content rather than being clipped to a box that does not fit
+     its text. --card-min is written by fitTrack; a percentage cannot be used
+     because it does not resolve against a flex container sized from script. */
+  .eon-ca-c{flex:0 0 calc(50% - 8px);min-height:var(--card-min,0px);scroll-snap-align:start;background:#f4f4f2;border:1px solid rgba(18,18,16,.08);border-radius:12px;padding:18px}
+  .eon-ca-n{font:300 24px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;color:#1a1a17;font-variant-numeric:tabular-nums}
+  .eon-ca-u{font-size:12px}
+  .eon-ca-t{font:500 16px/1.2 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.015em;color:#1a1a17;margin-top:12px}
+  .eon-ca-d{font:400 13.5px/1.5 'Hanken Grotesk',system-ui,sans-serif;color:#67665f;margin-top:8px;text-wrap:pretty}
+
+  /* --- STEP 02 · Information architecture, one-up ------------------------ */
+  .eon-s02{background:#f3eee3;padding:56px 24px;border-top:1px solid rgba(18,18,16,.1)}
+  .eon-ia{margin-top:32px}
+  .eon-ia-nav{justify-content:flex-end}
+  .eon-ia-fit{margin-top:28px}
+  .eon-ia-track{position:relative;display:flex;gap:24px;overflow-x:auto;overflow-y:hidden;align-items:flex-start;scroll-snap-type:x proximity;scroll-behavior:smooth;padding:0 0 16px;transition:height .32s cubic-bezier(.4,0,.2,1)}
+  .eon-ia-rail{position:absolute;left:0;top:0;width:0;height:1px;background:rgba(18,18,16,.16)}
+  .eon-ia-cardwrap{flex:none;display:flex;flex-direction:column;align-items:center;scroll-snap-align:start;width:100%}
+  .eon-ia-stem{width:1px;height:22px;background:rgba(18,18,16,.16);flex:none}
+  .eon-ia-card{width:100%;background:#fff;border:1px solid rgba(18,18,16,.10);border-radius:14px;padding:18px 20px}
+  .eon-ia-head{display:flex;align-items:baseline;gap:10px;margin:-18px -20px 14px;padding:12px 20px;border-bottom:1px solid rgba(18,18,16,.12)}
+  .eon-ia-hn{font:500 11px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.04em;font-variant-numeric:tabular-nums;color:#a6a49d}
+  .eon-ia-ht{font:600 15px/1.2 'Hanken Grotesk',system-ui,sans-serif;color:#1a1a17}
+  .iaroot{padding-left:14px}
+  .eon-ia-sub{padding-left:13px;margin-top:3px;margin-left:2px}
+  .eon-ia-grp{display:flex;flex-direction:column}
+  .eon-n1,.eon-n2,.eon-n3{display:flex;gap:10px;align-items:baseline}
+  .eon-n1{padding:6px 0 11px}
+  .eon-n2{padding:5px 0}
+  .eon-n3{padding:4px 0}
+  .eon-nn1,.eon-nn2{font:500 11px/1.55 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:#a6a49d;flex:none}
+  .eon-nn1{min-width:26px}
+  .eon-nn2{min-width:40px}
+  .eon-nn3{font:500 10px/1.6 'JetBrains Mono',monospace;color:#a6a49d;flex:none;min-width:54px}
+  .eon-nl1{font:600 13.5px/1.3 'Hanken Grotesk',system-ui,sans-serif;color:#1a1a17}
+  .eon-nl2{font:500 13px/1.35 'Hanken Grotesk',system-ui,sans-serif;color:#4c4b45}
+  .eon-nl3{font:400 12.5px/1.35 'Hanken Grotesk',system-ui,sans-serif;color:#67665f}
+
+  /* --- STEP 03 · Tree testing -------------------------------------------- */
+  .eon-s03{background:#f4f4f2;padding:56px 24px;border-top:1px solid rgba(18,18,16,.1)}
+  .eon-s03-grid{display:block}
+  /* left aligned, not centred: the ring and its stats sit on the column's left
+     edge like the step 01 stats and ArcelorMittal's mobile donuts */
+  .eon-tt{display:flex;flex-direction:column;align-items:flex-start;margin-top:38px}
+  .eon-ring{position:relative;width:160px;height:160px}
+  .eon-ring-svg{width:160px;height:160px;transform:rotate(-90deg);display:block}
+  .eon-ring-c{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .eon-ring-n{font:300 34px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;color:#1a1a17}
+  .eon-ring-u{font-size:17px}
+  .eon-ring-l{position:absolute;left:0;right:0;top:calc(50% + 21px);font:600 10px/1.4 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#67665f;text-align:center}
+  .eon-tt-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px;width:100%}
+
+  .eon-bars{margin-top:44px;border-top:1px solid rgba(18,18,16,.12);padding-top:36px}
+  .eon-bars-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:24px}
+  .eon-bars-n{font:600 10px/1.5 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+  .eon-bars-rows{display:flex;flex-direction:column;gap:18px}
+  /* the label moves above its bar so the track keeps a usable length */
+  .eon-bar{display:grid;grid-template-columns:1fr 54px;gap:6px 14px;align-items:center}
+  /* Regular 400, not Medium 500 (18 Aug 2026, mobile only). At 500 the ten task
+     names stacked full-width read as ten headings and shouted over the bars they
+     label. Desktop keeps 500: there the name sits in a narrow column beside the
+     bar rather than above it, so it needs the extra weight to hold its own. */
+  .eon-bar-l{font:400 16px/1.3 'Hanken Grotesk',system-ui,sans-serif;color:#1a1a17;grid-column:1 / -1}
+  .eon-bar-track{height:7px;border-radius:100px;background:rgba(18,18,16,.12);overflow:hidden}
+  .eon-bar-f{height:100%;border-radius:100px;background:#0f738a}
+  .eon-bar-v{font:500 16px/1 'Hanken Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#1a1a17;text-align:right}
+  .eon-bar-u{font-size:13px}
+  .eon-post{margin:32px 0 0;background:#ffffff;border:1px solid rgba(18,18,16,.12);border-radius:14px;padding:26px 24px}
+  .eon-post-l{display:block;margin-bottom:12px}
+  .eon-post-p{font:300 19px/1.5 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.015em;color:#1a1a17;margin:0;text-wrap:pretty}
+
+  /* --- STEP 04 · Navigation testing (black) ------------------------------ */
+  .eon-s04{background:#201C16;padding:56px 24px}
+  .eon-s04-grid{display:block}
+  .eon-conc-l{display:flex;padding:56px 0 14px}
+  .eon-conc{display:grid;grid-template-columns:30px 1fr;gap:18px}
+  .eon-conc--first{padding:20px 0}
+  .eon-conc-n{font:500 12px/1.5 'Hanken Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:rgba(240,237,227,.42)}
+  .eon-conc:not(.eon-conc--first) .eon-conc-n{padding-top:20px}
+  .eon-conc-b{padding:20px 0;border-top:1px solid rgba(240,237,227,.16)}
+  .eon-conc-t{font:500 17px/1.25 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;color:#f0ede3}
+  .eon-conc-p{font:400 15px/1.6 'Hanken Grotesk',system-ui,sans-serif;color:rgba(240,237,227,.74);margin:7px 0 0}
+  .eon-tag-w{margin:14px 0 0}
+  .eon-tag{display:inline-block;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#f0ede3;background:rgba(240,237,227,.12);padding:7px 12px;border-radius:100px}
+
+  .eon-proto{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:40px}
+  .eon-phone-stage{position:relative;width:240px;height:502px;flex:none}
+  .eon-phone{width:240px;height:502px;overflow:hidden;border-radius:29px;filter:drop-shadow(0 22px 40px rgba(0,0,0,.5))}
+  .eon-phone-body{width:399px;background:#3b342c;border-radius:48px;padding:12px;box-shadow:0 0 0 1.6px rgba(240,237,227,.22),0 40px 80px -28px rgba(0,0,0,.75);transform:scale(.6);transform-origin:top left}
+  .eon-phone-screen{width:375px;height:812px;border-radius:36px;overflow:hidden;background:#fff}
+  .eon-phone-screen iframe{width:375px;height:812px;border:0;display:block}
+  .eon-cue{position:absolute;left:120px;top:453px;transform:translate(-50%,-50%);width:68px;height:68px;pointer-events:none}
+  .eon-cue-r{position:absolute;inset:0;border:2px solid #ffd400;border-radius:50%;box-shadow:0 0 0 1px rgba(255,255,255,.35),0 6px 16px -6px rgba(32,28,22,.5)}
+  .eon-cue-p{position:absolute;inset:0;border:2px solid #ffd400;border-radius:50%;animation:ptRing 1.8s ease-out infinite}
+  .eon-proto-cap{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:36px}
+  .eon-cue-dot{position:relative;display:inline-block;width:16px;height:16px;flex:none}
+  .eon-cue-dot-r{position:absolute;inset:0;border:1.5px solid #ffd400;border-radius:50%;animation:ptRing 1.8s ease-out infinite}
+  .eon-cue-dot-c{position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:#ffd400}
+  .eon-proto-cap-t{font:300 18px/1.3 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;color:#f0ede3}
+  .eon-proto-act{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:24px}
+  .eon-btn{display:inline-flex;align-items:center;gap:9px;border:1px solid #ffffff;background:#ffffff;color:#201C16;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:15px 16px;border-radius:100px;cursor:pointer;min-height:44px}
+  .eon-proto-full{display:inline-flex;align-items:center;gap:8px;padding:16px 0;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+  .eon-proto-full,.eon-proto-full:hover{color:#f0ede3}
+  .eon-proto-full > span{border-bottom:2px solid #ffd400;padding-bottom:4px}
+
+  /* Not a card on mobile: a full-bleed band with a hairline top and bottom. The
+     card's own 24px of side padding sat inside the band's 24px, leaving 294px for
+     a tab row that needs more. Pulled out to the viewport edges and re-inset by
+     24px, the row gets the full 342px and the three tabs fit on one line. It
+     keeps the desktop card's lifted #2c271f, so the panel still separates itself
+     from the #201C16 step around it; only the radius and side borders go. */
+  .eon-ut{margin:44px -24px 0;padding:32px 24px 36px;background:#2c271f;border:0;border-top:1px solid rgba(240,237,227,.16);border-bottom:1px solid rgba(240,237,227,.16);border-radius:0}
+  .eon-ut-l{margin-bottom:24px}
+  /* The three pills total 370px against 294px of card at 390px wide, so the strip
+     used to scroll and the third tab sat off the edge, reading as cut off rather
+     than as something to swipe. It wraps instead: nothing is ever hidden, and the
+     22px radius keeps a two-row track from rendering as a stretched pill. The
+     signed-off mobile design also shortens this tab to "Learnings", which is what
+     .eon-tab-the does, and at the 440px column it was drawn for it still fits on
+     one row. */
+  .eon-ut-tabs{margin-bottom:32px}
+  .eon-tabtrack{border-color:rgba(240,237,227,.24);background:transparent}
+  /* the third tab takes the signed-off mobile design's shorter "Learnings" */
+  .eon-tab-the{display:none}
+  /* 16px is the mobile design's own pill padding, against the 20px the build
+     carries at both breakpoints. !important because cs-interactions rewrites the
+     whole style attribute on click, so the inline padding returns on every tap
+     and only an important declaration outranks it (CLAUDE.md, hover gotcha). */
+  .eon-ut-tabs button[data-tabgroup]{padding:11px 16px !important}
+  .eon-ut-data{display:grid;grid-template-columns:1fr 1fr;gap:26px 20px}
+  .eon-ut-n{font:300 38px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.03em;color:#f0ede3}
+  .eon-ut-u{font-size:20px}
+  .eon-ut-lab{font:600 10px/1.5 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#9d9b8f;margin-top:12px}
+  /* as desktop: the quotes and the learnings both step up, the learnings to
+     the 16px body floor */
+  .eon-ut-words{display:grid;grid-template-columns:1fr;gap:28px}
+  .eon-q{margin:0;font:400 20px/1.45 'Newsreader',serif;font-style:italic;color:#f0ede3;text-wrap:pretty}
+  .eon-q-a{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#9d9b8f;margin-top:12px}
+  .eon-ut-learn{display:grid;grid-template-columns:1fr;gap:22px}
+  .eon-learn{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:baseline}
+  .eon-learn-n{font:500 14px/1.6 'Hanken Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#9d9b8f}
+  .eon-learn-p{margin:0;font:400 18px/1.6 'Hanken Grotesk',system-ui,sans-serif;color:rgba(240,237,227,.74)}
+
+  /* --- STEP 05 · Delivery support ---------------------------------------- */
+  /* closes on 0: the collage bleeds off both edges of the band */
+  .eon-s05{background:#ffffff;padding:56px 24px 0;border-top:1px solid rgba(18,18,16,.1)}
+  .eon-hf{margin:30px -24px 0;--u:105.6px}
+  .eon-hf-frame{overflow:hidden;background:#201C16;border-top:1px solid rgba(18,18,16,.14);border-bottom:1px solid rgba(18,18,16,.12)}
+  /* a fixed 801px track shifted left, so the six columns bleed off both sides
+     of the 440px column exactly as drawn */
+  .eon-hf .eon-collage--hf{width:801px;height:calc(var(--u) * 600 / 144);padding:0 44px;justify-content:flex-start;transform:translateX(-239px);box-sizing:border-box}
+}
+
+
+/* ============================================================
+   17. Laced · End-to-end authentication redesign
+   Built from _design/Restore - Laced Authentication Case Study.dc.html
+   (authored on a 1200px card, 48px gutter, so a 1104px content column) and
+   _design/Restore - Laced Authentication Case Study Mobile.dc.html (440px
+   column, 24px side padding). Every value is lifted from those two files
+   unchanged except the type measures, which take the build column of the table
+   in SHIP-MANIFEST.md, and the BUILD notes below.
+
+   As with HSBC and E.ON the two designs are written as two complete blocks
+   rather than a base plus mobile overrides: step 02 goes from a two-up with a
+   bleeding tile strip to a single column, step 03's diagonal collage runs at
+   two different scales, and step 04's photo moves from the foot of the title
+   column into the reading order. Both blocks are fenced, which is also what
+   keeps section 9's homepage mobile rules intact underneath them.
+
+   BUILD notes (the design file and the build differ here on purpose):
+   · Step markers are 12px for BOTH the number and the label. The design leaves
+     the desktop label at 11px, which the shared .cs-marker-* corrects.
+   · Cover title keeps the design's 52px but takes the shared 24ch measure, not
+     the design's 14ch. Only measures rescale with the column, never sizes.
+   · Both band statements drop max-width:552px and text-wrap:pretty for the
+     shared five-twelfths-of-the-column measure and balance.
+   · Step and problem bodies go 16px -> 18px and gain the 63ch measure; on black
+     they take 55ch and the shared .82 cream rather than the design's #cdc9bd.
+   · Step titles take 48ch and balance in place of the design's 24ch/26ch/28ch.
+   · The outcome statement takes 40ch, not 28ch.
+   · Two-column steps take the measured cap-inset offset. The design eyeballs
+     the right column down by 50px (step 01) and 46px (steps 03 and 04), which
+     lands the body mid-way through the title's first line rather than on it.
+   · Band rhythm is normalised to 80px top and bottom. The design carries 64px
+     under context, 72px over steps 02/03/04 and 88px under steps 02/03/04, and
+     a 96px white spacer closing step 01. The two design-dictated exceptions
+     stay: My role -> step 01 is tucked (40/8), and on mobile step 03's collage
+     bleeds into the band edge, so that band closes on 0.
+   · The floor-plan panel, the blueprint tile strip and the step 03 collage clip
+     at the card edge, var(--cap), which is what the design's own -48px bleeds
+     cut against. laced-warehouse-floor.png is only 1448px wide, so letting it
+     run to a 2560px viewport would paint it at 1.77x source, past the 1.35x
+     ceiling; at the cap it is 1.16x.
+   ============================================================ */
+
+/* breakpoint-independent: the run of items on a step 01 stat card, separated by
+   a 2px dot, and the phrases inside it that must not break */
+.la-dot{display:inline-block;width:2px;height:2px;border-radius:50%;background:#b3b1aa;vertical-align:middle;position:relative;top:-1px;margin:0 4px}
+.la-nb{white-space:nowrap}
+
+
+/* --- desktop design (>= 900px) ------------------------------------------ */
+@media (min-width: 900px){
+
+  /* --- cover ------------------------------------------------------------ */
+  .page--la .cs-cover-copy{padding:72px 48px}
+  .page--la .cs-title{font:300 52px/1.03 'Hanken Grotesk';letter-spacing:-.035em;margin:20px 0 0}
+  .page--la .cs-disc{font:600 10px/1.7 'Hanken Grotesk';letter-spacing:.14em;margin-top:20px}
+  /* The panel's 1.1521 ratio is the design's own heroFrameAspect, 4218/2712
+     over the 1.35 hero zoom. It is held by aspect-ratio + align-self:start, not
+     by stretching to the row: the copy column is always the shorter of the two,
+     so the row height is the panel's and the ratio survives at every width.
+     Everything inside is percentage based, so the crop needs no zoom. */
+  .la-cover-media{display:block;align-self:start;aspect-ratio:1.1521;background:#f3eee3;border-left:1px solid rgba(18,18,16,.10)}
+  .la-cover-img{width:100%;height:100%;object-fit:contain;object-position:center;display:block;transform:translate(7.17%,0) scale(1.35);transform-origin:center}
+
+  /* --- context ---------------------------------------------------------- */
+  .page--la .cs-context{grid-template-columns:1fr 340px}
+  .page--la .cs-meta{margin-top:8px}
+
+  /* --- the business problem --------------------------------------------- */
+  /* The body column IS the step 01 body cell, so the two paragraphs share both
+     vertical edges at every width (SHIP-MANIFEST.md). Step 01 here is a
+     full-width two-up on a `1fr 1.15fr` grid with a 64px gap, laid out inside
+     the same content column, so the problem grid simply takes that template.
+     Column for position, ch for measure: the 63ch cap stays on the paragraph,
+     never on the track. */
+  .page--la .cs-problem-grid{grid-template-columns:1fr 1.15fr;gap:64px}
+
+  /* --- my role ---------------------------------------------------------- */
+  .page--la .cs-lead{padding-bottom:40px}
+
+  /* --- two-column step head --------------------------------------------- */
+  /* title left, body right, the body's first line on the title's first line.
+     --cs-top-body is the measured offset for the pairing this page uses
+     throughout (28px step title -> 18px body); the +2px is the difference
+     between the 14px title margin that token was measured against and the 16px
+     the shared .cs-step-title carries here. */
+  .la-head{display:grid;grid-template-columns:1fr 1.15fr;gap:64px;align-items:start;padding-inline:var(--csb)}
+  .la-head-b{padding-top:calc(var(--cs-top-body) + 2px)}
+  .la-head-b .cs-step-body:first-child{margin-top:0}
+
+  /* --- STEP 01 · Operational alignment ---------------------------------- */
+  /* top stays tucked under My role */
+  .la-s01{background:#ffffff;padding:8px 0 80px}
+  .la-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:stretch;margin-top:56px;padding-inline:var(--csb)}
+  .la-card{background:#f4f4f2;border:1px solid rgba(18,18,16,.08);border-radius:14px;padding:28px 28px 30px}
+  .la-card-n{font:300 28px/1 'Hanken Grotesk';letter-spacing:-.02em;color:#4c4b45}
+  .la-card-t{font:500 18px/1.3 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17;margin-top:18px}
+  .la-card-p{font:400 13.5px/1.9 'Hanken Grotesk';color:#67665f;margin:12px 0 0}
+  /* the toggle stays at its authored size and keeps the content column; both
+     panels run to the card edge, which is where the design cuts them */
+  .la-s01-tabs{margin-top:72px;padding-inline:var(--csb)}
+  .la-s01-p{margin-top:56px;padding-inline:var(--csb0)}
+  .la-flow-img{width:100%;height:auto;display:block}
+  .la-planfr{aspect-ratio:2.4;display:flex;align-items:center;justify-content:center}
+  .la-plan-img{height:100%;width:auto;max-width:100%;object-fit:contain;display:block}
+
+  /* --- STEP 02 · Service blueprints ------------------------------------- */
+  .la-s02{background:#f3eee3;border-top:1px solid rgba(18,18,16,.1);padding:0 0 80px}
+  .la-s02-grid{display:grid;grid-template-columns:.82fr 1fr;align-items:stretch;padding-inline:var(--csb0)}
+  .la-s02-copy{padding:80px 40px 72px 48px}
+  .la-s02-copy .cs-step-body{margin-top:22px}
+  .la-s02-copy .cs-step-body + .cs-step-body{margin-top:16px}
+  .la-s02-stats{gap:56px}
+  /* scaled: 1fr of the authored .82fr 1fr grid. The zoom is on the frame rather
+     than the grid cell, so the 80px that opens the band stays 80px while the
+     628px panel and its baked -234px crop ride the column. */
+  .la-s02-media{margin-top:80px}
+  .la-bird{zoom:var(--k,1);position:relative;overflow:hidden;background:#f2f0eb;height:628px;border-radius:22px 0 0 22px}
+  .la-bird-img{position:absolute;left:0;top:0;width:164%;height:auto;display:block;transform:translate(-234px,4px);transform-origin:0 0}
+  /* a fixed 1560px track centred in the card and clipped by it, so the outer
+     two tiles are cut about a fifth at the card boundary. The window is
+     min(100%, --cap): at k the authored 180px overruns scale with the tiles, so
+     the crop is the authored one at every width. */
+  .la-bp{position:relative;overflow:hidden;width:min(100%, var(--cap));height:calc(340px * var(--k,1));margin:16px auto 0}
+  .la-bp-stage{position:absolute;inset:0;overflow:hidden;zoom:var(--k,1)}
+  .la-bp-track{position:absolute;top:50%;left:50%;width:1560px;transform:translate(-50%,-50%);display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .la-bptile{height:340px;border-radius:22px;overflow:hidden;background:#ffffff;border:1px solid rgba(18,18,16,.10)}
+
+  /* --- STEP 03 · Authentication interfaces (black) ---------------------- */
+  .la-s03{background:#201C16;padding:80px 0}
+  .la-s03-head{grid-template-columns:1fr 1fr;gap:72px}
+  .la-floor{margin:40px 0 0;padding-inline:var(--csb0)}
+  .la-floor-fr{position:relative;aspect-ratio:21/9;overflow:hidden;background:#fff}
+  .la-wfwrap{margin:56px 0 0;padding-inline:var(--csb)}
+  /* the frame's height rides --k and the stage inside carries the zoom, so the
+     LOCKED collage geometry below is never re-derived: it lays out at the
+     authored 1104 x 640 and simply paints larger */
+  .la-wf{position:relative;height:calc(640px * var(--k,1));overflow:hidden;border-radius:14px;background:#201C16}
+  .la-wf-stage{position:absolute;inset:0;overflow:hidden;zoom:var(--k,1)}
+  .la-wf-track{gap:17px;transform:translate(-50%,-52%) rotate(-19deg) scale(1.04)}
+  .la-wf-col{gap:17px}
+  .la-wf-col--2{margin-top:-124px}
+  .la-wf-col--3{margin-top:-58px}
+  .la-wf-col--4{margin-top:-186px}
+  .la-wf-col--5{margin-top:-96px}
+  .la-wf-t{width:312px;border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.34)}
+  .la-ph{width:312px;height:208px;border-radius:10px;background:#ededeb}
+
+  /* --- STEP 04 · Usability testing (grey) ------------------------------- */
+  .la-s04{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1);padding:80px 48px;padding-inline:var(--csb)}
+  /* authored in mobile reading order (marker, title, body, photo, changes);
+     explicit placement puts the photo back at the foot of the title column */
+  .la-s04-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;column-gap:72px;align-items:start}
+  .la-s04-title{grid-column:1;grid-row:1}
+  .la-s04-body{grid-column:2;grid-row:1;padding-top:calc(var(--cs-top-body) + 2px)}
+  .la-s04-body .cs-step-body:first-child{margin-top:0}
+  .la-s04-photo{grid-column:1;grid-row:2;align-self:end;margin:40px 0 0}
+  .la-s04-changes{grid-column:2;grid-row:2;margin-top:56px}
+
+  /* --- C-suite feedback (grey) ------------------------------------------ */
+  .la-fb{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1);padding:80px 48px;padding-inline:var(--csb)}
+  .kicker-row--fb{margin-bottom:32px}
+  .la-fb-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch}
+  .la-fb-card{padding:32px}
+  .la-fb-l{margin-bottom:18px}
+  .la-fb-q{font:300 17px/1.5 'Hanken Grotesk';letter-spacing:-.01em}
+  .la-fb-by{margin-top:22px}
+  .la-fb-link{margin-top:22px}
+}
+
+
+/* --- shared between the two designs -------------------------------------- */
+.la-bird-img{pointer-events:none}
+.la-bptile-img{width:100%;height:100%;object-fit:cover;display:block}
+/* the three baked crops. Only the translate differs between the designs, and
+   it differs because the tile is a different size, not because the crop moved. */
+.la-bptile-img--a{object-position:30% 40%;transform:translate(-336px,-380px) scale(3.2);transform-origin:20% 44%}
+.la-bptile-img--b{object-position:12% 30%}
+.la-bptile-img--c{object-position:30% 45%;transform:translate(-37px,124px) scale(2.1);transform-origin:36% 48%}
+.la-floor-img{width:100%;height:100%;object-fit:cover;object-position:50% 32%;display:block}
+.la-s04-photo{aspect-ratio:5/4;border:1px solid rgba(18,18,16,.12);border-radius:14px;overflow:hidden}
+.la-s04-img{width:100%;height:100%;object-fit:cover;object-position:center 45%;display:block}
+
+/* STEP 03 diagonal collage. LOCKED (CLAUDE.md): pure rotation with a uniform
+   scale, per-column margin-top stagger, and each column fading in off --p at
+   0 / .08 / .16 / .24 / .32, carried on the column as --o. Only the tile size,
+   the gutter and the track scale change between the two designs; the offsets,
+   the angle and the crops do not. */
+.la-wf-track{position:absolute;left:50%;top:50%;display:flex;flex-direction:row;align-items:flex-start;transform-origin:center}
+/* no transition on the opacity, unlike the design file. --p is rewritten every
+   animation frame by cs-interactions, which restarts a .12s transition every
+   frame and pins the column at its start value: measured, the columns stayed
+   at opacity 0 with --p at 1. The rAF loop is already the animation, so the
+   fade is smooth without one, and it is how ArcelorMittal step 06 drives its
+   own --p opacities. */
+.la-wf-col{display:flex;flex-direction:column;align-items:flex-start;opacity:calc((var(--p,0) - var(--o,0)) * 2.6)}
+.la-wf-t{flex:none;overflow:hidden}
+.la-wf-t img{width:100%;height:auto;display:block}
+.la-ph{flex:none;display:flex;align-items:center;justify-content:center}
+.la-ph-l{font:500 10px 'JetBrains Mono',monospace;color:#67665f}
+
+/* the post-testing changes list (CLAUDE.md: caps kicker, tabular faint
+   numerals, hairlines between rows only). The row geometry lives here, at its
+   desktop values, and the mobile block below tightens it: keeping it in the
+   media queries alone left the desktop rows with no columns, no padding and no
+   hairlines, so the numerals stacked on top of their titles.
+
+   BUILD: every value here comes from E.ON step 04, which carries this module
+   twice. The geometry and the title are .eon-conc, its structural twin (a
+   numeral, a Medium-500 title and a supporting line on a 34px grid with 22px
+   gutters and 24px rows). The reading sizes are .eon-learn, the larger of the
+   two: 18px/1.6 body and a 14px/1.6 numeral, in place of the design file's
+   15px and 12px. 15px was under the 16px floor the accessibility contract sets
+   for body copy, so it had to move regardless.
+
+   Title and body are therefore both 18px, separated by weight and colour
+   rather than size. That is E.ON 04's own pairing carried to its reading
+   scale; if the title needs to pull further ahead it goes to 20px, but that
+   number would not come from this module. */
+.la-ch-l{display:block;font:600 10px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f;padding-bottom:20px}
+.la-ch-r{display:grid;grid-template-columns:34px 1fr;gap:22px}
+.la-ch-n{font:500 14px/1.6 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#c3c1ba}
+.la-ch-b{padding:0 0 24px}
+.la-ch-r + .la-ch-r .la-ch-n{padding-top:24px}
+.la-ch-r + .la-ch-r .la-ch-b{padding:24px 0;border-top:1px solid rgba(18,18,16,.12)}
+.la-ch-r:last-child .la-ch-b{padding:24px 0 0}
+.la-ch-t{font:500 18px/1.25 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17}
+.la-ch-p{font:400 18px/1.6 'Hanken Grotesk';color:#4c4b45;margin:7px 0 0}
+
+/* the C-suite cards, lifted from the toolkit and shared with the customer
+   support study */
+.la-fb-card{background:#ffffff;border:1px solid rgba(18,18,16,.12);border-radius:16px;display:flex;flex-direction:column}
+.la-fb-l{font:600 10px 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f}
+.la-fb-q{color:#1a1a17;flex:1;margin:0;text-wrap:pretty}
+.la-fb-by{display:flex;align-items:center;gap:13px}
+.la-fb-n{font:500 15px 'Hanken Grotesk';color:#1a1a17}
+.la-fb-r{font:400 13px 'Hanken Grotesk';color:#67665f}
+/* align-self, or the flex column stretches the link and its hover mark sweeps
+   the full width of the card */
+.la-fb-link{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:12px 0;letter-spacing:.14em}
+
+
+/* ============================================================
+   18. Laced authentication — mobile design (< 900px)
+   Restore - Laced Authentication Case Study Mobile.dc.html, 440px column grown
+   fluidly. The design file's mocked phone status bar is not built
+   (SHIP-MANIFEST.md).
+   ============================================================ */
+
+@media (max-width: 899px){
+
+  /* cover: the flow map sits in its own ivory band under the copy */
+  .la-cover-media{height:auto;aspect-ratio:2.05;background:#f3eee3;border-left:0}
+  .la-cover-img{width:100%;height:100%;object-fit:contain;object-position:center;display:block;transform:translate(0,0) scale(1.35);transform-origin:center}
+
+  /* two-column step heads collapse; the offset goes with them */
+  .la-head{display:block;padding-inline:24px}
+  .la-head-b{padding-top:0}
+
+  /* step 01 · tucked under My role, closing on the design's 52px */
+  .la-s01{background:#ffffff;padding:30px 0 52px}
+  .la-cards{display:flex;flex-direction:column;gap:14px;margin-top:36px;padding-inline:24px}
+  .la-card{background:#f4f4f2;border:1px solid rgba(18,18,16,.08);border-radius:14px;padding:24px}
+  .la-card-n{font:300 28px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;color:#4c4b45}
+  .la-card-t{font:500 18px/1.3 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;color:#1a1a17;margin-top:14px}
+  .la-card-p{font:400 13.5px/1.9 'Hanken Grotesk',system-ui,sans-serif;color:#67665f;margin:10px 0 0}
+  .la-s01-tabs{margin-top:44px;padding-inline:24px}
+  .la-s01-p{margin-top:36px;padding-inline:0}
+  /* the blueprint is shown at 2x the column and cropped, as drawn */
+  .la-flowfr{overflow:hidden}
+  .la-flow-img{width:200%;max-width:none;height:auto;display:block}
+  .la-s01-p--plan{padding-inline:24px}
+  .la-plan-img{width:100%;height:auto;display:block}
+
+  /* step 02 */
+  .la-s02{background:#f3eee3;border-top:1px solid rgba(18,18,16,.1);padding:56px 0}
+  .la-s02-grid{display:block}
+  .la-s02-copy{padding:0 24px}
+  .la-s02-stats{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .la-s02-media{margin-top:40px}
+  .la-bird{position:relative;overflow:hidden;background:#f2f0eb;height:420px;border-top:1px solid rgba(18,18,16,.08);border-bottom:1px solid rgba(18,18,16,.08)}
+  .la-bird-img{position:absolute;left:0;top:0;width:164%;height:auto;display:block;transform:translate(-156px,3px);transform-origin:0 0}
+  .la-bp{margin:16px 24px 0}
+  .la-bp-track{display:flex;flex-direction:column;gap:14px}
+  .la-bptile{height:262px;border-radius:14px;overflow:hidden;background:#ffffff;border:1px solid rgba(18,18,16,.10)}
+  .la-bptile-img--a{transform:translate(-259px,-293px) scale(3.2)}
+  .la-bptile-img--c{transform:translate(-28px,95px) scale(2.1)}
+
+  /* step 03 · closes on 0: the collage bleeds into the band edge */
+  .la-s03{background:#201C16;border-top:1px solid rgba(18,18,16,.1);padding:56px 0 0}
+  .la-floor{margin:36px 0 0}
+  .la-floor-fr{position:relative;aspect-ratio:21/13;overflow:hidden;background:#fff}
+  .la-floor-img{object-position:center 32%;transform:scale(1.02)}
+  .la-wfwrap{margin:0}
+  .la-wf{position:relative;height:340px;overflow:hidden;background:#201C16}
+  .la-wf-track{gap:7px;transform:translate(-50%,-52%) rotate(-19deg) scale(1.38)}
+  .la-wf-col{gap:7px}
+  .la-wf-col--2{margin-top:-49px}
+  .la-wf-col--3{margin-top:-23px}
+  .la-wf-col--4{margin-top:-74px}
+  .la-wf-col--5{margin-top:-38px}
+  .la-wf-t{width:124px;border-radius:4px;box-shadow:0 8px 18px rgba(0,0,0,.34)}
+  /* on mobile the empty slots are flat panels, not labelled placeholders */
+  .la-ph{width:124px;height:83px;border-radius:4px;background:#2c271f}
+  .la-ph-l{display:none}
+
+  /* step 04 · the photo takes its place in the reading order */
+  .la-s04{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1);padding:56px 24px}
+  .la-s04-grid{display:block}
+  .la-s04-body{padding-top:0}
+  .la-s04-photo{margin:28px 0 0}
+  .la-s04-changes{margin-top:56px}
+  .la-ch-l{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;padding-bottom:18px}
+  .la-ch-r{grid-template-columns:28px 1fr;gap:18px}
+  .la-ch-n{font:500 14px/1.6 'Hanken Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums}
+  .la-ch-b{padding:0 0 20px}
+  .la-ch-r + .la-ch-r .la-ch-n{padding-top:20px}
+  .la-ch-r + .la-ch-r .la-ch-b{padding:20px 0;border-top:1px solid rgba(18,18,16,.12)}
+  .la-ch-r:last-child .la-ch-b{padding:20px 0 0}
+  .la-ch-t{font:500 18px/1.25 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em}
+  .la-ch-p{font:400 18px/1.6 'Hanken Grotesk',system-ui,sans-serif;margin:7px 0 0}
+
+  /* C-suite feedback · the grey runs on from step 04, so no keyline and no
+     top padding of its own */
+  .la-fb{background:#f4f4f2;padding:0 24px 56px}
+  .kicker-row--fb{padding-top:8px;margin-bottom:24px}
+  .la-fb-grid{display:flex;flex-direction:column;gap:14px}
+  .la-fb-card{padding:26px}
+  .la-fb-l{font:600 10px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.16em;margin-bottom:16px}
+  .la-fb-q{font:300 16px/1.55 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em}
+  .la-fb-n{font:500 15px 'Hanken Grotesk',system-ui,sans-serif}
+  .la-fb-r{font:400 13px 'Hanken Grotesk',system-ui,sans-serif}
+  .la-fb-by{margin-top:20px}
+  .la-fb-link{margin-top:20px;font:600 11px 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.14em}
+}
+
+
+/* ============================================================
+   19. Laced · Customer support redesign
+   Built from _design/Restore - Laced Customer Support Case Study.dc.html
+   (authored on a 1200px card, 48px gutter, so a 1104px content column) and
+   _design/Restore - Laced Customer Support Case Study Mobile.dc.html (440px
+   column, 24px side padding). Every value is lifted from those two files
+   unchanged except the type measures, which take the build column of the table
+   in SHIP-MANIFEST.md, and the BUILD notes below.
+
+   As with the other four studies the two designs are written as two complete
+   blocks rather than a base plus mobile overrides: step 02 goes from a bleeding
+   two-up to a single column, step 04's tile strip goes from a clipped 1560px
+   track to a stack, and step 03's keyword rows put the tag above the run
+   instead of beside it. Both blocks are fenced, which is also what keeps
+   section 9's homepage mobile rules intact underneath them.
+
+   BUILD notes (the design file and the build differ here on purpose):
+   · Step markers are 12px for BOTH the number and the label. The design leaves
+     the desktop label at 11px, which the shared .cs-marker-* corrects.
+   · Cover title keeps the design's 52px but takes the shared 24ch measure, not
+     the design's 14ch. Only measures rescale with the column, never sizes.
+   · Both band statements drop max-width:552px and text-wrap:pretty for the
+     shared five-twelfths-of-the-column measure and balance.
+   · Step and problem bodies go 16px -> 18px and gain the 63ch measure; on black
+     they take 55ch and the shared .82 cream rather than the design's #c9c5b8.
+     Step 02's own 46ch cap goes with them: its column is the measure there.
+   · Step titles take 48ch and balance in place of the design's 20/24/26ch.
+   · The outcome statement takes 40ch, not 30ch.
+   · Card body copy (the three problem cards and the four business-case cards)
+     goes 14.5px -> 16px/1.6, and 15px -> 16px on mobile. Both were under the
+     16px body floor the accessibility contract sets, and both are full
+     sentences. This is E.ON step 04's own precedent, where the learnings moved
+     14.5px -> 16px for the same reason.
+   · The step 05 weekend statement is a Light-300 display statement, so it takes
+     the outcome statement's 40ch and balance in place of its authored 22ch,
+     which left a stub at the cap. Its two data phrases carry the 2px yellow
+     rule CLAUDE.md records for this module; the re-issued design file has them
+     on weight alone.
+   · Step 02's band is #f4f4f2, the palette's whisper grey, not the design's
+     off-system #f7f7f5. Step 05 already uses #f4f4f2 and the two are separated
+     by a white and a black band, so nothing sits side by side.
+   · Band rhythm is normalised to 80px top and bottom. The design carries 64px
+     under context, 72px over steps 02/03/04/05 and the feedback band, and 88px
+     under them. The two design-dictated exceptions stay: My role -> step 01 is
+     tucked (40/8), and on mobile step 02's card-sort boards bleed into the band
+     edge, so that band closes on 0. The 88px above the step 04 FAQ list is
+     interior spacing between the tile strip and the list, not a band edge, so
+     it is left alone.
+   · Stat rows take the site-wide 44px under a step body (the design carries 44
+     on step 02 and 34 on step 04).
+   · The step 03 keyword runs stay at JetBrains Mono 12px, the size CLAUDE.md
+     records for this module: they are quoted specimens of customer language,
+     not running prose. Mobile goes 11.5px -> 12px so both breakpoints agree.
+   · The weekend chart is drawn once, at the desktop 248px scale, and the mobile
+     design's second 200px scale is not built. One markup serves both designs
+     and data-h is what the engine animates to, so a second scale would need a
+     second set of bars. At 358px wide it sits inside the 440px column; the days
+     shrink below their 34px basis on a narrower phone.
+   ============================================================ */
+
+/* --- desktop design (>= 900px) ------------------------------------------ */
+@media (min-width: 900px){
+
+  /* --- cover ------------------------------------------------------------ */
+  .page--lcs .cs-cover-copy{padding:72px 48px}
+  .page--lcs .cs-title{font:300 52px/1.03 'Hanken Grotesk';letter-spacing:-.035em;margin:20px 0 0}
+  .page--lcs .cs-disc{font:600 10px/1.7 'Hanken Grotesk';letter-spacing:.14em;margin-top:20px}
+  /* The panel's ratio is the design's own 600 x 560. It is held by
+     aspect-ratio + align-self:start, not by stretching to the row: the copy
+     column is always the shorter of the two, so the row height is the panel's
+     and the ratio survives at every width. The crop inside is percentage based
+     (object-fit cover plus a percentage object-position), so it needs no zoom. */
+  .lcs-cover-media{display:block;align-self:start;aspect-ratio:600/560;background:#f2f0eb;border-left:1px solid rgba(18,18,16,.10)}
+
+  /* --- context ---------------------------------------------------------- */
+  .page--lcs .cs-context{grid-template-columns:1fr 340px}
+  .page--lcs .cs-meta{margin-top:8px}
+
+  /* --- the business problem --------------------------------------------- */
+  /* The body column IS the step 01 body cell, so the two paragraphs share both
+     vertical edges at every width (SHIP-MANIFEST.md). Step 01 here is a
+     full-width two-up on a `1fr 1fr` grid with a 72px gap, laid out inside the
+     same content column, so the problem grid takes that template in place of
+     the design's 1.1fr 1fr. Column for position, ch for measure: the 63ch cap
+     stays on the paragraph, never on the track. */
+  .page--lcs .cs-problem-grid{grid-template-columns:1fr 1fr;gap:72px}
+  .lcs-cards--3{margin-top:52px}
+
+  /* --- my role ---------------------------------------------------------- */
+  .page--lcs .cs-lead{padding-bottom:40px}
+
+  /* --- two-column step head --------------------------------------------- */
+  /* title left, body right, the body's CAP TOP on the title's cap top.
+     --cs-top-body is the shared token for this pairing (28px step title -> 18px
+     body) and the +2px is the difference between the 14px title margin the token
+     was measured against and the 16px the shared .cs-step-title carries here.
+
+     BUILD: the token's 17px measures 6px short. Re-measured here off the
+     browser's own baseline rather than font metrics (a zero-height inline-block
+     at vertical-align:baseline gives the baseline exactly; canvas
+     fontBoundingBox ascent/descent come back rounded to integers, which is what
+     made the earlier reading look aligned): with 19px of padding the body's cap
+     top sat 6.03px ABOVE the title's on all three two-column steps. The title
+     starts 28px down (12px marker + 16px margin) and the two cap insets differ
+     by 3.03px, so the body needs 31px, hence 23px + 2. The three studies that
+     take the same token with the same pairing (HSBC, E.ON, Laced
+     authentication) are out by the same 6px; they are signed off, so the
+     correction is scoped to this page until that sweep is agreed. */
+  .page--lcs{--cs-top-body:23px}
+  .lcs-head{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+  .lcs-head-b{padding-top:calc(var(--cs-top-body) + 2px)}
+  .lcs-head-b .cs-step-body:first-child{margin-top:0}
+  .lcs-head-b .cs-step-body + .cs-step-body{margin-top:16px}
+
+  /* --- STEP 01 · Ticket audit & interviews ------------------------------ */
+  /* top stays tucked under My role */
+  .lcs-s01{background:#ffffff;padding:8px 48px 80px;padding-inline:var(--csb)}
+  /* the toggle sits outside the evidence and stays at its authored size; the
+     hairline is a child of the padded band, so it spans the content column */
+  .lcs-tabs{margin-top:60px;border-top:1px solid rgba(18,18,16,.12);padding-top:46px}
+  .lcs-p{margin-top:38px;min-height:340px}
+  .lcs-pie-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+  .lcs-pie-cell{display:flex;justify-content:center;margin-top:30px}
+  .lcs-leg{margin-top:30px}
+  .lcs-leg-r{padding:16px 0}
+  /* The quotes open on 68px under the toggle, matching the ticket panel, where
+     the doughnut and legend each add 30px to the panel's own 38px. It has to be
+     PADDING on the panel, not a margin on the grid: the panel has no padding or
+     border of its own, so a margin-top on its only child collapses straight
+     through it and the design's 16px (and a 30px in its place) both rendered as
+     the panel's 38px and nothing more. The ticket panel does not have the problem
+     because its two children are grid items, which never collapse. */
+  .lcs-p--interviews{padding-top:30px}
+  .lcs-iv{display:grid;grid-template-columns:1fr 1fr;gap:60px 72px;align-items:start}
+  .lcs-iv-q{font-size:24px;line-height:1.44}
+  .lcs-iv-f{margin-top:10px}
+
+  /* --- STEP 02 · Open and closed card sorting --------------------------- */
+  /* The band carries no vertical padding of its own: the copy cell does, and
+     the media cell stretches to the row, which is what makes the two boards
+     bleed to the band's top and bottom edges without a negative margin. The
+     grid runs edge to edge (--csb0) so the media reaches the column's outer
+     edge, which is where the design's -48px bleed cut against the card. */
+  .lcs-s02{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1)}
+  .lcs-s02-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:72px;align-items:stretch;padding-inline:var(--csb0)}
+  .lcs-s02-copy{padding:80px 0 80px 48px}
+  .lcs-s02-copy .cs-step-body + .cs-step-body{margin-top:16px}
+  .lcs-s02-stats{gap:72px}
+  /* both crops are percentage based, so only the module's height rides --k */
+  .lcs-s02-media{position:relative;min-height:calc(588px * var(--k,1));border-left:1px solid rgba(18,18,16,.12)}
+  .lcs-sortstack{position:absolute;inset:0;display:flex;flex-direction:column;gap:18px}
+  .lcs-sort{flex:1 1 0;min-height:0}
+  .lcs-sort--a{margin-right:32%}
+  .lcs-sort--b{margin-left:32%}
+
+  /* --- STEP 03 · Keyword matching --------------------------------------- */
+  .lcs-s03{background:#ffffff;border-top:1px solid rgba(18,18,16,.1);padding:80px 48px;padding-inline:var(--csb)}
+  .lcs-kw{margin-top:60px}
+  .lcs-kw-h{display:grid;grid-template-columns:1fr max-content;gap:32px;align-items:baseline}
+  .lcs-kw-rows{margin-top:16px}
+  .lcs-kw-r{display:grid;grid-template-columns:1fr max-content;gap:32px;align-items:baseline;padding:20px 0}
+  .lcs-kw-r + .lcs-kw-r{border-top:1px solid rgba(18,18,16,.12)}
+  .lcs-kw-t{text-align:right;min-width:150px}
+
+  /* --- STEP 04 · Customer self-service strategy (black) ----------------- */
+  .lcs-s04{background:#201C16;padding:0 0 80px}
+  .lcs-s04-grid{display:grid;grid-template-columns:.82fr 1fr;align-items:stretch;padding-inline:var(--csb0)}
+  .lcs-s04-copy{padding:80px 40px 80px 48px}
+  .lcs-s04-copy .cs-step-body{margin-top:22px}
+  .lcs-s04-copy .cs-step-body + .cs-step-body{margin-top:16px}
+  /* scaled: 1fr of the authored .82fr 1fr grid. The zoom is on the frame, not
+     the grid cell, so the 80px that opens the band stays 80px while the 628px
+     panel rides the column. */
+  .lcs-s04-media{margin-top:80px}
+  .lcs-portal{zoom:var(--k,1);height:628px;border-radius:22px 0 0 22px}
+  /* a fixed 1560px track centred in the band and clipped by it, so the outer
+     two tiles are cut about a fifth at the band boundary. The window is
+     min(100%, --cap): at k the authored 180px overruns scale with the tiles, so
+     the crop is the authored one at every width. */
+  .lcs-strip{position:relative;overflow:hidden;width:min(100%, var(--cap));height:calc(340px * var(--k,1));margin:16px auto 0}
+  .lcs-strip-stage{position:absolute;inset:0;overflow:hidden;zoom:var(--k,1)}
+  .lcs-strip-track{position:absolute;top:50%;left:50%;width:1560px;transform:translate(-50%,-50%);display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .lcs-tile{height:340px;border-radius:22px}
+  /* interior spacing between the tile strip and the list, not a band edge */
+  .lcs-faq{padding-top:88px;padding-inline:var(--csb)}
+  .lcs-faq-l{margin-bottom:30px}
+  .lcs-faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:34px 72px}
+  .lcs-faq-r{grid-template-columns:34px 1fr;gap:18px}
+  .lcs-faq-t{font-size:23px;line-height:1.34;letter-spacing:-.02em}
+
+  /* --- STEP 05 · Operational resourcing (grey) -------------------------- */
+  .lcs-s05{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1);padding:80px 48px;padding-inline:var(--csb)}
+  /* the statement centres on the chart rather than sitting on its baseline: the
+     design's align-items:end left it hanging off the bottom of a 270px module */
+  .lcs-week{margin-top:60px;border-top:1px solid rgba(18,18,16,.12);padding-top:52px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+  .lcs-week-s{font-size:38px;line-height:1.42;letter-spacing:-.025em;max-width:40ch}
+  .lcs-week-chart{gap:20px}
+  .lcs-quote{margin:56px 0 0;width:calc(50% - 10px);padding:36px 40px}
+  .lcs-quote-p{font-size:24px;line-height:1.45;max-width:52ch}
+  .lcs-quote-by{margin-top:26px}
+  .lcs-found{margin-top:52px}
+  .lcs-found-l{margin-bottom:20px}
+  /* what the hires changed · opens on 52px, the same way .lcs-found opens under
+     the quote card. Three equal cells on one top hairline with dividers between
+     them and no rule underneath, and the padding either side of a divider is the
+     30px the black outcome strip uses. */
+  .lcs-hc{margin-top:52px}
+  .lcs-hc-grid{grid-template-columns:repeat(3,1fr)}
+  .lcs-hc-m{padding:34px 30px 36px 0;border-right:1px solid rgba(18,18,16,.12)}
+  .lcs-hc-m + .lcs-hc-m{padding-left:30px}
+  .lcs-hc-m:last-child{padding-right:0;border-right:0}
+  .lcs-cards{gap:20px}
+  .lcs-cards--4{grid-template-columns:repeat(4,1fr)}
+  .lcs-cards--3{grid-template-columns:repeat(3,1fr)}
+  .lcs-card{padding:30px 30px 32px}
+  .lcs-cards--4 .lcs-card{padding:30px 26px 32px}
+  .lcs-card-t{margin-top:16px}
+  .lcs-card-p{margin:10px 0 0}
+
+  /* --- C-suite feedback (ivory) ----------------------------------------- */
+  /* the cards themselves are the Laced authentication ones, lifted whole */
+  .lcs-fb{background:#f3eee3;border-top:1px solid rgba(18,18,16,.1);padding:80px 48px;padding-inline:var(--csb)}
+
+}
+
+
+/* --- shared between the two designs -------------------------------------- */
+.lcs-cover-img{width:100%;height:100%;object-fit:cover;object-position:83.3% 63.8%;display:block}
+
+/* problem / business-case cards */
+.lcs-cards{display:grid;align-items:stretch}
+.lcs-card{background:#ffffff;border:1px solid rgba(18,18,16,.12);border-radius:14px}
+.lcs-card-n{font:400 22px/1 'Hanken Grotesk';letter-spacing:.02em;color:#c3c1ba}
+.lcs-card-t{font:500 18px/1.3 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17;text-wrap:balance}
+.lcs-card-p{font:400 16px/1.6 'Hanken Grotesk';color:#4c4b45}
+
+/* a tracked-caps label opening a sub-block. display:flex, so the box is the
+   text: with neither a font of its own nor flex, the wrapper's line box takes
+   the inherited strut and centres the 10px span in it, which renders the
+   padding around 6px larger than it reads (CLAUDE.md). */
+.lcs-lab{font:600 10px/1 'Hanken Grotesk';letter-spacing:.2em;text-transform:uppercase;color:#67665f}
+.lcs-lab--r{text-align:right;min-width:150px}
+.lcs-lab--dark{color:#9d9b8f}
+.lcs-faq-l,.lcs-found-l{display:flex;align-items:center}
+
+/* STEP 01 · the doughnut. Bespoke, driven by lcs-pie.js rather than data-arc:
+   the segments draw strictly in sequence, each for share x 1700ms, and replay
+   on every tab click. Geometry is r=52 on a 120 box, circumference 326.73, each
+   segment rotated by its cumulative share x 3.6deg; none of that is re-derived.
+
+   BUILD: 160px, not the design file's 260px. 260 put this ring half again as
+   large as any other donut on the site: ArcelorMittal's tree-test rings are
+   140px (118 mobile), HSBC's three are 142px, and E.ON's, the only other solo
+   ring, is 160px at both breakpoints. 160 is that one, so the ring reads as the
+   same component here as it does there. It is expressed as 31.008% of the cell,
+   which is 160px in the authored 516px cell and 234px at the 1680 cap, matching
+   what E.ON's 160px ring reaches under its own --k (230px).
+
+   The percentage is deliberate: this is the one figure on the page that scales
+   natively rather than through data-fit and a zoom, because a percentage cannot
+   be measured at the wrong moment and a zoom can. The cell is a grid item on
+   desktop and a full-width block on mobile, so a --k computed against the mobile
+   cell painted the ring at 2.1x, and because the cell's own width never changes
+   on desktop nothing re-triggered the measure. That is what made the ring load
+   oversized until a tab switch rebuilt it.
+
+   The ring NUMBER rides the ring in cqw, which is the manifest's one exception
+   to type sizes never scaling: a donut is a single drawn composition. 20cqw =
+   32px at 160, between E.ON's 28px and HSBC's 34px, and the % follows it at
+   E.ON's proportion (8.75cqw = 14px). The caps label is not part of that
+   exception and is pinned, as E.ON's is: 3.846cqw would be 6px here. */
+.lcs-pie{position:relative;width:31.008%;aspect-ratio:1;container-type:inline-size}
+.lcs-pie-svg{width:100%;height:100%;transform:rotate(-90deg);display:block}
+.lcs-pie-hole{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.lcs-pie-n{font:300 20cqw/1 'Hanken Grotesk';letter-spacing:-.03em;color:#1a1a17}
+.lcs-pie-u{font-size:8.75cqw}
+.lcs-pie-l{font:600 10px/1.4 'Hanken Grotesk';letter-spacing:.13em;text-transform:uppercase;color:#67665f}
+
+/* The table takes the step body's own edges: it sits in the second cell of a
+   1fr 1fr / 72px grid, the same template .lcs-head uses, so its left edge is the
+   body's left edge above it and the figures right-align on the body's right edge.
+
+   The right edge is the body's BOX, not the cell. The cell is 516px at the
+   authored width, where the two coincide, but 756px at the 1680 cap, while the
+   body stops at its 63ch measure: 635.04px. Aligned to the cell the figures
+   overshot the copy by 121px at the cap. A ch count would not do it here because
+   the legend's own text is 15px against the body's 18px, so this is the length.
+
+   The figures sit in their own max-content track at that far edge, so they align
+   as a column rather than each trailing its label.
+
+   The rule spans the label and the figure only, not the dot. It is drawn as a
+   pseudo element inset by the dot column rather than as a border on the row,
+   because a border split across the two cells would break at the column gap. */
+.lcs-leg{max-width:635.04px}
+.lcs-leg-r{display:grid;grid-template-columns:14px 1fr max-content;column-gap:14px;align-items:center;position:relative}
+.lcs-leg-r::after{content:"";position:absolute;left:28px;right:0;bottom:0;height:1px;background:rgba(18,18,16,.1)}
+.lcs-leg-r:last-child::after{content:none}
+.lcs-leg-v{text-align:right}
+.lcs-leg-d{width:10px;height:10px;border-radius:50%}
+.lcs-leg-t{font:400 15px/1.35 'Hanken Grotesk';color:#4c4b45}
+.lcs-leg-t--lead{font-weight:500;color:#1a1a17}
+.lcs-leg-v{font:500 14px/1 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#4c4b45}
+.lcs-leg-v--lead{color:#1a1a17}
+
+.lcs-iv-q{font:400 24px/1.44 'Newsreader',Georgia,serif;font-style:italic;letter-spacing:-.005em;color:#1a1a17;margin:0;text-wrap:pretty}
+.lcs-iv-f{font:400 13.5px/1.55 'Hanken Grotesk';color:#67665f}
+
+/* STEP 02 · the two card-sort boards. Only the frame heights and the two
+   percentage insets change between the designs; the crops do not. Board b's
+   right keyline is dropped: it bled past the card edge in the design and was
+   clipped there, and the build lets it run to the column's outer edge. */
+.lcs-sort{overflow:hidden;background:#0e0d0b;position:relative}
+.lcs-sort--a{border-radius:0 0 14px 0}
+.lcs-sort--b{border-radius:14px 0 0 0}
+.lcs-sort-img{width:100%;height:100%;object-fit:cover;display:block}
+.lcs-sort-img--a{object-position:18% 73%;transform:scale(1.8) translate(16%,-11.5%)}
+.lcs-sort-img--b{object-position:68% 70%;transform:scale(1.32) translate(-9%,-10%)}
+.lcs-sort-k{position:absolute;inset:0;pointer-events:none}
+.lcs-sort--a .lcs-sort-k{border-right:1px solid rgba(18,18,16,.16);border-bottom:1px solid rgba(18,18,16,.16);border-radius:0 0 14px 0}
+.lcs-sort--b .lcs-sort-k{border-left:1px solid rgba(18,18,16,.16);border-top:1px solid rgba(18,18,16,.16);border-radius:14px 0 0 0}
+
+/* STEP 03 · the keyword rows (CLAUDE.md's 2c treatment) */
+.lcs-kw-k{font:400 12px/1.9 'JetBrains Mono',monospace;color:#4c4b45}
+.lcs-kw-t{font:500 19px/1.2 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17}
+
+/* STEP 04 · the portal panel and the three real screens */
+.lcs-portal{position:relative;overflow:hidden;background:#f2f0eb}
+.lcs-portal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:83.3% 63.8%;display:block}
+.lcs-tile{position:relative;overflow:hidden;background:#ffffff;border:1px solid rgba(240,237,227,.14)}
+.lcs-tile-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.lcs-tile-img--a{object-position:27.2% 0%}
+.lcs-tile-img--b{object-position:43.2% 0.2%}
+.lcs-tile-img--c{object-position:54.3% 0.2%}
+.lcs-faq-r{display:grid;align-items:baseline}
+/* BUILD: the design sets these numerals in JetBrains Mono, whose zero carries a
+   dot. The site's faint index numerals are Hanken tabular figures (.la-ch-n,
+   .eon-conc-n, .eon-learn-n), so these take the same treatment. */
+.lcs-faq-n{font:500 14px/1 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:rgba(240,237,227,.42)}
+.lcs-faq-t{font-family:'Hanken Grotesk';font-weight:300;color:#f0ede3;text-wrap:balance}
+
+/* STEP 05 · the weekend queue module. LOCKED (CLAUDE.md): seven flat day bars,
+   248px = 100 on the scale, Mon 100 / Tue 41 / Wed 46 / Thu 38 / Fri 33 /
+   Sat 57 / Sun 31, with Monday's top 54% in the weekend colour as the
+   carry-over. Weekdays teal, weekend and the Monday carry red, both Laced UI
+   colours. No legend, caption, footnote or axis. */
+.lcs-week-s{font-family:'Hanken Grotesk';font-weight:300;color:#1a1a17;margin:0;text-wrap:balance}
+/* the two data phrases carry weight alone, no yellow rule: CLAUDE.md records a
+   2px #ffd400 border under them from the module's authoring page, and Thomas
+   removed it on review (17 Aug 2026). The re-issued design file agrees. */
+.lcs-week-e{font-weight:400}
+.lcs-week-chart{display:flex;align-items:flex-end;justify-content:center}
+.lcs-day{display:flex;flex-direction:column;align-items:center;flex:0 0 34px}
+.lcs-day-col{width:100%;max-width:34px;height:248px;display:flex;flex-direction:column;justify-content:flex-end}
+.lcs-bar{width:100%}
+.lcs-bar--wd{background:#5cbdb2}
+.lcs-bar--wk{background:#d43b30}
+.lcs-bar--cap{border-radius:6px 6px 0 0}
+.lcs-day-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#67665f;margin-top:12px}
+
+/* what the hires changed. The figures take the cover metric strip's own type
+   (.cs-metric-n / -u / -l), so the strip reads as that component rather than a
+   third size of metric. display:flex on the label wrapper, so its box is the
+   text and the padding renders as it reads (CLAUDE.md). */
+/* display and the top hairline are shared; only the column count differs between
+   the two designs, so they sit here rather than in either block */
+.lcs-hc-grid{display:grid;border-top:1px solid rgba(18,18,16,.12)}
+.lcs-hc-l{display:flex;align-items:center;padding-bottom:20px}
+.lcs-hc-n{font:300 44px/1 'Hanken Grotesk';letter-spacing:-.025em;color:#1a1a17}
+.lcs-hc-u{font-size:24px}
+.lcs-hc-lab{font:600 10px/1.5 'Hanken Grotesk';letter-spacing:.11em;text-transform:uppercase;color:#67665f;margin-top:11px}
+
+.lcs-quote{background:#ffffff;border:1px solid rgba(18,18,16,.12);border-radius:16px}
+/* BUILD: Newsreader italic, the site's editorial quote voice (.am-quote-p,
+   .eon-q, and this page's own interview quotes), in place of the design's
+   Light-300 Hanken. As Hanken at 22px on a white card in a grey band it read as
+   another paragraph rather than a quote. Sized with .eon-q's reasoning:
+   Newsreader italic reads smaller than Hanken at the same size, so it takes the
+   24px this page's interview quotes carry rather than the 22px it replaces. */
+.lcs-quote-p{font:400 24px/1.45 'Newsreader',Georgia,serif;font-style:italic;letter-spacing:-.005em;color:#1a1a17;margin:0;text-wrap:pretty}
+.lcs-quote-by{font:500 15px/1.3 'Hanken Grotesk';letter-spacing:-.01em;color:#1a1a17}
+
+
+/* ============================================================
+   20. Laced customer support — mobile design (< 900px)
+   Restore - Laced Customer Support Case Study Mobile.dc.html, 440px column
+   grown fluidly. The design file's mocked phone status bar is not built
+   (SHIP-MANIFEST.md).
+   ============================================================ */
+
+@media (max-width: 899px){
+
+  /* cover: the portal flow sits in its own band under the copy */
+  .lcs-cover-media{height:auto;aspect-ratio:1.3;background:#f2f0eb;border-left:0}
+
+  /* two-column step heads collapse; the offset goes with them */
+  .lcs-head{display:block}
+  .lcs-head-b{padding-top:0}
+  .lcs-head-b .cs-step-body + .cs-step-body{margin-top:14px}
+
+  /* step 01 · tucked under My role */
+  .lcs-s01{background:#ffffff;padding:30px 24px 56px}
+  /* no hairline over the toggle on mobile */
+  .lcs-tabs{margin-top:60px;border-top:0;padding-top:0}
+  /* No min-height on mobile: the ticket panel's content is well short of the
+     interviews panel's, so a shared floor left dead space under the legend. Each
+     panel takes its own height and the module resizes on switch, which is the
+     right trade in a single column. Desktop keeps its 340px floor, where the two
+     panels sit side by side with the doughnut and the jump would be visible. */
+  .lcs-p{margin-top:36px}
+  .lcs-pie-grid{display:block}
+  .lcs-pie-cell{display:flex;justify-content:center}
+  /* a fixed 160px here, not a percentage: on mobile the cell is a full-width
+     block, so a percentage would size off the column instead of the module. 160
+     is E.ON's ring, which is 160px at both breakpoints too, in place of the
+     design file's 240px. The number and the % stay on cqw and follow it. */
+  .lcs-pie{width:160px}
+  .lcs-leg{margin-top:24px}
+  .lcs-leg-r{padding:15px 0}
+  .lcs-iv{display:flex;flex-direction:column;gap:30px}
+  .lcs-iv-q{font-size:20px;line-height:1.45}
+  .lcs-iv-f{margin-top:8px}
+
+  /* step 02 · closes on 0: the boards bleed into the band edge */
+  .lcs-s02{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1);padding:56px 24px 0}
+  .lcs-s02-grid{display:block;padding-inline:0}
+  .lcs-s02-copy{padding:0}
+  .lcs-s02-copy .cs-step-body + .cs-step-body{margin-top:14px}
+  .lcs-s02-stats{grid-template-columns:1fr 1fr;gap:20px}
+  .lcs-s02-media{position:static;min-height:0;border-left:0;margin:36px -24px 0}
+  .lcs-sortstack{position:static;display:flex;flex-direction:column;gap:14px;border-top:1px solid rgba(18,18,16,.16)}
+  .lcs-sort{flex:none;height:196px}
+  .lcs-sort--a{margin-right:22%}
+  .lcs-sort--b{margin-left:22%}
+
+  /* step 03 · the tag sits above its keyword run */
+  .lcs-s03{background:#ffffff;border-top:1px solid rgba(18,18,16,.1);padding:56px 24px}
+  .lcs-kw{margin-top:40px}
+  .lcs-kw-h{display:block;padding-bottom:14px}
+  .lcs-lab--r{display:none}
+  /* column-reverse, so the tag renders above the run the markup lists first */
+  .lcs-kw-r{display:flex;flex-direction:column-reverse;padding:18px 0;border-top:1px solid rgba(18,18,16,.12)}
+  .lcs-kw-r:last-child{padding-bottom:0}
+  .lcs-kw-k{line-height:1.85;margin-top:8px}
+  .lcs-kw-t{font-size:18px;text-align:left;min-width:0}
+
+  /* step 04 · the black band */
+  .lcs-s04{background:#201C16;border-top:1px solid rgba(18,18,16,.1);padding:56px 0 0}
+  .lcs-s04-grid{display:block;padding-inline:0}
+  .lcs-s04-copy{padding:0 24px}
+  .lcs-s04-copy .cs-step-body{margin-top:18px}
+  .lcs-s04-copy .cs-step-body + .cs-step-body{margin-top:14px}
+  .lcs-s04-media{margin-top:40px}
+  .lcs-portal{zoom:1;height:420px;border-radius:0;border-top:1px solid rgba(240,237,227,.14);border-bottom:1px solid rgba(240,237,227,.14)}
+  /* the clipped 1560px track becomes a stack */
+  .lcs-strip{position:static;overflow:visible;width:auto;height:auto;margin:16px 24px 0}
+  .lcs-strip-stage{position:static;overflow:visible;zoom:1}
+  .lcs-strip-track{position:static;transform:none;width:auto;display:flex;flex-direction:column;gap:14px}
+  .lcs-tile{height:262px;border-radius:14px}
+  .lcs-faq{padding:56px 24px}
+  .lcs-faq-l{margin-bottom:24px}
+  .lcs-faq-grid{display:flex;flex-direction:column;gap:20px}
+  .lcs-faq-r{grid-template-columns:28px 1fr;gap:16px}
+  .lcs-faq-t{font-size:19px;line-height:1.42;letter-spacing:-.015em}
+
+  /* step 05 */
+  .lcs-s05{background:#f4f4f2;border-top:1px solid rgba(18,18,16,.1);padding:56px 24px}
+  .lcs-week{margin-top:40px;border-top:1px solid rgba(18,18,16,.12);padding-top:36px;display:block}
+  .lcs-week-s{font-size:24px;line-height:1.42;letter-spacing:-.02em;max-width:none}
+  .lcs-week-fit{margin-top:40px}
+  /* the days shrink off their 34px basis on a phone narrower than the column */
+  .lcs-week-chart{gap:14px}
+  .lcs-day{flex:1 1 34px;max-width:34px;min-width:0}
+  .lcs-quote{margin:40px 0 0;width:auto;padding:28px}
+  /* the size this page's interview quotes take on mobile */
+  .lcs-quote-p{font-size:20px;line-height:1.45;max-width:none}
+  .lcs-quote-by{margin-top:20px}
+  .lcs-found{margin-top:40px}
+  .lcs-found-l{margin-bottom:18px}
+  /* what the hires changed · two up with the third spanning, which is what the
+     cover metric strip does on mobile. Three columns in a 352px column would put
+     these labels on three lines each; the figures take the mobile stat size. */
+  .lcs-hc{margin-top:40px}
+  .lcs-hc-l{padding-bottom:18px}
+  .lcs-hc-grid{grid-template-columns:1fr 1fr}
+  .lcs-hc-m,.lcs-hc-m + .lcs-hc-m{padding:26px 0 28px;border-right:0}
+  .lcs-hc-m:nth-child(1){padding-right:20px;border-right:1px solid rgba(18,18,16,.12)}
+  .lcs-hc-m:nth-child(2){padding-left:20px}
+  .lcs-hc-m:nth-child(3){grid-column:1 / -1;padding:26px 0 0;border-top:1px solid rgba(18,18,16,.12)}
+  .lcs-hc-n{font:300 32px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.025em}
+  .lcs-hc-u{font-size:18px}
+  .lcs-hc-lab{font:600 10px/1.4 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.11em;margin-top:10px}
+  .lcs-cards{display:flex;flex-direction:column;gap:14px}
+  .lcs-cards--3{margin-top:32px}
+  .lcs-card{padding:24px}
+  .lcs-card-t{margin-top:14px}
+  .lcs-card-p{margin:8px 0 0}
+
+  /* C-suite feedback · its own band here, so it opens on its own 56px */
+  .lcs-fb{background:#f3eee3;border-top:1px solid rgba(18,18,16,.1);padding:56px 24px}
+  .lcs-fb .kicker-row--fb{padding-top:0;margin-bottom:24px}
+
+}

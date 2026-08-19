@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thomas Saldanha · UX and product design leader</title>
+<meta name="description" content="Thomas Saldanha, UX and product design leader in London. Research, strategy and service design for ArcelorMittal, HSBC, E.ON and Laced, and what each delivered.">
+<meta name="google-site-verification" content="fc5AT7ZWq8FnnyHvEdb3cRI6tNl9PcYJxGD0JSu2aSY">
+<!-- Canonical and share metadata. These are the only ABSOLUTE urls on the site;
+     every other path is relative. Open Graph requires it: a relative og:image or
+     og:url is ignored by every crawler, so they cannot follow the site's usual
+     convention. This also means the share preview only resolves once the site is
+     live at www.uxtom.co.uk. -->
+<link rel="canonical" href="https://www.uxtom.co.uk/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Thomas Saldanha">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://www.uxtom.co.uk/">
+<meta property="og:title" content="Thomas Saldanha · UX and product design leader">
+<meta property="og:description" content="Thomas Saldanha, UX and product design leader in London. Research, strategy and service design for ArcelorMittal, HSBC, E.ON and Laced, and what each delivered.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Thomas Saldanha · UX and product design leader">
+<meta name="twitter:description" content="Thomas Saldanha, UX and product design leader in London. Research, strategy and service design for ArcelorMittal, HSBC, E.ON and Laced, and what each delivered.">
+<meta property="og:image" content="https://www.uxtom.co.uk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Thomas Saldanha, UX and product design leader. I help teams find clarity in complex problems.">
+<meta name="twitter:image" content="https://www.uxtom.co.uk/og-image.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>
+/* Breakpoint contract (SHIP-MANIFEST.md):
+     >= 1200px  the desktop design, bands edge to edge, content column capped at
+                1680px (all of that is in styles.css, no JS involved)
+     900–1199px the same desktop design, scaled proportionally to the viewport
+     < 900px    the mobile design, its 440px column growing fluidly
+
+   The 900–1199px band is a geometric scale, not a re-layout: the page is laid
+   out at 1200px, the bottom of the desktop band, and then transformed, so
+   nothing re-wraps and 1199px is continuous with 1200px. .viewport carries the
+   resulting height (and clips the layout overflow, `clip` rather than `hidden`
+   so it never becomes a scroll container that could jump on keyboard focus).
+
+   Per-view count on the testimonial carousel is the one interactive value that
+   differs between the two designs, so it is set here rather than in CSS. */
+(function(){
+  var W = 1200, MIN = 900, root = document.documentElement, page, host, last;
+
+  /* Figures scale uniformly with the column. --k is the only thing computed
+     here: a figure cell's current width over data-fit, the width it had at the
+     authored 1320px. The CSS then zooms the cell by it, so the image inside
+     keeps its authored geometry and simply paints larger. It has to be computed
+     in script because CSS cannot divide one length by another.
+
+     Measuring the zoomed element is not circular: zoom scales an element's
+     contents, not the box its parent lays out, so the rect stays the track
+     width whatever --k is. */
+  function figures(w){
+    /* --bleed is the distance from the capped column's edge to the viewport's,
+       for the modules drawn to run off the page. It has to be measured here
+       rather than written in CSS: the same max((100% - cap) / 2) the bands use
+       would re-resolve its 100% against whichever child read it. */
+    var p = document.querySelector('.page');
+    if (p) p.style.setProperty('--bleed',
+      Math.max(0, (p.getBoundingClientRect().width - 1680) / 2).toFixed(2) + 'px');
+    document.querySelectorAll('[data-fit]').forEach(function(el){
+      if (w < MIN){ el.style.removeProperty('--k'); return; }
+      var k = Math.max(1, el.getBoundingClientRect().width / parseFloat(el.getAttribute('data-fit')));
+      el.style.setProperty('--k', k.toFixed(4));
+    });
+  }
+
+  function fit(){
+    page = page || document.querySelector('.page');
+    host = host || document.querySelector('.viewport');
+    /* The breakpoint has to be decided the way the media query decides it.
+       A media query measures innerWidth, which includes a classic scrollbar;
+       documentElement.clientWidth excludes it. Between them the CSS served the
+       desktop design while this script still thought it was mobile, so .page
+       stayed 1200px wide, unscaled, inside an 885px viewport and .viewport
+       clipped the right third away. So: innerWidth picks the design, and
+       clientWidth, the box the page actually has to fit in, sets the scale. */
+    var w = innerWidth || root.clientWidth, desktop = w >= MIN,
+        s = desktop ? Math.min(1, root.clientWidth / W) : 1;
+    if (s !== last){ root.style.setProperty('--page-scale', String(s)); last = s; }
+    figures(w);
+    if (page && host) host.style.height = s < 1 ? Math.ceil(page.offsetHeight * s) + 'px' : '';
+    var t = document.querySelector('[data-carousel-track-el="tst"]');
+    if (t) t.setAttribute('data-carousel-perview', desktop ? '3' : '1');
+  }
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('load', fit);
+  document.addEventListener('DOMContentLoaded', function(){
+    fit();
+    /* catches height changes from font/image load and width changes that fire no
+       resize event, such as the scrollbar appearing */
+    if (window.ResizeObserver){
+      var ro = new ResizeObserver(fit);
+      ro.observe(document.querySelector('.page'));
+      ro.observe(root);
+    }
+  });
+})();
+</script>
+<!-- Microsoft Clarity, project y4a8k7mdho. Session recording and heatmaps.
+     Loads async and injects its own tag, so it cannot block first paint; it sits
+     at the end of <head> so it never competes with the stylesheet or the fonts
+     for the connection. The only third-party request on the site besides Google
+     Fonts. Sets cookies and records behaviour, so it is in scope for GDPR
+     consent: there is no cookie banner on this site, which was a deliberate
+     call, not an oversight. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y4a8k7mdho");
+</script>
+</head>
+<body>
+
+<div class="viewport">
+<div class="page">
+
+  <header class="nav">
+    <a class="brand" href="./">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <nav class="nav-links">
+      <a href="#work"><span>Work</span></a>
+      <a class="nav-cv" href="cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span>CV</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="dl13" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></a>
+      <a class="nav-linkedin" href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <a class="nav-email" href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+    </nav>
+    <button class="nav-burger" type="button" data-nav-toggle aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span></button>
+  </header>
+
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="kicker-row kicker-row--hero"><span class="mark">//</span><span class="kicker kicker--hero">UX, Strategy, research &amp; service design</span></div>
+      <h1 class="hero-title">I help teams find clarity in complex problems</h1>
+      <p class="hero-lede">I use research, data and business context to challenge assumptions, align competing priorities and find a direction that works for users and the business.</p>
+      <div class="hero-cta">
+        <a class="btn-outline" href="cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span class="btn-outline-label">Download CV</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon14" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></a>
+      </div>
+    </div>
+    <div class="hero-media" data-fit="580.8"><img src="./screenshot-2026-06-30-at-15-13-18-mr4y82zv.png" alt="Service-design decision logic from a Laced returns and authentication project"></div>
+  </section>
+
+  <section class="marquee-band">
+    <div class="kicker-row kicker-row--marquee"><span class="mark">//</span><span class="kicker kicker--marquee">A decade across sectors</span></div>
+    <div class="marquee">
+      <div class="marquee-track">
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">HSBC</span><span class="mq-sector">Finance</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">Samsung</span><span class="mq-sector">Technology</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">E.ON</span><span class="mq-sector">Energy</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">CVS</span><span class="mq-sector">Healthcare</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">Sainsbury's</span><span class="mq-sector">Retail</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">Bupa Global</span><span class="mq-sector">Healthcare</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">EE</span><span class="mq-sector">Telecoms</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">Hastings Direct</span><span class="mq-sector">Insurance</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">WACOM</span><span class="mq-sector">Technology</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">ArcelorMittal</span><span class="mq-sector">Steel</span></span></span>
+        <span class="mq-item"><span class="mq-col"><span class="mq-name">IMI</span><span class="mq-sector">Engineering</span></span></span>
+        <span class="mq-half" aria-hidden="true">
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">HSBC</span><span class="mq-sector">Finance</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">Samsung</span><span class="mq-sector">Technology</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">E.ON</span><span class="mq-sector">Energy</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">CVS</span><span class="mq-sector">Healthcare</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">Sainsbury's</span><span class="mq-sector">Retail</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">Bupa Global</span><span class="mq-sector">Healthcare</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">EE</span><span class="mq-sector">Telecoms</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">Hastings Direct</span><span class="mq-sector">Insurance</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">WACOM</span><span class="mq-sector">Technology</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">ArcelorMittal</span><span class="mq-sector">Steel</span></span></span>
+          <span class="mq-item"><span class="mq-col"><span class="mq-name">IMI</span><span class="mq-sector">Engineering</span></span></span>
+        </span>
+      </div>
+      <div class="marquee-fade marquee-fade--l"></div>
+      <div class="marquee-fade marquee-fade--r"></div>
+    </div>
+  </section>
+
+  <section class="work" id="work">
+    <div class="work-head"><div class="kicker-row"><span class="mark">//</span><span class="kicker kicker--work">Case studies</span></div></div>
+
+    <a class="row" href="work/arcelormittal/">
+      <span class="row-num">01</span>
+      <div class="row-main">
+        <div class="row-title">ArcelorMittal <span class="row-sub">Global website rebuild</span></div>
+        <div class="row-disc">Analytics discovery · Card sorting · Tree testing · Information architecture</div>
+      </div>
+      <div class="row-metrics">
+        <div><div class="metric-n">+72%</div><div class="metric-l">Page views</div></div>
+        <div><div class="metric-n">+25%</div><div class="metric-l">Engaged sessions</div></div>
+      </div>
+      <span class="row-more"><span>View case study</span></span>
+    </a>
+
+    <a class="row" href="work/hsbc-premier/">
+      <span class="row-num">02</span>
+      <div class="row-main">
+        <div class="row-title">HSBC <span class="row-sub">Premier proposition redesign</span></div>
+        <div class="row-disc">Experience strategy · Personalisation · User research · User testing</div>
+      </div>
+      <div class="row-metrics">
+        <div><div class="metric-n">-21%</div><div class="metric-l">Application time</div></div>
+        <div><div class="metric-n">+70%</div><div class="metric-l">Product exploration</div></div>
+      </div>
+      <span class="row-more"><span>View case study</span></span>
+    </a>
+
+    <a class="row" href="work/laced-authentication/">
+      <span class="row-num">03</span>
+      <div class="row-main">
+        <div class="row-title">Laced <span class="row-sub">End-to-end authentication redesign</span></div>
+        <div class="row-disc">Service blueprints · Operational design · Touch interfaces · user testing</div>
+      </div>
+      <div class="row-metrics">
+        <div><div class="metric-n">+26%</div><div class="metric-l">Daily capacity</div></div>
+        <div><div class="metric-n">-38%</div><div class="metric-l">Authentication time</div></div>
+      </div>
+      <span class="row-more"><span>View case study</span></span>
+    </a>
+
+    <a class="row" href="work/laced-customer-support/">
+      <span class="row-num">04</span>
+      <div class="row-main">
+        <div class="row-title">Laced <span class="row-sub">Customer support redesign</span></div>
+        <div class="row-disc">Journey analysis · Ticket data strategy · Self-service design · New hires business case</div>
+      </div>
+      <div class="row-metrics">
+        <div><div class="metric-n">-22%</div><div class="metric-l">WISMO tickets</div></div>
+        <div><div class="metric-n">2</div><div class="metric-l">New hires</div></div>
+      </div>
+      <span class="row-more"><span>View case study</span></span>
+    </a>
+
+    <a class="row" href="work/eon-app-ia/">
+      <span class="row-num">05</span>
+      <div class="row-main">
+        <div class="row-title">E.ON <span class="row-sub">App IA &amp; navigation redesign</span></div>
+        <div class="row-disc">Card sorting · Tree testing · Information architecture · Navigation design · User testing</div>
+      </div>
+      <div class="row-metrics">
+        <div><div class="metric-n">+7%</div><div class="metric-l">Task completion</div></div>
+        <div><div class="metric-n">-13%</div><div class="metric-l">Key-task time</div></div>
+      </div>
+      <span class="row-more"><span>View case study</span></span>
+    </a>
+
+    <!-- Row 06, the "How I make strategic decisions" article, is out for now at
+         Thomas's request (17 Aug 2026) and will be re-added later. Its .row--article
+         styling, the Article tag and the read-time treatment all stay in
+         styles.css section 5 so it can go straight back in as row 06. -->
+  </section>
+
+  <section class="mentoring">
+    <div class="mentor-grid">
+      <div class="mentor-intro">
+        <div class="kicker-row kicker-row--mentor"><span class="mark">//</span><span class="kicker kicker--mentor">Mentoring &amp; upskilling</span></div>
+        <h2 class="mentor-title">I help teams build confidence in research, analytics and decision-making</h2>
+        <p class="mentor-lede">I run agency-wide lunch &amp; learns and smaller team sessions using real project work, so colleagues can apply the same thinking themselves. I’ve also line managed and mentored designers throughout my career and it’s a part of the role I genuinely enjoy.</p>
+      </div>
+      <div class="mentor-media" data-fit="554.1463"><img src="images/ga-talk.jpg" alt="Speaking at a General Assembly panel in London"></div>
+      <!-- HIDDEN UNTIL writing/ AND writing/user-research-and-testing/ ARRIVE
+           (17 Aug 2026). Delete these two comment lines to restore, and replace
+           the second pill's placeholder label "Second document" with the real one.
+           The whole .mentor-res cell is commented out, not just the pills: the
+           "Resources from my talks" label would otherwise sit on its own with
+           nothing under it. .mentor-media spans both grid rows, so it keeps its
+           height and the layout holds without this cell.
+      <div class="mentor-res">
+        <div class="mentor-res-label">Resources from my talks</div>
+        <div class="pills">
+          <a class="pill" href="writing/user-research-and-testing/"><span class="pill-label">User Research &amp; Testing</span></a>
+          <a class="pill pill--2" href="writing/"><span class="pill-label">Second document</span></a>
+        </div>
+      </div>
+      -->
+    </div>
+
+    <div class="mentor-cards">
+      <div class="card">
+        <div class="card-label card-label--faint">Mentored</div>
+        <div class="quote">“Tom is a highly effective UX professional that is fantastic at communicating. I had the pleasure of being mentored by Tom between 2017 &amp; 2018 while at Iris Worldwide. There is no doubt his advice and guidance was a significant catalyst in my career in the user experience industry. Any employer would be lucky to have Tom on their team.”</div>
+        <div class="byline byline--mentor"><div class="avatar avatar--steven"></div><div><div class="byline-name">Steven Ellis</div><div class="byline-role byline-role--mentor">Senior Technical Consultant · UX &amp; Service Design</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-label card-label--faint">Managed</div>
+        <div class="quote">“I would hire Thomas with my eyes closed. He is one of the best UX leaders I’ve had the pleasure to work with and learn from. A mentor and a friend, Tom taught me a great deal at Digitas. Deploying his superpower of ‘common sense’ (ironically not that common), he makes the complicated seem easy, breaking hard problems into simple, actionable steps. In one word, Tom’s UX leadership is SOLID.<span class="desk-tail"> With him on the team, projects flow steadily and everyone’s anxiety drops.</span>”</div>
+        <div class="byline byline--mentor"><div class="avatar avatar--daniel"></div><div><div class="byline-name">Daniel Fraga</div><div class="byline-role byline-role--mentor">Chief GenAI UX Designer · Danske Bank</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="testimonials">
+    <div class="tst-head">
+      <div class="kicker-row kicker-row--tst"><span class="mark">//</span><span class="kicker kicker--tst">What clients and colleagues say</span></div>
+      <a class="marklink tst-link" href="https://www.linkedin.com/in/thomassaldanha/details/recommendations/" target="_blank" rel="noopener"><span>LinkedIn recommendations</span><svg width="8" height="8" viewBox="0 0 10 10" fill="none" class="ext8" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+
+    <div data-carousel-track-el="tst" data-carousel-perview="3" class="ts-carousel-track tst-track">
+      <div data-carousel-card="" class="card tst-card">
+        <div class="card-label card-label--faint">CEO</div>
+        <div class="quote">“Tom led the redesign of our internal authentication experience, turning a complex operational flow across multiple teams into clear blueprints that cut authentication times and reduced mistakes. Commercially focused and pragmatic, he balanced great user experience with what the business needed to move quickly. He was also instrumental in scaling our design and engineering capabilities, hiring and mentoring the team and consistently raising the bar, and I trusted him to own major initiatives from concept to delivery.”</div>
+        <div class="byline"><div class="avatar avatar--chris"></div><div><div class="byline-name">Chris Gibbons</div><div class="byline-role">CEO &amp; Founder · Laced</div></div></div>
+        <a class="marklink card-link" href="work/laced-authentication/"><span>View the Laced work</span></a>
+      </div>
+      <div data-carousel-card="" class="card tst-card">
+        <div class="card-label card-label--faint">Client</div>
+        <div class="quote">“Tom is very skilled at understanding the business challenge and identifying ways to uncover the pain points that drive satisfaction, personalisation and revenue. He’s great at presenting his findings and recommendations in a way that helps the business take action. He’s a great collaborator, has lots of energy and ideas and is genuinely a nice person to work with.”</div>
+        <div class="byline"><div class="avatar avatar--trina"></div><div><div class="byline-name">Trina Smith</div><div class="byline-role">Senior Premier Proposition Executive · HSBC</div></div></div>
+        <a class="marklink card-link" href="work/hsbc-premier/"><span>View the HSBC work</span></a>
+      </div>
+      <div data-carousel-card="" class="card tst-card">
+        <div class="card-label card-label--faint">Manager</div>
+        <div class="quote">“Tom was our inaugural hire within the product team and pivotal in scaling it to over 20 members. Leveraging his expertise we created the first service design blueprints for our warehouse operations, authenticating over 3,000 sneakers daily. What I valued most was his ability to navigate stakeholder relationships and provide clear, valuable insights. Strategically sound, he can go beyond the usual remit and take on the role of an advisor who really impacts an organisation’s efficacy.”</div>
+        <div class="byline"><div class="avatar avatar--gareth"></div><div><div class="byline-name">Gareth Olyott</div><div class="byline-role">Chief of Staff · Laced</div></div></div>
+        <a class="marklink card-link" href="work/laced-authentication/"><span>View the Laced work</span></a>
+      </div>
+      <div data-carousel-card="" class="card tst-card">
+        <div class="card-label">Colleague</div>
+        <div class="quote">“Tom is one of the best UX designers I’ve had the pleasure to work with, the strongest strategist, capable of finding the very best solution to any challenge. What he does best is dealing with customers: a natural-born communicator, clients love him because he’s honest, transparent and projects confidence. I’ve worked with him across HSBC Premier and E.ON, and he’s easily one of the best colleagues I ever had. Any company would be lucky to have him.”</div>
+        <div class="byline"><div class="avatar avatar--borja"></div><div><div class="byline-name">Borja Sampedro</div><div class="byline-role">Experience Design &amp; Strategy Lead · Lloyds Bank</div></div></div>
+        <a class="marklink card-link" href="work/eon-app-ia/"><span>View the E.ON work</span></a>
+      </div>
+      <div data-carousel-card="" class="card tst-card">
+        <div class="card-label">Colleague</div>
+        <div class="quote">“I worked with Tom for two years at SampsonMay when he joined as UX director. He immediately gave the business clarity on all aspects of UX, from ‘lunch and learn’ sessions on the fundamentals of a sound approach to research, testing and auditing, to deeper-dive sessions with the design team around data analysis. He is a capable and personable UX practitioner and advocate with a clear background and pedigree. I’d happily work with him again.”</div>
+        <div class="byline"><div class="avatar avatar--alex"></div><div><div class="byline-name">Alex Wastell</div><div class="byline-role">Senior Product Designer · SampsonMay</div></div></div>
+        <a class="marklink card-link" href="work/arcelormittal/"><span>View the ArcelorMittal work</span></a>
+      </div>
+      <div aria-hidden="true" class="tst-spacer"></div>
+    </div>
+
+    <div class="tst-nav">
+      <button data-carousel-nav="prev" data-carousel-track="[data-carousel-track-el='tst']" aria-label="Previous testimonial" class="tst-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon17" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+      <div class="tst-frac"><span data-carousel-frac="tst" class="tst-frac-n">01</span><span class="tst-frac-t tst-frac-t--d">/ 02</span><span class="tst-frac-t tst-frac-t--m">/ 05</span></div>
+      <button data-carousel-nav="next" data-carousel-track="[data-carousel-track-el='tst']" aria-label="Next testimonial" class="tst-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon17" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></button>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-main">
+      <div class="footer-line">Get in touch.</div>
+      <div class="footer-cta">
+        <a class="btn-solid" href="mailto:hello@thomas-saldanha.com">hello@thomas-saldanha.com</a>
+        <a class="btn-ghost" href="cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span class="btn-ghost-label">Download CV</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon14" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></a>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <a href="https://www.uxtom.co.uk" target="_blank" rel="noopener"><span>uxtom.co.uk</span></a>
+    </div>
+  </footer>
+
+</div>
+</div>
+
+<script src="cs-interactions.js"></script>
+<script src="ts-carousel.js"></script>
+
+<!-- Mobile menu open state (Nav Options.dc.html, option 2g). A direct child of
+     body, outside .viewport, so a transformed .page can never become its
+     containing block; display:none above 900px. Driven by nav-menu.js. -->
+<div class="nav-menu" id="nav-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="nav-menu-top">
+    <a class="brand" href="./">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <button class="nav-close" type="button" data-nav-close aria-label="Close menu">
+      <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M1 1l16 16M17 1L1 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+    </button>
+  </div>
+  <nav class="nav-menu-links" aria-label="Site">
+    <a href="#work"><span class="nav-menu-u">Work</span></a>
+    <a href="cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">CV</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></span></a>
+    <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">LinkedIn</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></a>
+    <a href="mailto:hello@thomas-saldanha.com"><span class="nav-menu-u">hello@thomas-saldanha.com</span></a>
+  </nav>
+  <div class="nav-menu-foot">London, United Kingdom</div>
+</div>
+<script src="nav-menu.js"></script>
+</body>
+</html>

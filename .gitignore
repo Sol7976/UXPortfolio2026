@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Local dev only: the Claude Code launch config and the no-cache static server
+.claude/
+
+# Design source (.dc.html prototypes and the design-tool runtime).
+# Excluded from this public repo by default. GitHub Pages would not publish it
+# anyway, since Jekyll ignores underscore-prefixed directories, but the files
+# would still be readable in the repo. See HANDOFF-README.md if you want it
+# version-controlled: either commit it here or keep it in a private repo.
+_design/

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer support redesign · Laced · Thomas Saldanha</title>
+<meta name="description" content="Ticket taxonomy, self-service design and the weekend business case that cut WISMO contacts by 22% at Laced, a marketplace shipping 3,000 orders a day.">
+<!-- Canonical and share metadata. These are the only ABSOLUTE urls on the site;
+     every other path is relative. Open Graph requires it: a relative og:image or
+     og:url is ignored by every crawler, so they cannot follow the site's usual
+     convention. This also means the share preview only resolves once the site is
+     live at www.uxtom.co.uk. -->
+<link rel="canonical" href="https://www.uxtom.co.uk/work/laced-customer-support/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Thomas Saldanha">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://www.uxtom.co.uk/work/laced-customer-support/">
+<meta property="og:title" content="Customer support redesign · Laced · Thomas Saldanha">
+<meta property="og:description" content="Ticket taxonomy, self-service design and the weekend business case that cut WISMO contacts by 22% at Laced, a marketplace shipping 3,000 orders a day.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Customer support redesign · Laced · Thomas Saldanha">
+<meta name="twitter:description" content="Ticket taxonomy, self-service design and the weekend business case that cut WISMO contacts by 22% at Laced, a marketplace shipping 3,000 orders a day.">
+<meta property="og:image" content="https://www.uxtom.co.uk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Thomas Saldanha, UX and product design leader. I help teams find clarity in complex problems.">
+<meta name="twitter:image" content="https://www.uxtom.co.uk/og-image.png">
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<!-- JetBrains Mono sets the step 03 keyword runs and the step 04 FAQ numerals.
+     Newsreader italic sets the step 01 interview quotes and loads on every case
+     study anyway (CLAUDE.md). The design file also asks for Hanken weight 800
+     for the // mark; the rest of the site loads 300–700 and strokes the mark, so
+     this page matches them rather than rendering one page's // heavier. -->
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&amp;family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles.css">
+<script>
+/* Breakpoint contract (SHIP-MANIFEST.md), identical to the homepage and the
+   other four case studies:
+     >= 1200px  the desktop design, bands edge to edge, content column capped at
+                1680px (all of that is in styles.css, no JS involved)
+     900–1199px the same desktop design, scaled proportionally to the viewport
+     < 900px    the mobile design, its 440px column growing fluidly
+
+   The 900–1199px band is a geometric scale, not a re-layout: the page is laid
+   out at 1200px, the bottom of the desktop band, and then transformed, so
+   nothing re-wraps and 1199px is continuous with 1200px. 1200px is also where
+   this page's content column is 1104px, the width the desktop design was drawn
+   at, so the build and the design line up there exactly. .viewport carries the
+   resulting height (and clips the layout overflow, `clip` rather than `hidden`
+   so it never becomes a scroll container that could jump on keyboard focus). */
+(function(){
+  var W = 1200, MIN = 900, root = document.documentElement, page, host, last;
+
+  /* Figures scale uniformly with the column. --k is the only thing computed
+     here: a figure cell's current width over data-fit, the width it had at the
+     authored 1200px. The CSS then zooms the cell by it, so everything inside
+     keeps its authored geometry and simply paints larger. It has to be computed
+     in script because CSS cannot divide one length by another.
+
+     Measuring the zoomed element is not circular: zoom scales an element's
+     contents, not the box its parent lays out, so the rect stays the track
+     width whatever --k is. */
+  function figures(w){
+    /* --col is the band content column, 1104px authored and 1584px at the cap.
+       Band statements take five twelfths of it. Measured here for the same
+       reason as the rest: CSS cannot divide one length by another, and a max()
+       written into a child would re-resolve its 100% against the child. */
+    if (page) page.style.setProperty('--col',
+      (Math.min(page.getBoundingClientRect().width, 1680) - 96).toFixed(2) + 'px');
+    document.querySelectorAll('[data-fit]').forEach(function(el){
+      if (w < MIN){ el.style.removeProperty('--k'); return; }
+      var box = el.getBoundingClientRect().width;
+      var cap = parseFloat(el.getAttribute('data-fit-cap'));
+      if (cap) box = Math.min(box, cap);
+      var k = Math.max(1, box / parseFloat(el.getAttribute('data-fit')));
+      el.style.setProperty('--k', k.toFixed(4));
+    });
+  }
+
+  function fit(){
+    page = page || document.querySelector('.page');
+    host = host || document.querySelector('.viewport');
+    /* The breakpoint has to be decided the way the media query decides it.
+       A media query measures innerWidth, which includes a classic scrollbar;
+       documentElement.clientWidth excludes it. Between them the CSS served the
+       desktop design while this script still thought it was mobile, so .page
+       stayed 1200px wide, unscaled, inside a narrower viewport and .viewport
+       clipped the right third away. So: innerWidth picks the design, and
+       clientWidth, the box the page actually has to fit in, sets the scale. */
+    var w = innerWidth || root.clientWidth,
+        s = w >= MIN ? Math.min(1, root.clientWidth / W) : 1;
+    if (s !== last){ root.style.setProperty('--page-scale', String(s)); last = s; }
+    figures(w);
+    if (page && host) host.style.height = s < 1 ? Math.ceil(page.offsetHeight * s) + 'px' : '';
+  }
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('load', fit);
+  document.addEventListener('DOMContentLoaded', function(){
+    fit();
+    /* catches height changes from font/image load and width changes that fire no
+       resize event, such as the scrollbar appearing */
+    if (window.ResizeObserver){
+      var ro = new ResizeObserver(fit);
+      ro.observe(document.querySelector('.page'));
+      ro.observe(root);
+    }
+  });
+})();
+</script>
+<!-- Microsoft Clarity, project y4a8k7mdho. Session recording and heatmaps.
+     Loads async and injects its own tag, so it cannot block first paint; it sits
+     at the end of <head> so it never competes with the stylesheet or the fonts
+     for the connection. The only third-party request on the site besides Google
+     Fonts. Sets cookies and records behaviour, so it is in scope for GDPR
+     consent: there is no cookie banner on this site, which was a deliberate
+     call, not an oversight. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y4a8k7mdho");
+</script>
+</head>
+<body>
+
+<div class="viewport">
+<div class="page page--cs page--lcs">
+
+  <header class="nav nav--cs">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <nav class="nav-links">
+      <a href="../../#work"><span>Work</span></a>
+      <a class="nav-cv" href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span>CV</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="dl13" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></a>
+      <a class="nav-linkedin" href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <a class="nav-email" href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+    </nav>
+    <button class="nav-burger" type="button" data-nav-toggle aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span></button>
+  </header>
+
+  <!-- cover -->
+  <section class="cs-cover">
+    <div class="cs-cover-copy">
+      <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">Laced</span></div>
+      <h1 class="cs-title">Customer support redesign<span class="cs-dot">.</span></h1>
+      <div class="cs-disc">Journey analysis · Ticket data strategy · Self-service design · New hires business case</div>
+    </div>
+    <!-- no data-fit: the crop is percentage based (object-fit cover plus a
+         percentage object-position), so the panel is already fluid and the
+         aspect-ratio holds the composition at every width. -->
+    <div class="cs-cover-media lcs-cover-media">
+      <img class="lcs-cover-img" src="../../images/laced-cs-portal-flow.png" alt="Decision flow for the self-serve sale items modules: seller and listing states mapped to the module the customer sees">
+    </div>
+  </section>
+
+  <!-- metric strip -->
+  <div class="cs-metrics">
+    <div class="cs-metric"><div class="cs-metric-n">-22<span class="cs-metric-u">%</span></div><div class="cs-metric-l">WISMO tickets</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">70,000<span class="cs-metric-u">+</span></div><div class="cs-metric-l">Historical tickets tagged</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">2</div><div class="cs-metric-l">Staff hires approved</div></div>
+    <div class="cs-metric"><div class="cs-metric-n">-54<span class="cs-metric-u">%</span></div><div class="cs-metric-l">Monday’s CS ticket backlog</div></div>
+  </div>
+
+  <!-- context -->
+  <section class="cs-context">
+    <div class="cs-context-main">
+      <div class="kicker-row kicker-row--cs"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">Context</span></div>
+      <p class="cs-statement">Laced is a high-growth marketplace for rare, limited-release sneakers. Every pair passes through a five-stage warehouse authentication process, with up to 3,000 processed each day and customer support regularly stepping in between buyers and sellers</p>
+    </div>
+    <div class="cs-meta">
+      <div class="cs-meta-row"><span class="cs-meta-k">Programme</span><span class="cs-meta-v">Customer service operations redesign</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Role</span><span class="cs-meta-v">UX &amp; Strategy Lead</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Sector</span><span class="cs-meta-v">Marketplace &amp; customer service</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Scale</span><span class="cs-meta-v">Up to 3,000 orders processed daily</span></div>
+      <div class="cs-meta-row"><span class="cs-meta-k">Remit</span><span class="cs-meta-v">End-to-end support experience and operations</span></div>
+    </div>
+  </section>
+
+  <!-- the business problem -->
+  <section class="cs-problem">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">The business problem</span></div>
+    <div class="cs-problem-grid">
+      <p class="cs-statement">Support was becoming the bottleneck to growth</p>
+      <div class="cs-problem-body">
+        <p class="cs-body">Daily sales were growing faster than the support team and tools could handle. Much of the workload came from issues that could have been prevented or self-served earlier in the journey, creating three clear problems.</p>
+      </div>
+    </div>
+    <div class="lcs-cards lcs-cards--3">
+      <div class="lcs-card">
+        <div class="lcs-card-n">01</div>
+        <div class="lcs-card-t">No ticket tagging or insight</div>
+        <p class="lcs-card-p">About 70,000 historical tickets were untagged, leaving the team reliant on anecdotal feedback and making it difficult to build evidence-based cases for improvement.</p>
+      </div>
+      <div class="lcs-card">
+        <div class="lcs-card-n">02</div>
+        <div class="lcs-card-t">No customer-facing order tracking</div>
+        <p class="lcs-card-p">Customers had little visibility of where their sneaker was in the five-stage authentication process, driving a high volume of avoidable WISMO tickets.</p>
+      </div>
+      <div class="lcs-card">
+        <div class="lcs-card-n">03</div>
+        <div class="lcs-card-t">No weekend cover, created a weekly backlog</div>
+        <p class="lcs-card-p">With no weekend support, every week started with a backlog already in place, hurting response times, team morale and customer confidence.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- my role -->
+  <section class="cs-lead">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">My role</span></div>
+  </section>
+
+  <!-- STEP 01 · Ticket audit & interviews (white) -->
+  <section class="lcs-s01">
+    <div class="lcs-head">
+      <div class="lcs-head-t">
+        <div class="cs-marker"><span class="cs-marker-n">01.</span><span class="cs-marker-t">Ticket audit &amp; interviews</span></div>
+        <h2 class="cs-step-title">Turning anecdotal problems into evidence</h2>
+      </div>
+      <div class="lcs-head-b">
+        <p class="cs-step-body">With no historical tagging, nobody could say what customers were actually contacting support about. I interviewed the support team to understand the recurring issues, then manually reviewed and categorised the latest 500 tickets to quantify demand and test those assumptions against real data.</p>
+      </div>
+    </div>
+
+    <div class="lcs-s01-ev">
+      <!-- the toggle sits outside the evidence and stays at its authored size -->
+      <div class="cs-tabs lcs-tabs" aria-label="Step 01 evidence">
+        <div class="cs-tabtrack lcs-tabtrack">
+          <button data-tabgroup="lcs-src" data-view="tickets" data-on="font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#201C16;background:#ffd400;border:none;border-radius:100px;padding:15px 22px;cursor:pointer" data-off="font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#4c4b45;background:transparent;border:none;border-radius:100px;padding:15px 22px;cursor:pointer" style="font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#201C16;background:#ffd400;border:none;border-radius:100px;padding:15px 22px;cursor:pointer">Ticket audit</button>
+          <button data-tabgroup="lcs-src" data-view="interviews" data-on="font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#201C16;background:#ffd400;border:none;border-radius:100px;padding:15px 22px;cursor:pointer" data-off="font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#4c4b45;background:transparent;border:none;border-radius:100px;padding:15px 22px;cursor:pointer" style="font:600 10px/1 'Hanken Grotesk';letter-spacing:.14em;text-transform:uppercase;color:#4c4b45;background:transparent;border:none;border-radius:100px;padding:15px 22px;cursor:pointer">Interviews</button>
+        </div>
+      </div>
+
+      <!-- no data-disp: the two designs give these panels the same display
+           value, so the engine clears the inline display and the CSS decides -->
+      <div class="lcs-p lcs-p--tickets" data-panelgroup="lcs-src" data-view="tickets">
+        <div class="lcs-pie-grid">
+          <!-- no data-fit and no .cs-fig on the doughnut: it is 50.388% of its
+               cell, which is the authored 260-in-516 at every width, and its
+               number and label ride the ring in cqw. See the note in styles.css:
+               a zoom measured against the mobile cell painted it at 2.1x. -->
+          <div class="lcs-pie-cell">
+              <div class="lcs-pie">
+                <svg class="lcs-pie-svg" viewBox="0 0 120 120" aria-hidden="true">
+                  <circle data-pie="" data-c="326.73" data-off="107.82" cx="60" cy="60" r="52" fill="none" stroke="#d43b30" stroke-width="9.5" stroke-dasharray="326.73" stroke-dashoffset="107.82" transform="rotate(0 60 60)"></circle>
+                  <circle data-pie="" data-c="326.73" data-off="287.52" cx="60" cy="60" r="52" fill="none" stroke="#e0736a" stroke-width="9.5" stroke-dasharray="326.73" stroke-dashoffset="287.52" transform="rotate(241.2 60 60)"></circle>
+                  <circle data-pie="" data-c="326.73" data-off="297.32" cx="60" cy="60" r="52" fill="none" stroke="#5cbdb2" stroke-width="9.5" stroke-dasharray="326.73" stroke-dashoffset="297.32" transform="rotate(284.4 60 60)"></circle>
+                  <circle data-pie="" data-c="326.73" data-off="303.86" cx="60" cy="60" r="52" fill="none" stroke="#8ed4cd" stroke-width="9.5" stroke-dasharray="326.73" stroke-dashoffset="303.86" transform="rotate(316.8 60 60)"></circle>
+                  <circle data-pie="" data-c="326.73" data-off="310.39" cx="60" cy="60" r="52" fill="none" stroke="#c7e5e1" stroke-width="9.5" stroke-dasharray="326.73" stroke-dashoffset="310.39" transform="rotate(342 60 60)"></circle>
+                </svg>
+                <div class="lcs-pie-hole">
+                  <div class="lcs-pie-n">67<span class="lcs-pie-u">%</span></div>
+                  <div class="lcs-pie-l">WISMO</div>
+                </div>
+              </div>
+          </div>
+          <div class="lcs-leg">
+            <div class="lcs-leg-r"><span class="lcs-leg-d" style="background:#d43b30"></span><span class="lcs-leg-t lcs-leg-t--lead">Where is my order? (WISMO)</span><span class="lcs-leg-v lcs-leg-v--lead">67%</span></div>
+            <div class="lcs-leg-r"><span class="lcs-leg-d" style="background:#e0736a"></span><span class="lcs-leg-t">Returns, cancellations &amp; sizing</span><span class="lcs-leg-v">12%</span></div>
+            <div class="lcs-leg-r"><span class="lcs-leg-d" style="background:#5cbdb2"></span><span class="lcs-leg-t">Authentication queries</span><span class="lcs-leg-v">9%</span></div>
+            <div class="lcs-leg-r"><span class="lcs-leg-d" style="background:#8ed4cd"></span><span class="lcs-leg-t">Payments &amp; payouts</span><span class="lcs-leg-v">7%</span></div>
+            <div class="lcs-leg-r"><span class="lcs-leg-d" style="background:#c7e5e1"></span><span class="lcs-leg-t">Everything else</span><span class="lcs-leg-v">5%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lcs-p lcs-p--interviews" data-panelgroup="lcs-src" data-view="interviews" style="display:none">
+        <div class="lcs-iv">
+          <div><p class="lcs-iv-q">“Most of my day is looking up where a pair is in authentication.”</p><div class="lcs-iv-f">WISMO questions dominated the tickets.</div></div>
+          <div><p class="lcs-iv-q">“Monday is the day nobody wants. You open the queue and it’s already two days deep.”</p><div class="lcs-iv-f">No weekend cover left a backlog to work through.</div></div>
+          <div><p class="lcs-iv-q">“We’ve asked for extra cover before but it was always never the right time.”</p><div class="lcs-iv-f">Requests for headcount had been rejected.</div></div>
+          <div><p class="lcs-iv-q">“If they don’t hear back over the weekend, they assume they’ve been scammed.”</p><div class="lcs-iv-f">No reply over the weekend, so customers assumed fraud and cancelled.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 02 · Open and closed card sorting (grey) -->
+  <section class="lcs-s02">
+    <div class="lcs-s02-grid">
+      <div class="lcs-s02-copy">
+        <div class="cs-marker"><span class="cs-marker-n">02.</span><span class="cs-marker-t">Open and closed card sorting</span></div>
+        <h2 class="cs-step-title">Building a tagging system the whole team could use</h2>
+        <p class="cs-step-body">I used open and closed card sorts with the support team to define a clear set of ticket categories in their own language. Where agents disagreed, labels were merged or renamed until the same ticket would be tagged consistently.</p>
+        <p class="cs-step-body">The final categories became mandatory in Zendesk, giving the team reliable demand data from that point forward.</p>
+        <div class="cs-stats lcs-s02-stats">
+          <div class="cs-stat"><div class="cs-stat-n">6</div><div class="cs-stat-l">Participants</div></div>
+          <div class="cs-stat"><div class="cs-stat-n">8</div><div class="cs-stat-l">Tag categories agreed</div></div>
+        </div>
+      </div>
+      <!-- the two boards bleed to the band's top, bottom and outer edge, as
+           drawn. Both crops are percentage based, so the pair stays composed at
+           every width; only the module's height rides --k. -->
+      <div class="lcs-s02-media" data-fit="577.8">
+        <div class="lcs-sortstack">
+          <div class="lcs-sort lcs-sort--a" data-tilewipe data-tw-i="0">
+            <img class="lcs-sort-img lcs-sort-img--a" src="../../uploads/laced-cs-cardsort-closed.png" alt="Closed card sort board: the same tickets re-placed, with disagreements showing as differently coloured cards">
+            <div class="lcs-sort-k" aria-hidden="true"></div>
+          </div>
+          <div class="lcs-sort lcs-sort--b" data-tilewipe data-tw-i="1">
+            <img class="lcs-sort-img lcs-sort-img--b" src="../../uploads/laced-cs-cardsort-open.png" alt="Open card sort board: tickets grouped into WISMO, Account, Money, Authentication, Returns, Damaged, Delivery and Catalogue">
+            <div class="lcs-sort-k" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 03 · Keyword matching (white) -->
+  <section class="lcs-s03">
+    <div class="lcs-head">
+      <div class="lcs-head-t">
+        <div class="cs-marker"><span class="cs-marker-n">03.</span><span class="cs-marker-t">Keyword matching</span></div>
+        <h2 class="cs-step-title">Turning 70,000 historical tickets into usable data</h2>
+      </div>
+      <div class="lcs-head-b">
+        <p class="cs-step-body">I worked with a developer to apply the agreed tags retrospectively to around 70,000 historical tickets using the language customers actually used.</p>
+        <p class="cs-step-body">Keyword matching was not perfect, but it created a reliable enough baseline to show the scale of demand by topic and support evidence-based decisions.</p>
+      </div>
+    </div>
+
+    <div class="lcs-kw">
+      <div class="lcs-kw-h">
+        <span class="lcs-lab">Example keyword matches</span>
+        <span class="lcs-lab lcs-lab--r">Tag</span>
+      </div>
+      <div class="lcs-kw-rows">
+        <div class="lcs-kw-r"><div class="lcs-kw-k">“where is my order” &nbsp;/&nbsp; “tracking” &nbsp;/&nbsp; “dispatched” &nbsp;/&nbsp; “delayed” &nbsp;/&nbsp; “not received”</div><div class="lcs-kw-t">WISMO</div></div>
+        <div class="lcs-kw-r"><div class="lcs-kw-k">“return” &nbsp;/&nbsp; “wrong size” &nbsp;/&nbsp; “doesn’t fit” &nbsp;/&nbsp; “I don’t want”</div><div class="lcs-kw-t">Returns</div></div>
+        <div class="lcs-kw-r"><div class="lcs-kw-k">“fake” &nbsp;/&nbsp; “passed” &nbsp;/&nbsp; “failed” &nbsp;/&nbsp; “verification” &nbsp;/&nbsp; “authentication” &nbsp;/&nbsp; “condition”</div><div class="lcs-kw-t">Authentication</div></div>
+        <div class="lcs-kw-r"><div class="lcs-kw-k">“withdraw” &nbsp;/&nbsp; “money” &nbsp;/&nbsp; “payout” &nbsp;/&nbsp; “payment failed” &nbsp;/&nbsp; “card declined”</div><div class="lcs-kw-t">Money</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 04 · Customer self-service strategy (black) -->
+  <section class="lcs-s04">
+    <div class="lcs-s04-grid">
+      <div class="lcs-s04-copy">
+        <div class="cs-marker cs-marker--dark"><span class="cs-marker-n">04.</span><span class="cs-marker-t">Customer self-service strategy</span></div>
+        <h2 class="cs-step-title cs-step-title--dark">Designing out avoidable support contact</h2>
+        <p class="cs-step-body cs-step-body--dark">The data showed two clear gaps. Sellers had no simple way to manage listings, while buyers had no way to track an order through authentication.</p>
+        <p class="cs-step-body cs-step-body--dark">I designed a self-service portal around the same underlying order record, giving each user the information and actions they needed while keeping sensitive operational states internal.</p>
+        <div class="cs-stats lcs-s04-stats">
+          <div class="cs-stat"><div class="cs-stat-n cs-stat-n--dark">-22<span class="cs-stat-u">%</span></div><div class="cs-stat-l cs-stat-l--dark">WISMO tickets</div></div>
+        </div>
+      </div>
+      <!-- scaled: 1fr of the authored .82fr 1fr grid. The zoom is on the frame,
+           not the grid cell, so the 80px that opens the band stays 80px while
+           the 628px panel rides the column. -->
+      <div class="lcs-s04-media" data-fit="659.3407">
+        <div class="lcs-portal" data-tilewipe data-tw-i="0">
+          <img class="lcs-portal-img" src="../../images/laced-cs-portal-flow.png" alt="Decision flow for the self-serve sale items modules: seller and listing states mapped to the exact module the customer sees">
+        </div>
+      </div>
+    </div>
+
+    <!-- a fixed 1560px track centred in a 1200px window and clipped by it, so
+         the outer two tiles are cut at the band edge exactly as drawn -->
+    <div class="lcs-strip" data-fit="1200" data-fit-cap="1680">
+      <div class="lcs-strip-stage">
+        <div class="lcs-strip-track">
+          <div class="lcs-tile" data-tilewipe data-tw-i="0"><img class="lcs-tile-img lcs-tile-img--a" src="../../images/laced-cs-seller-settings.png" alt="Seller settings: holiday mode and lowest-price notifications, both switched on"></div>
+          <div class="lcs-tile" data-tilewipe data-tw-i="1"><img class="lcs-tile-img lcs-tile-img--b" src="../../images/laced-cs-need-to-ship.png" alt="You need to ship: the seller queue with ship-by dates, delivery-label actions and in-transit states"></div>
+          <div class="lcs-tile" data-tilewipe data-tw-i="2"><img class="lcs-tile-img lcs-tile-img--c" src="../../images/laced-cs-listing-failed-auth.png" alt="Listing detail in the customer view: a failed authentication shown as a dated line in the listing history, with help routes underneath"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lcs-faq">
+      <div class="lcs-faq-l"><span class="lcs-lab lcs-lab--dark">WISMO FAQs moved to self-service</span></div>
+      <div class="lcs-faq-grid">
+        <div class="lcs-faq-r"><span class="lcs-faq-n">01</span><span class="lcs-faq-t">Can I track my order?</span></div>
+        <div class="lcs-faq-r"><span class="lcs-faq-n">02</span><span class="lcs-faq-t">When will my order arrive?</span></div>
+        <div class="lcs-faq-r"><span class="lcs-faq-n">03</span><span class="lcs-faq-t">Has my order been dispatched?</span></div>
+        <div class="lcs-faq-r"><span class="lcs-faq-n">04</span><span class="lcs-faq-t">Why is my order delayed?</span></div>
+        <div class="lcs-faq-r"><span class="lcs-faq-n">05</span><span class="lcs-faq-t">My tracking says delivered, but I haven’t received it.</span></div>
+        <div class="lcs-faq-r"><span class="lcs-faq-n">06</span><span class="lcs-faq-t">Can I redirect the parcel to a collection point?</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 05 · Operational resourcing (grey) -->
+  <section class="lcs-s05">
+    <div class="lcs-head">
+      <div class="lcs-head-t">
+        <div class="cs-marker"><span class="cs-marker-n">05.</span><span class="cs-marker-t">Operational resourcing</span></div>
+        <h2 class="cs-step-title">The case for two weekend support hires</h2>
+      </div>
+      <div class="lcs-head-b">
+        <p class="cs-step-body">The analysis kept surfacing the same issue. With no weekend cover, a backlog built up every week and the team started Monday already behind.</p>
+        <p class="cs-step-body">Previous requests for more staff had been rejected because there was no evidence to quantify the problem. I used the new ticket data to show the scale and operational impact of the backlog, building the case that secured two new weekend support hires.</p>
+      </div>
+    </div>
+
+    <!-- data-panelgroup is what seeds and observes the bars: cs-interactions
+         only looks for data-bar-v inside one. There is no tabgroup of this
+         name, so nothing ever toggles the panel's display. -->
+    <div class="lcs-week" data-panelgroup="lcs-week">
+      <p class="lcs-week-s">Every weekend the inbox was unstaffed for <span class="lcs-week-e">48 hours</span>, resulting in Monday opening <span class="lcs-week-e">×2.5 heavier</span> than normal.</p>
+      <div class="lcs-week-fit" data-fit="520">
+        <div class="cs-fig">
+          <div class="lcs-week-chart">
+            <div class="lcs-day">
+              <div class="lcs-day-col">
+                <div class="lcs-bar lcs-bar--wk lcs-bar--cap" data-bar-v data-h="133.9px" data-delay="0" style="height:133.9px"></div>
+                <div class="lcs-bar lcs-bar--wd" data-bar-v data-h="114.1px" data-delay="0" style="height:114.1px"></div>
+              </div>
+              <div class="lcs-day-l">Mon</div>
+            </div>
+            <div class="lcs-day">
+              <div class="lcs-day-col"><div class="lcs-bar lcs-bar--wd lcs-bar--cap" data-bar-v data-h="101.7px" data-delay="90" style="height:101.7px"></div></div>
+              <div class="lcs-day-l">Tue</div>
+            </div>
+            <div class="lcs-day">
+              <div class="lcs-day-col"><div class="lcs-bar lcs-bar--wd lcs-bar--cap" data-bar-v data-h="114.1px" data-delay="180" style="height:114.1px"></div></div>
+              <div class="lcs-day-l">Wed</div>
+            </div>
+            <div class="lcs-day">
+              <div class="lcs-day-col"><div class="lcs-bar lcs-bar--wd lcs-bar--cap" data-bar-v data-h="94.2px" data-delay="270" style="height:94.2px"></div></div>
+              <div class="lcs-day-l">Thu</div>
+            </div>
+            <div class="lcs-day">
+              <div class="lcs-day-col"><div class="lcs-bar lcs-bar--wd lcs-bar--cap" data-bar-v data-h="81.8px" data-delay="360" style="height:81.8px"></div></div>
+              <div class="lcs-day-l">Fri</div>
+            </div>
+            <div class="lcs-day">
+              <div class="lcs-day-col"><div class="lcs-bar lcs-bar--wk lcs-bar--cap" data-bar-v data-h="141.4px" data-delay="450" style="height:141.4px"></div></div>
+              <div class="lcs-day-l">Sat</div>
+            </div>
+            <div class="lcs-day">
+              <div class="lcs-day-col"><div class="lcs-bar lcs-bar--wk lcs-bar--cap" data-bar-v data-h="76.9px" data-delay="540" style="height:76.9px"></div></div>
+              <div class="lcs-day-l">Sun</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lcs-quote">
+      <p class="lcs-quote-p">“We were fighting a never-ending backlog. No matter how hard we worked, the weekend intake meant we could never get ahead.”</p>
+      <div class="lcs-quote-by">Support team lead</div>
+    </div>
+
+    <div class="lcs-found">
+      <div class="lcs-found-l"><span class="lcs-lab">The foundations of the business case</span></div>
+      <div class="lcs-cards lcs-cards--4">
+        <div class="lcs-card">
+          <div class="lcs-card-n">01</div>
+          <div class="lcs-card-t">The backlog rebuilt every weekend</div>
+          <p class="lcs-card-p">With no weekend cover, tickets accumulated for 48 hours and the team started every week already behind.</p>
+        </div>
+        <div class="lcs-card">
+          <div class="lcs-card-n">02</div>
+          <div class="lcs-card-t">Response metrics worsened and morale dropped</div>
+          <p class="lcs-card-p">The weekend gap inflated response times and left the team feeling they could never get ahead.</p>
+        </div>
+        <div class="lcs-card">
+          <div class="lcs-card-n">03</div>
+          <div class="lcs-card-t">Weekend silence damaged customer trust</div>
+          <p class="lcs-card-p">In a scam-sensitive market, two days without updates led some customers to assume something was wrong and cancel.</p>
+        </div>
+        <div class="lcs-card">
+          <div class="lcs-card-n">04</div>
+          <div class="lcs-card-t">The gap had a measurable commercial cost</div>
+          <p class="lcs-card-p">Using cancellation rates on orders left without updates, I quantified the revenue lost to the weekend gap and turned a staffing request into a commercial case.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- what the hires changed · a three-up metric strip on its own top hairline,
+         dividers between the cells, no rule under it -->
+    <div class="lcs-hc">
+      <div class="lcs-hc-l"><span class="lcs-lab">What the hires changed</span></div>
+      <div class="lcs-hc-grid">
+        <div class="lcs-hc-m"><div class="lcs-hc-n">2</div><div class="lcs-hc-lab">Weekend hires approved</div></div>
+        <div class="lcs-hc-m"><div class="lcs-hc-n">-54<span class="lcs-hc-u">%</span></div><div class="lcs-hc-lab">Reduction to Monday’s backlog</div></div>
+        <div class="lcs-hc-m"><div class="lcs-hc-n">0</div><div class="lcs-hc-lab">Weekend hours unstaffed</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- C-suite feedback (ivory) -->
+  <section class="lcs-fb">
+    <div class="kicker-row kicker-row--fb"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">C-suite feedback</span></div>
+    <div class="la-fb-grid">
+      <div class="la-fb-card">
+        <div class="la-fb-l">CEO &amp; Founder</div>
+        <blockquote class="la-fb-q">“Tom led the redesign of our internal authentication experience, turning a complex operational flow across multiple teams into clear blueprints that cut authentication times and reduced mistakes. Commercially focused and pragmatic, he balanced great user experience with what the business needed to move quickly. He was also instrumental in scaling our design and engineering capabilities, hiring and mentoring the team and consistently raising the bar, and I trusted him to own major initiatives from concept to delivery.”</blockquote>
+        <div class="la-fb-by">
+          <div class="avatar avatar--chris"></div>
+          <div>
+            <div class="la-fb-n">Chris Gibbons</div>
+            <div class="la-fb-r">CEO &amp; Founder · Laced</div>
+          </div>
+        </div>
+        <a class="marklink la-fb-link" href="https://www.linkedin.com/in/thomassaldanha/details/recommendations/" target="_blank" rel="noopener"><span>LinkedIn recommendations</span><svg width="8" height="8" viewBox="0 0 10 10" fill="none" class="ext8" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      </div>
+      <div class="la-fb-card">
+        <div class="la-fb-l">Chief of Staff</div>
+        <blockquote class="la-fb-q">“Tom was our inaugural hire within the product team and pivotal in scaling it to over 20 members. Leveraging his expertise we created the first service design blueprints for our warehouse operations, authenticating over 3,000 sneakers daily. What I valued most was his ability to navigate stakeholder relationships and provide clear, valuable insights. Strategically sound, he can go beyond the usual remit and take on the role of an advisor who really impacts an organisation’s efficacy.”</blockquote>
+        <div class="la-fb-by">
+          <div class="avatar avatar--gareth"></div>
+          <div>
+            <div class="la-fb-n">Gareth Olyott</div>
+            <div class="la-fb-r">Chief of Staff · Laced</div>
+          </div>
+        </div>
+        <a class="marklink la-fb-link" href="https://www.linkedin.com/in/thomassaldanha/details/recommendations/" target="_blank" rel="noopener"><span>LinkedIn recommendations</span><svg width="8" height="8" viewBox="0 0 10 10" fill="none" class="ext8" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- the outcome (black) -->
+  <section class="cs-outcome">
+    <div class="kicker-row"><span class="mark mark--sm">//</span><span class="kicker kicker--cs kicker--dark">The outcome</span></div>
+    <p class="cs-outcome-statement">A support operation that reduced avoidable contact, created usable demand data and fixed the weekend backlog<span class="cs-dot">.</span></p>
+    <div class="cs-outcome-grid">
+      <div class="cs-outcome-metric"><div class="cs-outcome-n cs-outcome-n--lead">-22<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">WISMO tickets</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">70,000<span class="cs-outcome-u">+</span></div><div class="cs-outcome-l">Historical tickets tagged</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">2</div><div class="cs-outcome-l">Staff hires approved</div></div>
+      <div class="cs-outcome-metric"><div class="cs-outcome-n">-54<span class="cs-outcome-u">%</span></div><div class="cs-outcome-l">Monday’s CS ticket backlog</div></div>
+    </div>
+  </section>
+
+  <footer class="cs-footer">
+    <div class="cs-footer-main">
+      <div class="cs-footer-next">Next: ArcelorMittal<span class="cs-dot">.</span></div>
+      <a class="cs-footer-link" href="../arcelormittal/"><span>View the next case study</span></a>
+    </div>
+    <div class="cs-footer-links">
+      <a href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+      <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9 ext9--cs" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+  </footer>
+
+</div>
+</div>
+
+<script src="../../cs-interactions.js"></script>
+<script src="../../lcs-pie.js"></script>
+
+<!-- Mobile menu open state (Nav Options.dc.html, option 2g). A direct child of
+     body, outside .viewport, so a transformed .page can never become its
+     containing block; display:none above 900px. Driven by nav-menu.js. -->
+<div class="nav-menu" id="nav-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="nav-menu-top">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <button class="nav-close" type="button" data-nav-close aria-label="Close menu">
+      <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M1 1l16 16M17 1L1 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+    </button>
+  </div>
+  <nav class="nav-menu-links" aria-label="Site">
+    <a href="../../#work"><span class="nav-menu-u">Work</span></a>
+    <a href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">CV</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></span></a>
+    <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">LinkedIn</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></a>
+    <a href="mailto:hello@thomas-saldanha.com"><span class="nav-menu-u">hello@thomas-saldanha.com</span></a>
+  </nav>
+  <div class="nav-menu-foot">London, United Kingdom</div>
+</div>
+<script src="../../nav-menu.js"></script>
+</body>
+</html>

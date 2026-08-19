@@ -1,0 +1,5 @@
+# uxtom.co.uk
+User-agent: *
+Allow: /
+
+Sitemap: https://www.uxtom.co.uk/sitemap.xml

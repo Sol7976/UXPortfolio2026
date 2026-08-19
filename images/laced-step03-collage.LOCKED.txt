@@ -1,0 +1,72 @@
+Laced Step 03 diagonal collage, LOCKED 3 Aug 2026.
+Geometry, column stagger, fade offsets and the exact image in every slot.
+Never re-derive these numbers or retrim the crops.
+
+CROP RULE
+Every images/laced-ui-<key>-crop.png is the widest native 3:2 window its source
+(images/src-<key>.png) allows, centred horizontally, anchored to the top.
+No rescaling, no content-bbox trimming. delete-listing is bottom-anchored.
+
+Frame: height 640px, rotate -19deg, uniform scale 1.04 (pure rotation, no shear).
+Tiles: 312px wide, natural height (3:2 crops). Placeholders 312x208 (#ededeb, mono "[ ui screen ]").
+Track: centred with translate(-50%,-52%), columns are flex-column, gap 17px.
+
+col 1  margin-top 0px  fade offset 0
+  01  [ ui screen placeholder ]
+  02  [ ui screen placeholder ]
+  03  images/laced-ui-auth-csnote-crop.png
+  04  images/laced-ui-fail-reason-full-crop.png
+  05  images/laced-ui-delivery-label-crop.png
+  06  images/laced-ui-auth-csnote-crop.png
+
+col 2  margin-top -124px  fade offset 0.08
+  01  [ ui screen placeholder ]
+  02  images/laced-ui-download-labels-crop.png
+  03  images/laced-ui-need-to-ship-crop.png
+  04  images/laced-ui-edit-listing-crop.png
+  05  images/laced-ui-writeoff-crop.png
+  06  [ ui screen placeholder ]
+
+col 3  margin-top -58px  fade offset 0.16
+  01  [ ui screen placeholder ]
+  02  images/laced-ui-cancelled-crop.png
+  03  images/laced-ui-auth-csnote-crop.png
+  04  images/laced-ui-fail-reason-crop.png
+  05  images/laced-ui-listing-detail-crop.png
+  06  [ ui screen placeholder ]
+
+col 4  margin-top -186px  fade offset 0.24
+  01  [ ui screen placeholder ]
+  02  images/laced-ui-listing-history-crop.png
+  03  images/laced-ui-delete-listing-crop.png
+  04  images/laced-ui-labelling-requires-auth-crop.png
+  05  images/laced-ui-delivery-label-crop.png
+  06  images/laced-ui-scan-qa-crop.png
+
+col 5  margin-top -96px  fade offset 0.32
+  01  [ ui screen placeholder ]
+  02  [ ui screen placeholder ]
+  03  images/laced-ui-your-cart-crop.png
+  04  images/laced-ui-login-register-crop.png
+  05  [ ui screen placeholder ]
+  06  [ ui screen placeholder ]
+
+CROP SIZES
+auth-csnote: 3240x2160
+writeoff: 3240x2160
+fail-reason: 3240x2160
+fail-reason-full: 3240x2160
+labelling-requires-auth: 3240x2160
+scan-qa: 3240x2160
+delivery-label: 3240x2160
+delete-listing: 2880x1920
+edit-listing: 2880x1920
+cancelled: 3072x2048
+listing-detail: 2880x1920
+download-labels: 2880x1920
+listing-history: 2880x1920
+sell-items: 3072x2048
+need-to-ship: 2880x1920
+parcels: 3240x2160
+your-cart: 2880x1920
+login-register: 2880x1920

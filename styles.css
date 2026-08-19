@@ -1400,6 +1400,8 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .hs-q-l{font:600 10px/1 'Hanken Grotesk';letter-spacing:.16em;text-transform:uppercase;color:#67665f;margin-top:12px}
 
   .hs-l-i{display:grid;grid-template-columns:26px 1fr;gap:14px;align-items:baseline;padding:18px 0;border-bottom:1px solid rgba(18,18,16,.1)}
+  /* separators between rows only, as the quotes panel above already does */
+  .hs-l-i:last-child{border-bottom:0}
   .hs-l-n{font:500 12px/1.5 'Hanken Grotesk';font-variant-numeric:tabular-nums;color:#a6a49d}
   .hs-l-p{font:400 15.5px/1.55 'Hanken Grotesk';color:#1a1a17;margin:0}
 

@@ -2900,6 +2900,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
    the type: 57px into a 69px margin at the 1104 column, 63px into 99px at the
    1584 cap. A fixed 20px inset with a 48px button cleared the narrow case by
    one pixel. */
+.dk-view{position:relative}
 .dk-inframe{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:0 1.2%;pointer-events:none}
 .dk-inframe .dk-btn{pointer-events:auto}
 
@@ -3151,50 +3152,39 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
    22. Talk page + deck — mobile design (< 900px)
    ============================================================
 
-   The deck is NOT the desktop stage shrunk. A 1920px stage scaled into a 375px
-   phone renders the deck's 25px body at about 5px, which fails the 16px floor
-   by a factor of three and is simply unreadable. So the stage is dismantled
-   here and each slide lays out in normal flow at a phone type scale, off the
-   same markup: same classes, same copy, same order, one slide at a time with
-   the same controls. Only the presentation changes. */
+   The deck is NOT reflowed here. It is the same 1920x1080 stage as the
+   desktop, scaled to the frame: a literal page of the deck, the way a PDF
+   viewer shows one, with no internal scrolling and no responsive re-layout.
+   That is a deliberate call by Thomas over the alternative, which reflowed
+   each slide to a phone type scale.
+
+   The trade is legibility: at 375px the frame is the full screen width, so
+   --dk-k is about 0.195 and the deck's 25px body renders near 5px. The slide
+   is legible by pinching the page, which is how a reader treats a page of a
+   document anyway, and full screen in landscape roughly doubles it. Only the
+   page's own bands are given a phone treatment below. */
 @media (max-width: 899px){
 
   .tk-intro{padding:56px 24px 0}
   .tk-h1{font:300 34px/1.1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.03em;max-width:none}
   .tk-lede{font:400 16px/1.6 'Hanken Grotesk',system-ui,sans-serif;margin-top:20px;max-width:none}
-  /* A fixed-ratio card that scrolls its own content, not a block that changes
-     height with every slide. The slides still reflow to a phone type scale
-     rather than being a 1920px stage shrunk to 5px text, but they now read as
-     pages inside a document viewer: one constant 3:4 frame, hairline and
-     radius intact, with the slide scrolling inside it and the chevrons pinned
-     to the bottom of the card. */
+
   .tk-deck{padding:40px 0 0}
-  .dk-frame{aspect-ratio:3/4;width:auto;margin:0 24px;border-radius:14px;background:#ffffff;cursor:auto;
-    overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-  .dk-stage{position:static;width:auto;height:auto;min-height:100%;transform:none;display:flex;flex-direction:column}
-  .dk-s{position:static;inset:auto;display:none;padding:30px 22px 84px;overflow:visible;opacity:1;visibility:visible}
-  .dk-s.is-on{display:flex;flex:1}
-  .dk-s--pad90,.dk-s--pad100,.dk-s--pad118{padding:30px 22px 84px}
-  .dk-s--flat{padding:0}
-  .dk-s--flat .s-div{padding:30px 22px 84px}
+  /* full bleed: every pixel of width is a pixel of legibility here */
+  .dk-frame{border-radius:0;border-left:0;border-right:0;cursor:auto}
   .dk-hint{display:none}
   .dk-hint-m{display:block;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
-  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 32px;padding-top:22px}
-  /* pinned to the bottom of the card while the slide scrolls behind them; the
-     slide's 84px bottom padding is what keeps its last line clear of them */
-  .dk-inframe{position:sticky;inset:auto;bottom:14px;z-index:3;justify-content:center;gap:14px;padding:0;margin-top:-58px}
+  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 24px;padding-top:22px}
   .dk-nav,.dk-jump{gap:10px}
   .dk-nav{align-items:flex-start}
   .dk-nav-row{gap:10px}
   .dk-count{font-size:24px}
   .dk-chaps{gap:6px}
   .dk-chap{padding:0 13px;letter-spacing:.1em}
-  /* full screen buys nothing here: below 900px the deck is reflowed text, not a
-     scaled stage, so the button would only strip browser chrome, and on iOS
-     Safari element fullscreen is not supported at all */
-  .dk-jump-row > .dk-btn{display:none}
-
-  .work--talks{padding:8px 0 44px}
+  /* under the frame, not over it: at this size the frame is about 211px tall
+     and an overlaid 44px button would cover a fifth of the slide */
+  .dk-inframe{position:static;justify-content:center;gap:14px;padding:22px 24px 0}
+  .dk-view{position:static}
 
   .tk-close{padding:56px 24px}
   .tk-close-grid{grid-template-columns:1fr;gap:32px;padding-top:34px}
@@ -3203,111 +3193,5 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .tk-cta{padding:28px 26px}
   .tk-cta-p{font-size:16px;margin-bottom:22px}
 
-  /* --- slides, reflowed ------------------------------------------------ */
-  .s-k{gap:10px;margin-bottom:12px}
-  .s-mark,.s-mark--lg{font-size:13px;top:-2px;-webkit-text-stroke:.8px #ffd400}
-  .s-kl{font-size:10px;letter-spacing:.18em;line-height:1.4}
-  .s-top{flex-direction:column;gap:14px;align-items:flex-start}
-  .s-wm{font-size:12px;letter-spacing:.2em}
-  .s-wm i{font-size:16px}
-  .s-foot{flex-direction:column;align-items:flex-start;gap:8px;font-size:10px;letter-spacing:.16em;margin-top:28px}
-
-  .s-h1{font-size:34px;line-height:1.08;letter-spacing:-.03em;max-width:none;margin-top:26px}
-  .s-h,.s-h--xl,.s-h--meth{font-size:26px;line-height:1.16;letter-spacing:-.02em;margin:0 0 20px}
-  .s-h--m0,.s-h--meth{margin-bottom:0}
-  .s-h--m20,.s-h--m24,.s-h--m34,.s-h--m44,.s-h--m56,.s-h--m64{margin-bottom:20px}
-  .s-h--black{font-size:30px;line-height:1.14;margin:0 0 26px}
-  .s-h--close{font-size:32px;line-height:1.1;max-width:none;margin-top:26px}
-  .dot--13,.dot--14,.dot--15,.dot--17{width:8px;height:8px}
-  .dot--7{width:6px;height:6px}
-
-  .s-lede,.s-lede--28,.s-lede--32,.s-lede--30,.s-lede--sub{font-size:17px;line-height:1.6;max-width:none;margin-top:16px}
-  .s-lede--30,.s-lede--sub{margin-top:18px}
-  .s-stmt{font-size:24px;line-height:1.24;max-width:none}
-  .s-note{font-size:16px;line-height:1.6;margin-top:22px;padding-top:22px}
-
-  .s-ul,.s-ul--14{gap:14px}
-  .s-ul--top{margin-top:22px}
-  .s-ul--con{margin-top:18px}
-  .s-li{gap:11px}
-  .s-t{font-size:16px;line-height:1.6}
-  .s-m,.s-m--sm{width:8px;height:8px;margin-top:8px}
-  .s-m--y{width:8px;height:8px;margin-top:8px}
-  .s-m--box{width:18px;height:18px;margin-top:2px}
-  .s-pl,.s-mi{width:14px;font-size:16px;line-height:1.6}
-  .s-aside{font-size:16px;line-height:1.6;margin-left:19px}
-
-  .s-2,.s-2--even,.s-2--wide,.s-3,.s-cards,.s-cards--3,.s-cards--4,.s-grid,.s-check-g,.s-cols,.s-meth{grid-template-columns:1fr;gap:26px}
-  .s-3--auto{margin:0}
-  .s-cols{margin-top:26px;padding-top:22px}
-  .s-cols p{font-size:16px;line-height:1.6}
-
-  .s-card{padding:26px 24px;border-radius:14px}
-  .s-card--dark{padding:24px 22px}
-  .s-cl{font-size:10px;letter-spacing:.16em}
-  .s-cd{font-size:20px;line-height:1.26;margin-top:12px}
-  .s-ct{font-size:19px}
-  .s-cp{font-size:16px;line-height:1.6;margin-top:12px}
-
-  .s-panel,.s-panel--tall{padding:26px 24px;border-radius:14px}
-  .s-pl-l{font-size:10px;letter-spacing:.16em;margin-bottom:14px}
-  .s-pl-h,.s-pl-h--lg,.s-pl-h--xl{font-size:21px;line-height:1.3}
-  .s-pl-h--n{font-size:34px}
-  .s-pl-h--n i{font-size:22px}
-  .s-pl-p,.s-pl-rv,.s-pl-q{font-size:16px;line-height:1.6}
-  .s-pl-p{margin-top:16px}
-  .s-pl-p--rule{margin-top:18px;padding-top:18px}
-  .s-pl-rows{gap:16px;margin-top:20px}
-  .s-pl-row + .s-pl-row{padding-top:16px}
-  .s-pl-rl{font-size:10px;letter-spacing:.16em}
-  .s-pl-hr{margin-top:20px;padding-top:20px}
-  .s-pl-rule{margin-bottom:20px;padding-bottom:20px}
-  .s-tag{font-size:10px;letter-spacing:.13em;padding:6px 12px}
-  .s-link{font-size:14px;margin-top:18px}
-  .s-link--sm{font-size:14px;margin:14px 0 0;display:inline-flex}
-  .s-src{font-size:13px;margin-top:10px}
-
-  .s-div{padding:0;justify-content:flex-start}
-  .s-div-n{font-size:200px;right:-6px;bottom:-52px}
-  .s-div-k{margin-bottom:18px}
-  .s-div-h{font-size:40px;line-height:1.04}
-  .s-div-p{font-size:17px;line-height:1.6;max-width:none;margin-top:18px}
-
-  .s-gn{font-size:20px}
-  .s-gt,.s-gt--step{font-size:20px;line-height:1.2;margin-top:10px}
-  .s-gp,.s-gp--step{font-size:16px;line-height:1.6;margin-top:8px}
-  .s-rule{border-top:0;padding-top:0}
-  .s-well{margin-top:26px;padding:24px 22px;border-radius:14px}
-  .s-well-l{font-size:10px;letter-spacing:.16em;margin-bottom:12px}
-  .s-well-p{font-size:17px;line-height:1.55;max-width:none}
-
-  .s-check{padding:24px 22px;border-radius:14px}
-  .s-check-g .s-li{gap:12px}
-
-  .s-row,.s-row--out{grid-template-columns:1fr;gap:8px;padding:18px 0}
-  .s-rl{font-size:10px;letter-spacing:.16em}
-  .s-rv{font-size:19px;line-height:1.3}
-  .s-rn{font-size:18px}
-  .s-rd{font-size:16px;line-height:1.6}
-
-  .s-chips{gap:10px;padding-top:24px;margin-top:22px}
-  .s-chip{font-size:15px;padding:12px 18px}
-  .s-prompts{gap:9px}
-  .s-prompt{font-size:15px;padding:11px 17px}
-  .s-quote{gap:20px;max-width:none}
-  .s-quote-row{gap:12px}
-  .s-quote-m{font-size:62px;top:2px}
-  .s-quote-t{font-size:23px;line-height:1.26}
-  .s-band{font-size:19px;line-height:1.35;padding:22px 20px;margin-top:24px;max-width:none;border-radius:14px}
-
-  .s-meth-h{flex-wrap:wrap;gap:12px}
-  .s-pill{font-size:10px;letter-spacing:.12em;padding:8px 14px}
-  .s-meth{margin-top:22px}
-  .s-meth > div:nth-child(1),.s-meth > div:nth-child(2),.s-meth > div:nth-child(3){padding:0;border:0}
-  .s-meth > div + div{padding-top:22px;border-top:1px solid rgba(18,18,16,.12)}
-  .s-meth-l{font-size:10px;letter-spacing:.16em;margin-bottom:14px}
-
-  .s-acts{flex-direction:column;align-items:stretch;gap:12px;margin-top:28px}
-  .s-acts-in{flex-direction:column;gap:10px}
-  .s-a{justify-content:center;font-size:11px;letter-spacing:.13em;padding:16px 22px}
+  .work--talks{padding:8px 0 44px}
 }

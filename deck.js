@@ -10,12 +10,9 @@
    >= 900px  the slides are painted at their authored 1920x1080 and the whole
              stage is scaled to the frame, so every slide is pixel-exact and
              nothing reflows. One slide is shown at a time.
-   <  900px  the stage is dismantled in CSS (section 22) and each slide lays
-             out in normal flow at a phone type scale, inside a fixed 3:4 card
-             that scrolls its own content. Same markup, same one-at-a-time
-             model: a 1920px stage scaled to a 375px screen would render the
-             deck's 25px body text at about 5px, and a card that grew and
-             shrank with each slide read as page content rather than a deck.
+   <  900px  exactly the same, full bleed. The deck is a literal page of the
+             document at every width, never reflowed and never scrolled, which
+             is Thomas's call over a phone-legible reflow. See section 22.
 
    The scale is computed here rather than in CSS because CSS cannot divide one
    length by another. It is read from offsetWidth, NOT getBoundingClientRect:
@@ -25,7 +22,7 @@
   var deck = document.querySelector('[data-deck]');
   if (!deck) return;
 
-  var DESIGN_W = 1920, DESIGN_H = 1080, MIN_DESKTOP = 900;
+  var DESIGN_W = 1920;   /* the authored slide width; the 16:9 frame carries the height */
 
   var frame  = deck.querySelector('[data-deck-frame]');
   var stage  = deck.querySelector('[data-deck-stage]');
@@ -46,7 +43,6 @@
 
   function fit() {
     if (!frame || !stage) return;
-    if (innerWidth < MIN_DESKTOP) { stage.style.removeProperty('--dk-k'); return; }
     var w = frame.offsetWidth;
     if (!w) return;
     /* the frame is a 16/9 box, so width alone determines the fit; height is
@@ -85,10 +81,6 @@
       deck.classList.add('is-used');
       if (history.replaceState) history.replaceState(null, '', '#' + slug(i));
     }
-    /* below 900px the frame is a fixed-ratio card that scrolls its own content,
-       so a new slide starts at its top rather than wherever the last one was
-       left. A no-op on desktop, where the frame never scrolls. */
-    if (frame) frame.scrollTop = 0;
   }
 
   function chapterState() {
@@ -127,7 +119,6 @@
   /* a click anywhere on the stage advances, the way the deck was authored to
      behave; a click on a link inside a slide must still follow the link */
   if (frame) frame.addEventListener('click', function (e) {
-    if (innerWidth < MIN_DESKTOP) return;          /* mobile scrolls instead */
     if (e.target.closest('a[href], button')) return;
     show(i + 1);
   });

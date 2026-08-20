@@ -266,6 +266,19 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
 .row-disc{font:600 11px/1.55 'Hanken Grotesk';letter-spacing:.13em;text-transform:uppercase;color:#67665f;margin-top:11px}
 .row--article .row-disc{line-height:1.4}
 .row-tag{margin-top:12px}
+/* Row 06 carries a tag under its discipline line; no other row does. Left in
+   flow it makes .row-main 32px taller (a 20px pill on a 12px margin), and the
+   grid's align-items:center then drops the index number and the metrics 16px
+   below where they sit on every other row. Taking the tag out of flow and
+   buying the same 32px back as row padding gives an identical row height with
+   the number and the metrics centred on the title and discipline line, exactly
+   as the five case studies above it. Desktop only: below 900px the row is a
+   block, the tag is display:none and .row-artmeta carries it instead. */
+@media (min-width: 900px){
+  .row--article .row-main{position:relative}
+  .row--article .row-tag{position:absolute;top:100%;left:0;margin-top:12px}
+  .row--article{padding-bottom:60px}
+}
 .tag{font:600 10px/1 'Hanken Grotesk';letter-spacing:.13em;text-transform:uppercase;color:#201C16;background:#ffd400;padding:5px 9px;border-radius:5px}
 
 .row-metrics{display:flex;gap:36px;justify-content:flex-end;text-align:right}
@@ -2863,13 +2876,13 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
    own row of controls, so "Jump to chapter" sits directly over the chapter
    pills. Outside .dk-frame, so they are never scaled by --dk-k and keep their
    44px targets whatever the column width. */
-.dk-bar{display:flex;justify-content:space-between;align-items:flex-end;gap:24px 32px;flex-wrap:wrap;padding-top:26px;margin-bottom:22px;border-top:1px solid rgba(18,18,16,.12)}
+.dk-bar{display:flex;justify-content:space-between;align-items:flex-end;gap:24px 32px;flex-wrap:wrap;padding-top:26px;margin-bottom:32px;border-top:1px solid rgba(18,18,16,.12)}
 .dk-nav,.dk-jump{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dk-nav{align-items:flex-end}   /* the right-hand group: both its rows flush right */
 .dk-nav-row,.dk-jump-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.dk-hint{font:400 14px/1.4 'JetBrains Mono',ui-monospace,monospace;color:#a6a49d}
+/* both group labels read the same: tracked caps, not one caps and one mono */
+.dk-hint,.dk-jump-l{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
 .dk-hint-m{display:none}
-.dk-jump-l{font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
 .dk-btn{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:1px solid rgba(18,18,16,.3);border-radius:100px;color:#1a1a17;cursor:pointer;padding:0;transition:background .18s ease,border-color .18s ease,color .18s ease}
 .dk-btn:hover:not(:disabled){background:#ffd400;border-color:#ffd400}
 .dk-btn:disabled{opacity:.32;cursor:default}
@@ -2879,7 +2892,8 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
    secondaries rather than three equal buttons. */
 .dk-btn--next{background:#ffd400;border-color:#ffd400}
 .dk-btn--next:hover:not(:disabled){background:#ffffff;border-color:#ffd400}
-.dk-btn--prev,.dk-btn--quiet{background:#f4f4f2;border-color:rgba(18,18,16,.12)}
+.dk-btn--prev{background:#f4f4f2;border-color:rgba(18,18,16,.12)}
+.dk-btn--quiet{background:#ffffff;border-color:rgba(18,18,16,.12)}
 .dk-btn--prev:hover:not(:disabled),.dk-btn--quiet:hover:not(:disabled){background:#ffd400;border-color:#ffd400}
 .dk-count{font:300 22px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap;color:#a6a49d}
 .dk-count [data-deck-now]{color:#1a1a17}   /* the slide you are on, inked; the rest stays faint */
@@ -3123,7 +3137,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .dk-s--flat{padding:0}
   .dk-hint{display:none}
   .dk-hint-m{display:block;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
-  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 16px;padding-top:22px}
+  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 24px;padding-top:22px}
   .dk-nav,.dk-jump{gap:10px}
   .dk-nav{align-items:flex-start}
   .dk-nav-row{gap:10px}

@@ -2962,7 +2962,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
 .dk-btn--prev:hover:not(:disabled),.dk-btn--quiet:hover:not(:disabled){background:#ffd400;border-color:#ffd400}
 .dk-count{font:300 28px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;color:#a6a49d}
 .dk-count [data-deck-now]{color:#1a1a17}   /* the slide you are on, inked; the rest stays faint */
-.dk-chaps{display:flex;gap:8px;flex-wrap:wrap}
+.dk-chaps{display:flex;gap:12px 8px;flex-wrap:wrap}
 .dk-chap{min-height:44px;padding:0 16px;background:#f4f4f2;border:1px solid rgba(18,18,16,.12);border-radius:100px;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#67665f;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease}
 .dk-chap:hover{background:#ffd400;border-color:#ffd400;color:#201C16}
 .dk-chap.is-on{background:#ffd400;border-color:#ffd400;color:#201C16}
@@ -3209,7 +3209,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .dk-nav{align-items:flex-start}
   .dk-nav-row{gap:10px}
   .dk-count{font-size:24px}
-  .dk-chaps{gap:6px}
+  .dk-chaps{gap:12px 6px}   /* the pills wrap to two rows here; the row gap is the one that reads */
   .dk-chap{padding:0 13px;letter-spacing:.1em}
   /* under the frame, not over it: at this size the frame is about 211px tall
      and an overlaid 44px button would cover a fifth of the slide */

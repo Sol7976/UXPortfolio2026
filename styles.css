@@ -2876,7 +2876,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
    own row of controls, so "Jump to chapter" sits directly over the chapter
    pills. Outside .dk-frame, so they are never scaled by --dk-k and keep their
    44px targets whatever the column width. */
-.dk-bar{display:flex;justify-content:space-between;align-items:flex-end;gap:24px 32px;flex-wrap:wrap;padding-top:26px;margin-bottom:32px;border-top:1px solid rgba(18,18,16,.12)}
+.dk-bar{display:flex;justify-content:space-between;align-items:flex-end;gap:24px 32px;flex-wrap:wrap;padding-top:26px;margin-bottom:48px;border-top:1px solid rgba(18,18,16,.12)}
 .dk-nav,.dk-jump{display:flex;flex-direction:column;gap:12px;min-width:0}
 .dk-nav{align-items:flex-end}   /* the right-hand group: both its rows flush right */
 .dk-nav-row,.dk-jump-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -3137,7 +3137,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .dk-s--flat{padding:0}
   .dk-hint{display:none}
   .dk-hint-m{display:block;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
-  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 24px;padding-top:22px}
+  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 32px;padding-top:22px}
   .dk-nav,.dk-jump{gap:10px}
   .dk-nav{align-items:flex-start}
   .dk-nav-row{gap:10px}

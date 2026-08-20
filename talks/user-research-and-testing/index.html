@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User research &amp; testing · A lunch and learn · Thomas Saldanha</title>
+<meta name="description" content="A 33-slide lunch and learn on user research and testing: planning a study, recruiting and screening, running the session, analysing what you saw, and the five methodologies worth knowing.">
+<link rel="canonical" href="https://www.uxtom.co.uk/talks/user-research-and-testing/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Thomas Saldanha">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://www.uxtom.co.uk/talks/user-research-and-testing/">
+<meta property="og:title" content="User research &amp; testing · A lunch and learn · Thomas Saldanha">
+<meta property="og:description" content="A 33-slide lunch and learn on user research and testing: planning a study, recruiting and screening, running the session, analysing what you saw, and the five methodologies worth knowing.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="User research &amp; testing · A lunch and learn · Thomas Saldanha">
+<meta name="twitter:description" content="A 33-slide lunch and learn on user research and testing: planning a study, recruiting and screening, running the session, analysing what you saw, and the five methodologies worth knowing.">
+<meta property="og:image" content="https://www.uxtom.co.uk/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Thomas Saldanha, UX and product design leader. I help teams find clarity in complex problems.">
+<meta name="twitter:image" content="https://www.uxtom.co.uk/og-image.png">
+<link rel="icon" href="../../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles.css">
+<script>
+/* Breakpoint contract (SHIP-MANIFEST.md), identical to the five case studies:
+     >= 1200px  the desktop design, content column capped at 1680px
+     900-1199px the same design, scaled proportionally to the viewport
+     < 900px    the mobile design
+
+   The deck inside this page is NOT part of that scale. It computes its own
+   --dk-k in deck.js against its frame's offsetWidth, precisely because .page
+   carries a transform in the 900-1199 band and a client rect would be scaled
+   twice. There are no [data-fit] figures on this page. */
+(function(){
+  var W = 1200, MIN = 900, root = document.documentElement, page, host, last;
+  function fit(){
+    page = page || document.querySelector('.page');
+    host = host || document.querySelector('.viewport');
+    var w = innerWidth || root.clientWidth,
+        s = w >= MIN ? Math.min(1, root.clientWidth / W) : 1;
+    if (s !== last){ root.style.setProperty('--page-scale', String(s)); last = s; }
+    if (page && host) host.style.height = s < 1 ? Math.ceil(page.offsetHeight * s) + 'px' : '';
+  }
+  fit();
+  addEventListener('resize', fit);
+  addEventListener('load', fit);
+  document.addEventListener('DOMContentLoaded', function(){
+    fit();
+    if (window.ResizeObserver){
+      var ro = new ResizeObserver(fit);
+      ro.observe(document.querySelector('.page'));
+      ro.observe(root);
+    }
+  });
+})();
+</script>
+<style>
+/* The deck is published as a page, not as a file. Printing is blanked so a
+   casual Cmd+P yields nothing. This is a deterrent and nothing more: anyone can
+   still screenshot a slide or read the source, and it should be described that
+   way to anyone who asks. */
+@media print{body{display:none}}
+</style>
+<!-- Microsoft Clarity, project y4a8k7mdho. Same tag as every other page. -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y4a8k7mdho");
+</script>
+</head>
+<body>
+
+<div class="viewport">
+<div class="page page--cs page--talk">
+
+  <header class="nav nav--cs">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <nav class="nav-links">
+      <a href="../../#work"><span>Work</span></a>
+      <a class="nav-cv" href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span>CV</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" class="dl13" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></a>
+      <a class="nav-linkedin" href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <a class="nav-email" href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+    </nav>
+    <button class="nav-burger" type="button" data-nav-toggle aria-label="Open menu" aria-expanded="false" aria-controls="nav-menu"><span></span><span></span></button>
+  </header>
+
+  <!-- intro -->
+  <section class="tk-intro">
+    <div class="kicker-row kicker-row--talk"><span class="mark mark--sm">//</span><span class="kicker kicker--cs">Lunch &amp; learn</span></div>
+    <h1 class="tk-h1">User research &amp; testing<span class="dot dot--13"></span></h1>
+    <p class="tk-lede">An introduction to planning, recruiting, running and analysing a study, written for anyone new to research and for the teams who commission it.</p>
+    <div class="tk-meta">
+      <div><div class="tk-meta-l">Format</div><div class="tk-meta-v">Internal session</div></div>
+      <div><div class="tk-meta-l">Length</div><div class="tk-meta-v">33 slides</div></div>
+      <div><div class="tk-meta-l">Chapters</div><div class="tk-meta-v">Six</div></div>
+    </div>
+  </section>
+
+  <!-- the deck -->
+  <section class="tk-deck">
+    <div class="dk" data-deck>
+      <div class="dk-frame" data-deck-frame>
+        <div class="dk-stage" data-deck-stage>
+
+          <!-- 01 -->
+          <section class="dk-s dk-s--black dk-s--pad118 dk-s--between" data-deck-slide data-label="Title" data-speaker-notes="Welcome. This is a working guide to user research and testing, generalised from the original lunch and learn. We will move through planning, recruitment, running the session, analysis, a few general tips and the methods worth knowing.">
+            <div class="s-top">
+              <div class="s-k s-k--lg"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wider">Lunch &amp; learn</span></div>
+              <div class="s-wm">Thomas Saldanha<i>.</i></div>
+            </div>
+            <div>
+              <h2 class="s-h1">User research &amp; testing<span class="dot dot--17"></span></h2>
+              <p class="s-lede s-lede--sub">An introduction to planning, recruiting, running and analysing a study and some basic methodologies to consider.</p>
+            </div>
+            <div class="s-foot"><span>Mentoring · Talk handout</span><span>Six chapters</span></div>
+          </section>
+
+          <!-- 02 -->
+          <section class="dk-s dk-s--pad100" data-deck-slide data-label="Contents" data-speaker-notes="Six chapters. Read or present end to end or jump to the part relevant to the study in front of you.">
+            <div class="s-k s-k--lg"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wide">Contents</span></div>
+            <h2 class="s-h s-h--xl s-h--m64">What this covers</h2>
+            <div class="s-grid">
+              <div><div class="s-gn">01</div><div class="s-gt">Planning</div><div class="s-gp">Define the hypothesis, then choose the shape of the test.</div></div>
+              <div><div class="s-gn">02</div><div class="s-gt">Recruitment</div><div class="s-gp">How many, who, screening, compensation and consent.</div></div>
+              <div><div class="s-gn">03</div><div class="s-gt">Conduct the test</div><div class="s-gp">The pre-flight checklist and a testing script that travels.</div></div>
+              <div class="s-rule"><div class="s-gn">04</div><div class="s-gt">Analysis</div><div class="s-gp">Turn what you watched into a documented, defensible decision.</div></div>
+              <div class="s-rule"><div class="s-gn">05</div><div class="s-gt">General tips</div><div class="s-gp">The hard-won principles that keep a session on track.</div></div>
+              <div class="s-rule"><div class="s-gn">06</div><div class="s-gt">Methodologies</div><div class="s-gp">Usability, guerrilla, A/B, card sort and tree test.</div></div>
+            </div>
+            <div class="s-well">
+              <span class="s-well-l">Who is this session for?</span>
+              <p class="s-well-p">Built for anyone new to research and for the teams who commission studies. It gives you a foundation to work from and gives the business a clearer set of questions to bring to any study.</p>
+            </div>
+          </section>
+
+          <!-- 03 -->
+          <section class="dk-s dk-s--ivory dk-s--flat" data-deck-slide data-label="01 Planning" data-speaker-notes="Chapter one. A test is only as good as its scope, so we start by framing it.">
+            <div class="s-div">
+              <div class="s-div-n" aria-hidden="true">01</div>
+              <div class="s-div-in">
+                <div class="s-k s-k--lg s-div-k"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wide">Chapter 01</span></div>
+                <h2 class="s-div-h">Planning<span class="dot dot--15"></span></h2>
+                <p class="s-div-p">Frame the study before you build anything.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 04 -->
+          <section class="dk-s" data-deck-slide data-label="Hypothesis" data-speaker-notes="Always start with the hypothesis you want to challenge. It sets scope and keeps stakeholders aligned. From there, filter the methodologies with three decisions.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">01 · Planning</span></div>
+            <h2 class="s-h">Define the purpose &amp; type of test</h2>
+            <div class="s-stmt">Start with the hypothesis you want to challenge<span class="dot dot--7"></span></div>
+            <p class="s-lede" style="margin-top:28px">It guides stakeholder conversations and keeps scope tight. Testing too much dilutes everything, so be focused. From there, filter the hundreds of methodologies with three decisions.</p>
+          </section>
+
+          <!-- 05 -->
+          <section class="dk-s" data-deck-slide data-label="Moderated?" data-speaker-notes="Moderated gives engagement and adaptability for complex tasks, at the cost of speed and bias risk. Unmoderated gives scale and less bias, but no one to unblock a stuck participant.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">01 · Planning</span></div>
+            <h2 class="s-h">Moderated or unmoderated?</h2>
+            <div class="s-cards">
+              <div class="s-card">
+                <div class="s-cl">Moderated</div>
+                <div class="s-cd">A facilitator guides the participant throughout.</div>
+                <div class="s-ul s-ul--top">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Higher engagement; you can warm a quiet participant.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Probe any in-session remarks live.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Guide the study back on track if instructions are unclear or the tech fails.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Complex tasks are likelier to succeed.</span></div>
+                </div>
+                <div class="s-ul s-ul--con">
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Risk of bias, as you may inadvertently prompt.</span></div>
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Hard to align both diaries efficiently.</span></div>
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">One participant at a time, per moderator.</span></div>
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Risk of the observer effect.</span></div>
+                </div>
+              </div>
+              <div class="s-card">
+                <div class="s-cl">Unmoderated</div>
+                <div class="s-cd">No one is present while they take the test.</div>
+                <div class="s-ul s-ul--top">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Runs at their convenience, no diaries to align.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Test many at once and quicker end to end.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Less risk of bias and observer effect.</span></div>
+                </div>
+                <div class="s-ul s-ul--con">
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">No one to unblock a stuck participant.</span></div>
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">No follow-up questions on in-session remarks.</span></div>
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Hard to use for tests that need complex instructions.</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 06 -->
+          <section class="dk-s" data-deck-slide data-label="In-person?" data-speaker-notes="In-person gives rich behavioural signal, control and eye-tracking, but costs more and limits reach. Remote is cheaper with wide reach, but less control and no special hardware.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">01 · Planning</span></div>
+            <h2 class="s-h">In-person or remote?</h2>
+            <div class="s-cards">
+              <div class="s-card">
+                <div class="s-cl">In-person</div>
+                <div class="s-cd">Participant and facilitator share a room.</div>
+                <div class="s-ul s-ul--top">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Generally more engaged, as it is easier to build rapport.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">You catch subtle behaviour you would miss remotely.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Control the setting and use hardware like eye-tracking.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Replicate the real use environment.</span></div>
+                </div>
+                <div class="s-ul s-ul--con">
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Hard to source a wide geographic pool, for travel cost and time.</span></div>
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">They generally cost more to conduct.</span></div>
+                </div>
+              </div>
+              <div class="s-card">
+                <div class="s-cl">Remote</div>
+                <div class="s-cd">They are not in the same room.</div>
+                <div class="s-ul s-ul--top">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Cheaper to run, no travel or hotel cost.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Easy to recruit a wide geographic pool.</span></div>
+                </div>
+                <div class="s-ul s-ul--con">
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Harder to control the environment.</span></div>
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">No specialist hardware, no real-world setting.</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 07 -->
+          <section class="dk-s" data-deck-slide data-label="Quant / qual" data-speaker-notes="Quantitative tells you what happened and is quick to analyse, but not why. Qualitative tells you why, ideal for concepts, but is slower and lighter on what.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">01 · Planning</span></div>
+            <h2 class="s-h">Quantitative or qualitative?</h2>
+            <div class="s-cards">
+              <div class="s-card">
+                <div class="s-cl">Quantitative</div>
+                <div class="s-cd">Anything you can count or measure. “4 of 5 chose Pepsi over Coke.”</div>
+                <div class="s-ul s-ul--top">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Tells you <b class="s-em">what</b> happened.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Effective for testing a theory or hypothesis.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Quicker to analyse.</span></div>
+                </div>
+                <div class="s-ul s-ul--con">
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Will not tell you <b class="s-em">why</b>.</span></div>
+                </div>
+              </div>
+              <div class="s-card">
+                <div class="s-cl">Qualitative</div>
+                <div class="s-cd">Anything expressed in words. “It was much sweeter than I expected.”</div>
+                <div class="s-ul s-ul--top">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Tells you <b class="s-em">why</b>.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Good for a concept or experience.</span></div>
+                </div>
+                <div class="s-ul s-ul--con">
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Often will not tell you <b class="s-em">what</b> happened.</span></div>
+                  <div class="s-li"><span class="s-mi">−</span><span class="s-t">Takes longer to analyse.</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 08 -->
+          <section class="dk-s" data-deck-slide data-label="Document findings" data-speaker-notes="Decide how you will package findings before you launch, so the study is set up to deliver them. And pre-agree success criteria so you cannot move the goalposts later.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">01 · Planning</span></div>
+            <h2 class="s-h s-h--m44">How will you document findings?</h2>
+            <div class="s-2 s-2--even">
+              <div>
+                <p class="s-lede" style="margin-bottom:26px">Think about documentation early. It shapes how you set the study up. Ask yourself:</p>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Do you need a detailed document or will summary notes suffice?</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Are you presenting to stakeholders or the internal product team?</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">How experienced is the audience in reading testing insights?</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Will you have video or audio clips to support your insights?</span></div>
+                </div>
+              </div>
+              <div class="s-panel s-panel--tall">
+                <div class="s-pl-l">Define success criteria</div>
+                <div class="s-pl-h s-pl-h--lg">Pre-agree what passing looks like. <span class="s-pl-sub">E.g. This icon passes if 8 of 10 identify what it represents.</span></div>
+                <div class="s-pl-p">Agree it before launch, so you cannot move the goalposts later.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 09 -->
+          <section class="dk-s dk-s--ivory dk-s--flat" data-deck-slide data-label="02 Recruitment" data-speaker-notes="Chapter two. The wrong participants quietly invalidate a perfect study, so most of the rigour lives here.">
+            <div class="s-div">
+              <div class="s-div-n" aria-hidden="true">02</div>
+              <div class="s-div-in">
+                <div class="s-k s-k--lg s-div-k"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wide">Chapter 02</span></div>
+                <h2 class="s-div-h">Recruitment<span class="dot dot--15"></span></h2>
+                <p class="s-div-p">Find the right people and screen them well.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 10 -->
+          <section class="dk-s" data-deck-slide data-label="How many?" data-speaker-notes="Five minimum for concepts, I prefer ten. A/B needs far more, sized with a calculator. Scale with the cost of being wrong and never over-recruit.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">02 · Recruitment</span></div>
+            <h2 class="s-h s-h--m44">How many participants?</h2>
+            <div class="s-2">
+              <div class="s-ul">
+                <div class="s-li"><span class="s-m"></span><span class="s-t">5 is the usual minimum for early concepts, but I personally prefer 10, especially unmoderated. If one session fails over tech etc you still have a clear majority rather than a potential 50/50 coin toss.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">For optimisation studies like A/B tests you will recruit significantly more than five. The number varies per company, so use an online calculator to reach statistical relevance.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">The number also varies with the severity of the consequences if something goes wrong. For example, you would not test something life-threatening only five times.</span></div>
+              </div>
+              <div class="s-panel">
+                <div class="s-pl-h s-pl-h--n">100 hrs <i>≈</i> 2½ wks</div>
+                <div class="s-pl-p">Do not over-recruit. 100 participants is 100 hours of footage, about two and a half weeks just to rewatch.</div>
+                <div class="s-pl-p">There is a well-known Nielsen Norman Group article on sample size:
+                  <a class="s-link s-link--sm" href="https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/" target="_blank" rel="noopener"><span>Why 5 users is enough</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M20 4l-8.5 8.5"></path><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 11 -->
+          <section class="dk-s" data-deck-slide data-label="Who?" data-speaker-notes="Weigh brand awareness, customer status, demographics, salary, employment and platform. The more specific, the costlier to source. Internal database is cheaper but blunt; external recruiters cost a fee for a larger pool.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">02 · Recruitment</span></div>
+            <h2 class="s-h">What characteristics do you need?</h2>
+            <div class="s-2">
+              <div>
+                <div class="s-ul s-ul--14">
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Should they know about your brand?</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Should they be a new or existing customer?</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">If existing, how frequently should they have purchased?</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Is any of the following important?</span></div>
+                  <div class="s-aside">Age, Gender, Location, Salary or Employment</div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Do they have to use Android or iOS?</span></div>
+                </div>
+                <div class="s-note">Be careful, there is a fine balance between letting everyone in and making it too difficult to find participants. The more specific you make the participant requirements, the more money it will cost to find them.</div>
+              </div>
+              <div class="s-panel">
+                <div class="s-pl-h s-pl-h--xl">Where are you sourcing your participants?</div>
+                <div class="s-pl-rows">
+                  <div class="s-pl-row"><div class="s-pl-rl">Internal database</div><div class="s-pl-rv">Cheaper, but blunt on targeting.</div></div>
+                  <div class="s-pl-row"><div class="s-pl-rl">External recruiter</div><div class="s-pl-rv">A fee, for a far larger, better-targeted pool.</div></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 12 -->
+          <section class="dk-s" data-deck-slide data-label="Screening" data-speaker-notes="The screener is your second-pass filter. Eliminate early, hide the study's aim, ask open non-leading questions, avoid yes/no.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">02 · Recruitment</span></div>
+            <h2 class="s-h s-h--m24">Screening the pool</h2>
+            <p class="s-lede" style="max-width:46ch">Defining participant characteristics filters the pool once. A second pass narrows it to the individuals who are actually eligible for your study, and that second pass is called a screener.</p>
+            <div class="s-2">
+              <div class="s-ul s-ul--14">
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Eliminate early, biggest criteria first.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Do not reveal the study’s aim.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Ask open questions about real behaviour.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Avoid leading and yes/no questions.</span></div>
+              </div>
+              <div class="s-panel">
+                <div class="s-pl-h s-pl-rule">Screening for a trainer brand, you would…</div>
+                <div>
+                  <div class="s-pl-rl">Avoid</div>
+                  <div class="s-pl-q">“Do you regularly buy trainers?” <i>(yes / no)</i></div>
+                </div>
+                <div class="s-pl-hr">
+                  <div style="margin-bottom:14px"><span class="s-tag">Better</span></div>
+                  <div class="s-pl-q s-pl-q--on">“Which of these products have you purchased two or more times in the last six months?” <em>Multi-select.</em></div>
+                  <div class="s-pl-rv s-it" style="margin-top:14px">T-shirts, Jumpers, Jeans, Hoodies, Jackets, Shorts, Suits, Trousers, Trainers, Shirts</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 13 -->
+          <section class="dk-s" data-deck-slide data-label="Compensation" data-speaker-notes="Agree the form and value early, clear cash with finance. Only pay those who pass and complete, pay promptly and release unless they clearly ignored instructions.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">02 · Recruitment</span></div>
+            <h2 class="s-h">Compensating participants</h2>
+            <div class="s-2">
+              <div class="s-ul s-ul--14">
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Are you planning to compensate participants for their time?</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">In what form: cash, vouchers, discounts or products? Check with accounting before issuing cash, for tax reasons.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Compensation value should vary to reflect the length of time and complexity of each study.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Only compensate those who pass the screener and complete.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Pay promptly. Never make a participant chase you.</span></div>
+              </div>
+              <div class="s-panel">
+                <div class="s-pl-h">You pay for their <em>time</em>, not the quality of answers.</div>
+                <div class="s-pl-p s-pl-p--rule">Unless they clearly ignored the instructions, release payment.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 14 -->
+          <section class="dk-s" data-deck-slide data-label="Consent" data-speaker-notes="Capture consent before launch: purpose, tasks, data handling and access, compensation, the right to withdraw and recording. Minors need guardian approval. Share the form early.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">02 · Recruitment</span></div>
+            <h2 class="s-h">Capturing consent</h2>
+            <div class="s-2">
+              <div>
+                <p class="s-lede" style="max-width:52ch;margin-bottom:26px">Before launch, capture consent to take part and to have data processed. <b class="s-em">Provide the form well in advance of the session</b>, so no one is pressured into signing without reading it.</p>
+                <div class="s-ul s-ul--14">
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Purpose of the study.</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Tasks and duration.</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Data storage and access.</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Compensation.</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">The ability to withdraw consent at any time.</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">Consent for audio and video to be recorded.</span></div>
+                  <div class="s-li"><span class="s-m"></span><span class="s-t">If the study involves a minor, you will need approval from a parent or guardian.</span></div>
+                </div>
+              </div>
+              <div class="s-panel">
+                <div class="s-pl-l">Reference</div>
+                <div class="s-pl-h">Nielsen Norman Group publish an example consent form.</div>
+                <a class="s-link" href="https://media.nngroup.com/media/articles/attachments/NNg_Example_Consent_Form.pdf" target="_blank" rel="noopener"><span>Example consent form</span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M20 4l-8.5 8.5"></path><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a>
+                <div class="s-src">nngroup.com · PDF</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 15 -->
+          <section class="dk-s dk-s--ivory dk-s--flat" data-deck-slide data-label="03 Conduct" data-speaker-notes="Chapter three. Two things carry the day: a checklist you actually ran and a script that keeps every session comparable.">
+            <div class="s-div">
+              <div class="s-div-n" aria-hidden="true">03</div>
+              <div class="s-div-in">
+                <div class="s-k s-k--lg s-div-k"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wide">Chapter 03</span></div>
+                <h2 class="s-div-h">Conduct the test<span class="dot dot--15"></span></h2>
+                <p class="s-div-p">Run a calm, consistent session.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 16 -->
+          <section class="dk-s" data-deck-slide data-label="Pre-flight" data-speaker-notes="Run through this before launch. A stalled session is almost always one line here that went unchecked.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">03 · Conduct the test</span></div>
+            <h2 class="s-h">Pre-test checklist</h2>
+            <div class="s-check">
+              <div class="s-check-g">
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">All participants have the URL, address and time of their test</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Consent forms completed.</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Compensation details on file.</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Script written and dry-run.</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Devices loaned and batteries full.</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Third-party tools installed and working.</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Screen, audio and video permissions granted.</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Wi-Fi stable in the testing location.</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Meeting-room booking confirmed.</span></div>
+                <div class="s-li"><span class="s-m s-m--box"></span><span class="s-t">Arrived well before the first participant</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 17 -->
+          <section class="dk-s" data-deck-slide data-label="Script · intro" data-speaker-notes="A script keeps every session consistent. It guides and prompts you, it is not read word for word. Open by warming the participant and setting expectations.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">03 · The testing script</span></div>
+            <h2 class="s-h">Introduction</h2>
+            <div class="s-2">
+              <div class="s-ul">
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Warm the participant with small talk. The content does not matter, it eases them in and starts a natural flow.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Confirm contact details and that consent is signed.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Set the scene: purpose, who you represent, your role.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Reassure them there are no right or wrong answers. It is not a test of them, and nothing they say is taken personally.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Encourage them to vocalise their thoughts. Explain it’ll feel odd at first, but it shows you what they are seeing and the thinking behind their actions.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Give a high-level overview of the structure, e.g. “I will ask you to interact with a prototype, then follow up with some questions.”</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Finish with “Any questions before we begin?”</span></div>
+              </div>
+              <div class="s-panel">
+                <div class="s-pl-h">A script is there to guide and prompt you, not to be read out word for word.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 18 -->
+          <section class="dk-s dk-s--pad90" data-deck-slide data-label="Script · during" data-speaker-notes="Ease them in with simple tasks. Keep questions open and non-leading, do not presume and observe more than you talk. Keep a few prompts to hand.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">03 · The testing script</span></div>
+            <h2 class="s-h s-h--m34">During the test</h2>
+            <div class="s-2">
+              <div class="s-ul">
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Simple tasks first, to build confidence.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Keep questions open ended. Avoid anything likely to get a one word answer: it tells you half the story and does not encourage them to disclose opinions, thoughts and emotions.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Avoid leading questions. “How easy was checkout?” presumes it was easy, where “How was the checkout experience?” does not.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Do not presume answers on behalf of the participant. When an answer is ambiguous, ask them to expand and clarify.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Your primary role is to observe, so avoid talking where you can. It keeps you from introducing bias, and from interrupting a participant who is in flow.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Use a deliberate pause. Silence does more work than another question, and it gives them room to fill it.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">Watch for someone answering to please you. Reassure them that they cannot get this wrong and that you value their honest thoughts.</span></div>
+                <div class="s-li"><span class="s-m"></span><span class="s-t">If asked what something does, hand the question back with “what would you expect it to do?”</span></div>
+              </div>
+              <div class="s-panel">
+                <div class="s-pl-l" style="margin-bottom:26px">Prompts worth keeping to hand</div>
+                <div class="s-prompts">
+                  <span class="s-prompt">“What do you mean by X?”</span>
+                  <span class="s-prompt">“Could you give an example?”</span>
+                  <span class="s-prompt">“What makes you think that?”</span>
+                  <span class="s-prompt">“What would you expect?”</span>
+                  <span class="s-prompt">“Tell me more about that.”</span>
+                  <span class="s-prompt">“What were you expecting to happen?”</span>
+                  <span class="s-prompt">“Is that what you expected?”</span>
+                  <span class="s-prompt">“What would you do next?”</span>
+                  <span class="s-prompt">“Why?”</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 19 -->
+          <section class="dk-s" data-deck-slide data-label="Script · end" data-speaker-notes="Give them a last open door, thank them and set the expectation on compensation timing.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">03 · The testing script</span></div>
+            <h2 class="s-h s-h--m44">End of test</h2>
+            <div class="s-quote">
+              <div class="s-quote-row">
+                <span class="s-quote-m" aria-hidden="true">“</span>
+                <div class="s-quote-t">Before we end, is there anything else you would like to mention?</div>
+              </div>
+              <p class="s-lede">It lets them add context or raise something you never asked. Then thank them for their time and feedback and remind them to get in touch if compensation has not arrived within 48 hours.</p>
+            </div>
+          </section>
+
+          <!-- 20 -->
+          <section class="dk-s dk-s--ivory dk-s--flat" data-deck-slide data-label="04 Analysis" data-speaker-notes="Chapter four. Everything so far gives you observations. This is where they become a decision.">
+            <div class="s-div">
+              <div class="s-div-n" aria-hidden="true">04</div>
+              <div class="s-div-in">
+                <div class="s-k s-k--lg s-div-k"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wide">Chapter 04</span></div>
+                <h2 class="s-div-h">Analysis<span class="dot dot--15"></span></h2>
+                <p class="s-div-p">Turn what you observed into actionable recommendations.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 21 -->
+          <section class="dk-s" data-deck-slide data-label="Footage to decision" data-speaker-notes="A short sequence takes you from raw observations to an agreed next step: confirm compensation, document, then present and conclude.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">04 · Analysis</span></div>
+            <h2 class="s-h s-h--m56">From insights to recommendations</h2>
+            <div class="s-3 s-3--auto">
+              <div><div class="s-gn">01</div><div class="s-gt s-gt--step">Confirm compensation</div><p class="s-gp s-gp--step">Check every participant has been paid before anything else.</p></div>
+              <div><div class="s-gn">02</div><div class="s-gt s-gt--step">Review &amp; document</div><p class="s-gp s-gp--step">Work the footage into the format you agreed up front.</p></div>
+              <div><div class="s-gn">03</div><div class="s-gt s-gt--step">Present &amp; conclude</div><p class="s-gp s-gp--step">Present the findings to your stakeholder and agree the next steps.</p></div>
+            </div>
+            <div class="s-chips">
+              <span class="s-cl">Ends one of three ways</span>
+              <span class="s-chip s-chip--y">Proceed as tested</span>
+              <span class="s-chip">Investigate further</span>
+              <span class="s-chip">Re-test</span>
+            </div>
+          </section>
+
+          <!-- 22 -->
+          <section class="dk-s" data-deck-slide data-label="Method outputs" data-speaker-notes="How you analyse depends on what you ran. Each method leaves you with a different artefact, so agree the output format before you start.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">04 · Analysis</span></div>
+            <h2 class="s-h s-h--m20">Different methods require different analysis</h2>
+            <p class="s-lede" style="margin-bottom:30px">The study you ran dictates how you analyse it. Below are a few examples of what you might look at.</p>
+            <div class="s-2 s-2--wide">
+              <div class="s-rows">
+                <div class="s-row s-row--out"><div class="s-rn">Card sort</div><div class="s-rd">A similarity matrix, the groupings participants made and the language they used to name them.</div></div>
+                <div class="s-row s-row--out"><div class="s-rn">Tree test</div><div class="s-rd">Success and directness rates per task, and the paths where people went wrong.</div></div>
+                <div class="s-row s-row--out"><div class="s-rn">Usability test</div><div class="s-rd">Task success, a severity-rated list of issues and clips you can show.</div></div>
+                <div class="s-row s-row--out"><div class="s-rn">Guerrilla test</div><div class="s-rd">Rough notes and an early signal, enough to spot a blocker.</div></div>
+                <div class="s-row s-row--out"><div class="s-rn">A/B test</div><div class="s-rd">The difference in conversion between A and B, with a significance figure.</div></div>
+              </div>
+              <div class="s-panel">
+                <div class="s-pl-h">Agree the output format before you launch, not after.</div>
+                <div class="s-pl-p s-pl-p--rule">It is the difference between writing findings up and hunting for them.</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 23 -->
+          <section class="dk-s" data-deck-slide data-label="What matters" data-speaker-notes="Triage before you present. Frequency, severity and cost to fix, weighed together, turn a pile of observations into a list someone can act on. It is judgement, not arithmetic.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">04 · Analysis</span></div>
+            <h2 class="s-h s-h--m20">Deciding what actually matters</h2>
+            <p class="s-lede" style="max-width:70ch;margin-bottom:40px">Not everything you observe is worth acting on. Before you take anything to a stakeholder, weigh it up in four ways.</p>
+            <div class="s-cards s-cards--4">
+              <div class="s-card"><div class="s-cl s-cl--m">Frequency</div><div class="s-t">How many participants ran into this issue. A single instance is a note to keep an eye on, a repeated one is a pattern.</div></div>
+              <div class="s-card"><div class="s-cl s-cl--m">Severity</div><div class="s-t">How much it got in their way. Did it stop them completely, slow them down or just irritate them?</div></div>
+              <div class="s-card"><div class="s-cl s-cl--m">Cost to fix</div><div class="s-t">What it would take to put right. Changing some copy and re-platforming are very different conversations to have.</div></div>
+              <div class="s-card"><div class="s-cl s-cl--m">Commercial impact</div><div class="s-t">What it costs the business to leave alone. An issue on the checkout carries more weight than the same issue three levels into the help pages.</div></div>
+            </div>
+            <div class="s-band">Weighing all four gives your stakeholder a list they can act on, rather than everything you noticed.</div>
+          </section>
+
+          <!-- 24 -->
+          <section class="dk-s" data-deck-slide data-label="Findings discipline" data-speaker-notes="Keep observation, interpretation and recommendation apart. It is what makes a finding defensible when a stakeholder pushes back on it.">
+            <div class="s-k"><span class="s-mark">//</span><span class="s-kl">04 · Analysis</span></div>
+            <h2 class="s-h s-h--m20">Keep these three apart</h2>
+            <p class="s-lede" style="max-width:78ch;margin-bottom:34px">Not everything can be quantified, but separating the three moves a finding from your opinion towards something closer to a fact.</p>
+            <div class="s-rows">
+              <div class="s-row"><div class="s-rl">Observation</div><div class="s-rv">“Three of ten opened the wrong tab first.”</div></div>
+              <div class="s-row"><div class="s-rl">Interpretation</div><div class="s-rv">“The tab labels do not describe what is inside them.”</div></div>
+              <div class="s-row"><div class="s-rl">Recommendation</div><div class="s-rv">“Rename the tabs using the words from the card sort.”</div></div>
+            </div>
+            <div class="s-cols">
+              <p>Collapsed into one sentence, a finding is easy to dismiss. Kept apart, a stakeholder can disagree with your recommendation without disputing what happened.</p>
+              <p>Expect them to disagree sometimes. They often hold commercial or technical context your study never saw, so do not take it personally.</p>
+            </div>
+          </section>
+
+          <!-- 25 -->
+          <section class="dk-s dk-s--ivory dk-s--flat" data-deck-slide data-label="05 General tips" data-speaker-notes="Chapter five. A few principles that make every session easier, whatever the method.">
+            <div class="s-div">
+              <div class="s-div-n" aria-hidden="true">05</div>
+              <div class="s-div-in">
+                <div class="s-k s-k--lg s-div-k"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wide">Chapter 05</span></div>
+                <h2 class="s-div-h">General tips<span class="dot dot--15"></span></h2>
+                <p class="s-div-p">What keeps a session on track, whatever the method.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 26 -->
+          <section class="dk-s dk-s--black dk-s--pad100 dk-s--centre" data-deck-slide data-label="Practice makes perfect" data-speaker-notes="None of this is precious. The best testers stay relaxed and keep learning.">
+            <div class="s-k" style="margin-bottom:22px"><span class="s-mark s-mark--lg" style="font-size:20px">//</span><span class="s-kl">05 · General tips</span></div>
+            <h2 class="s-h s-h--black">Practice makes perfect<span class="dot dot--13"></span></h2>
+            <div class="s-cards s-cards--3">
+              <div class="s-card s-card--dark"><div class="s-ct">It is not about you</div><p class="s-cp">Participants do not know what you are looking for. If it doesn’t go to plan, learn from it.</p></div>
+              <div class="s-card s-card--dark"><div class="s-ct">Progress over perfection</div><p class="s-cp">You will never get the perfect setup. Just stay aware of the concessions you make.</p></div>
+              <div class="s-card s-card--dark"><div class="s-ct">Stay focused</div><p class="s-cp">Do not do too much. Chase the one thing that drives the most value.</p></div>
+            </div>
+          </section>
+
+          <!-- 27 -->
+          <section class="dk-s dk-s--ivory dk-s--flat" data-deck-slide data-label="06 Methodologies" data-speaker-notes="Chapter six. There are hundreds of methodologies; these five cover most of what I reach for and what each is good at.">
+            <div class="s-div">
+              <div class="s-div-n" aria-hidden="true">06</div>
+              <div class="s-div-in">
+                <div class="s-k s-k--lg s-div-k"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wide">Chapter 06</span></div>
+                <h2 class="s-div-h">Methodologies<span class="dot dot--15"></span></h2>
+                <p class="s-div-p">Five methods worth knowing and where each one fits.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 28 -->
+          <section class="dk-s dk-s--pad90" data-deck-slide data-label="Usability testing" data-speaker-notes="Usability testing observes real behaviour on real tasks. Incredibly versatile, for validating almost any hypothesis before a big build.">
+            <div class="s-k" style="margin-bottom:18px"><span class="s-mark">//</span><span class="s-kl">06 · Methodologies</span></div>
+            <div class="s-meth-h"><h2 class="s-h s-h--meth">Usability testing</h2><span class="s-pill">Behavioural</span></div>
+            <p class="s-lede s-lede--28">Observe real behaviour and reactions as people attempt a set of tasks with your product.</p>
+            <div class="s-meth">
+              <div>
+                <div class="s-meth-l">Process</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">You ask participants to complete a series of tasks while interacting with your product.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">Whilst they conduct these tasks you may observe and record their reactions and behaviours using a range of tools such as eye-tracking, heat maps, video, audio and screen recording.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">Where possible you want the testing environment to replicate the real-life conditions in which users would typically use your product.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">Conducted with participants who are pre-recruited.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">To avoid participant fatigue, we recommend tests should last no longer than 30-40 minutes.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Benefits</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Validates your product is intuitive and fulfils your end users’ expectations and needs.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Receive unbiased feedback from real users, helping to validate or challenge stakeholder assumptions.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Validate hypothesis and concepts prior to investing significant cost in large complex builds.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Use case</div>
+                <div class="s-li"><span class="s-m s-m--y"></span><span class="s-t">Usability testing is incredibly versatile and can be used in almost any use case where you want to test and validate a hypothesis.</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 29 -->
+          <section class="dk-s dk-s--pad90" data-deck-slide data-label="Guerrilla testing" data-speaker-notes="Guerrilla testing is quick and low-cost, in public spaces with people you did not recruit. Great for early signal and winning support for a bigger study.">
+            <div class="s-k" style="margin-bottom:18px"><span class="s-mark">//</span><span class="s-kl">06 · Methodologies</span></div>
+            <div class="s-meth-h"><h2 class="s-h s-h--meth">Guerrilla testing</h2><span class="s-pill">Behavioural</span></div>
+            <p class="s-lede s-lede--28">A quick, low-cost test in public spaces: ask passers-by to try a few simple tasks with your prototype.</p>
+            <div class="s-meth">
+              <div>
+                <div class="s-meth-l">Process</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">Unlike formal usability testing, participants are not pre-recruited so they won’t represent your real end user.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">You are unlikely to be able to observe and record the participants’ reactions beyond a video and audio recording as you’re limited by the environment’s setup.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">As per formal usability testing you still ask participants to complete a series of tasks while interacting with your product.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">Due to the informal nature of guerrilla testing, we recommend limiting tests to no longer than 10 minutes to keep your participants engaged.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Benefits</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Relatively minimal planning and preparation required prior to launch.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Validate simple hypothesis and concepts prior to committing to larger formal tests.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Show the advantages of user testing to stakeholders, with the intention of convincing them to commission a larger study in the future.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Use case</div>
+                <div class="s-li"><span class="s-m s-m--y"></span><span class="s-t">Used primarily for small tests that need to be executed quickly with a minimal budget and it’s not essential you use a participant who accurately reflects your real user.</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 30 -->
+          <section class="dk-s dk-s--pad90" data-deck-slide data-label="A/B testing" data-speaker-notes="A/B testing changes one variable and measures A against B. Data-driven, low-risk and ideal for optimising a live experience.">
+            <div class="s-k" style="margin-bottom:18px"><span class="s-mark">//</span><span class="s-kl">06 · Methodologies</span></div>
+            <div class="s-meth-h"><h2 class="s-h s-h--meth">A/B testing</h2><span class="s-pill">Optimisation</span></div>
+            <p class="s-lede s-lede--28">Change a single variable of an execution and compare whether version A or B performs better.</p>
+            <div class="s-meth">
+              <div>
+                <div class="s-meth-l">Process</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">You create two versions of the same execution, with the exception of a single variable.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">You show half of your audience version A and the other half version B.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">To avoid ambiguity you only change a single variable, so it’s clear what is the responsible factor for the performance change.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Benefits</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Utilises data-driven decision making rather than relying on gut feelings.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">A/B tests are often restricted to a smaller sub-section of your audience, so the impact of any major failures are often limited.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Quick and easy way to optimise an existing experience.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Cost-effective strategy as any negative dips in performance may be quickly identified and reverted.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Use case</div>
+                <div class="s-li"><span class="s-m s-m--y"></span><span class="s-t">A/B tests are incredibly versatile and can be used in almost any use case where you want to test two versions of a single execution.</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 31 -->
+          <section class="dk-s dk-s--pad90" data-deck-slide data-label="Card sorting" data-speaker-notes="Card sorting reveals how users group and relate content, by watching them organise it. Primarily for drafting information architecture.">
+            <div class="s-k" style="margin-bottom:18px"><span class="s-mark">//</span><span class="s-kl">06 · Methodologies</span></div>
+            <div class="s-meth-h"><h2 class="s-h s-h--meth">Card sorting</h2><span class="s-pill">Information architecture</span></div>
+            <p class="s-lede s-lede--28">Understand how users group and relate your content, by watching them organise it themselves.</p>
+            <div class="s-meth">
+              <div>
+                <div class="s-meth-l">Process</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">You provide the participants with a series of cards, each containing one piece of content. You ask them to sort the cards into groups that feel natural to them and provide a title for each group.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">We analyse first party data alongside business priorities to identify which cards should be included.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">To maintain participant focus, we recommend providing no more than 40 cards to sort.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Benefits</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Creates a logical and intuitive structure that aligns with your actual users’ expectations on where content should be located.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Helps identify the natural language your users would use and expect to see for each section heading.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">By getting the structure right early on, it reduces the need for costly re-designs later in the project.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Use case</div>
+                <div class="s-li"><span class="s-m s-m--y"></span><span class="s-t">Used primarily to help inform a draft website information architecture and primary navigation.</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 32 -->
+          <section class="dk-s dk-s--pad90" data-deck-slide data-label="Tree test" data-speaker-notes="Tree testing checks how easily users navigate the IA with no interface in the way. Primarily to validate a draft structure.">
+            <div class="s-k" style="margin-bottom:18px"><span class="s-mark">//</span><span class="s-kl">06 · Methodologies</span></div>
+            <div class="s-meth-h"><h2 class="s-h s-h--meth">Tree test</h2><span class="s-pill">Information architecture</span></div>
+            <p class="s-lede s-lede--28">Evaluate how easily users navigate your information architecture, with no designed interface in the way.</p>
+            <div class="s-meth">
+              <div>
+                <div class="s-meth-l">Process</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">You ask participants to navigate through a non-designed text based navigation, to identify where they would expect to find a piece of content.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">We analyse first party data alongside business priorities to identify which tasks should be included.</span></div>
+                  <div class="s-li"><span class="s-m s-m--sm"></span><span class="s-t">To maintain participant focus, we recommend asking participants to find no more than 10 tasks.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Benefits</div>
+                <div class="s-ul">
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Validates if your information architecture is logical and easy to navigate.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">It separates the information architecture from the user interface, so there is no ambiguity if a test fails which part is responsible.</span></div>
+                  <div class="s-li"><span class="s-pl">+</span><span class="s-t">Helps identify potential locations to display lateral links to re-direct a small portion of users who are unable to initially find the correct pathway.</span></div>
+                </div>
+              </div>
+              <div>
+                <div class="s-meth-l">Use case</div>
+                <div class="s-li"><span class="s-m s-m--y"></span><span class="s-t">Used primarily to validate your draft website information architecture and primary navigation.</span></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 33 -->
+          <section class="dk-s dk-s--black dk-s--pad118 dk-s--between" data-deck-slide data-label="Thank you" data-speaker-notes="Now go and run that study. If your team could use a session like this or you just want to talk research, get in touch.">
+            <div class="s-top">
+              <div class="s-k s-k--lg"><span class="s-mark s-mark--lg">//</span><span class="s-kl s-kl--wider">Thank you</span></div>
+              <div class="s-wm">Thomas Saldanha<i>.</i></div>
+            </div>
+            <div>
+              <h2 class="s-h s-h--close">Now go and run that study<span class="dot dot--14"></span></h2>
+              <p class="s-lede s-lede--30">If your team could use a session like this or you just want to talk research, I am always happy to.</p>
+            </div>
+            <div class="s-acts">
+              <div class="s-acts-in">
+                <a class="s-a s-a--y" href="mailto:hello@thomas-saldanha.com">hello@thomas-saldanha.com</a>
+                <a class="s-a" href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener">LinkedIn<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M20 4l-8.5 8.5"></path><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a>
+                <a class="s-a" href="https://www.uxtom.co.uk">uxtom.co.uk<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"></path><path d="M20 4l-8.5 8.5"></path><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></a>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <div class="dk-cap">
+        <div class="dk-hint">Arrow keys or click to move through</div>
+        <div class="dk-ro">Read only</div>
+      </div>
+      <div class="tk-ro-m">Read only · swipe or use the arrows</div>
+
+      <div class="dk-bar">
+        <button class="dk-btn" type="button" data-deck-prev aria-label="Previous slide"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+        <button class="dk-btn" type="button" data-deck-next aria-label="Next slide"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+        <div class="dk-count"><span data-deck-now>01</span> <span>/</span> <span data-deck-total>33</span></div>
+        <div class="dk-name" data-deck-label>Title</div>
+        <div class="dk-chaps dk-spacer">
+          <button class="dk-chap" type="button" data-deck-chapter="3">Planning</button>
+          <button class="dk-chap" type="button" data-deck-chapter="9">Recruitment</button>
+          <button class="dk-chap" type="button" data-deck-chapter="15">Conduct</button>
+          <button class="dk-chap" type="button" data-deck-chapter="20">Analysis</button>
+          <button class="dk-chap" type="button" data-deck-chapter="25">Tips</button>
+          <button class="dk-chap" type="button" data-deck-chapter="27">Methods</button>
+        </div>
+        <button class="dk-btn" type="button" data-deck-full aria-label="Full screen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"></path><path d="M20 9V4h-5"></path><path d="M4 15v5h5"></path><path d="M20 15v5h-5"></path></svg></button>
+      </div>
+
+      <p class="dk-live" data-deck-live aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- closing -->
+  <section class="tk-close">
+    <div class="tk-close-grid">
+      <div>
+        <h2 class="tk-h2">Why I wrote it</h2>
+        <p class="tk-p">Teams commission research more often than they run it. The session gives people new to testing a foundation to work from, and gives the business a clearer set of questions to bring to any study.</p>
+      </div>
+      <div class="tk-cta">
+        <div class="tk-cta-l">Run this for your team</div>
+        <p class="tk-cta-p">I run this session with product and marketing teams, tailored to the studies you have coming up.</p>
+        <a class="tk-cta-a" href="mailto:hello@thomas-saldanha.com"><span>Get in touch</span></a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="cs-footer">
+    <div class="cs-footer-main">
+      <div class="cs-footer-next">Next: ArcelorMittal<span class="cs-dot">.</span></div>
+      <a class="cs-footer-link" href="../../work/arcelormittal/"><span>View the first case study</span></a>
+    </div>
+    <div class="cs-footer-links">
+      <a href="mailto:hello@thomas-saldanha.com"><span>hello@thomas-saldanha.com</span></a>
+      <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span>LinkedIn</span><svg width="9" height="9" viewBox="0 0 10 10" fill="none" class="ext9 ext9--cs" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+  </footer>
+
+</div>
+</div>
+
+<div class="nav-menu" id="nav-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="nav-menu-top">
+    <a class="brand" href="../../">Thomas Saldanha<span class="brand-dot">.</span></a>
+    <button class="nav-close" type="button" data-nav-close aria-label="Close menu">
+      <svg width="17" height="17" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M1 1l16 16M17 1L1 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+    </button>
+  </div>
+  <nav class="nav-menu-links" aria-label="Site">
+    <a href="../../#work"><span class="nav-menu-u">Work</span></a>
+    <a href="../../cv/thomas-saldanha-cv.pdf" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">CV</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 11l5 5 5-5"></path><path d="M4 21h16"></path></svg></span></a>
+    <a href="https://www.linkedin.com/in/thomassaldanha/" target="_blank" rel="noopener"><span class="nav-menu-li"><span class="nav-menu-u">LinkedIn</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="ext9" aria-hidden="true"><path d="M1 9L9 1M9 1H3.5M9 1V6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></a>
+    <a href="mailto:hello@thomas-saldanha.com"><span class="nav-menu-u">hello@thomas-saldanha.com</span></a>
+  </nav>
+  <div class="nav-menu-foot">London, United Kingdom</div>
+</div>
+
+<script src="../../deck.js"></script>
+<script src="../../nav-menu.js"></script>
+</body>
+</html>

@@ -2888,6 +2888,16 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
    page always fits whichever way the phone is held. */
 .dk.is-full .dk-frame{height:min(100vh, calc(100vw * 9 / 16));width:auto;max-width:100vw;margin:0;border:0;border-radius:0}
 .dk.is-full .dk-inframe{position:absolute;inset:0;padding:0 1.2%;justify-content:space-between}
+/* The way out. The overlay covers the bar the expand button sits in, so
+   without this the reader is stuck: Escape is no help on a phone, and the
+   only remaining exit is the browser's back gesture. Tapping the letterbox
+   around the page closes it too. */
+.dk-close{display:none}
+.dk.is-full .dk-close{display:flex;position:absolute;top:14px;right:14px;z-index:3;
+  width:44px;height:44px;align-items:center;justify-content:center;padding:0;
+  background:rgba(240,237,227,.10);border:1px solid rgba(240,237,227,.28);border-radius:100px;
+  color:#f0ede3;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease}
+.dk.is-full .dk-close:hover{background:#ffd400;border-color:#ffd400;color:#201C16}
 .dk-frame:fullscreen,.dk-view:fullscreen{background:#1a1714}
 .dk-stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--dk-k,1));transform-origin:50% 50%}
 
@@ -3194,7 +3204,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .dk-frame{border-radius:0;border-left:0;border-right:0;cursor:auto}
   .dk-hint{display:none}
   .dk-hint-m{display:block;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
-  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 24px;padding-top:22px}
+  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 24px;padding-top:34px}
   .dk-nav,.dk-jump{gap:10px}
   .dk-nav{align-items:flex-start}
   .dk-nav-row{gap:10px}

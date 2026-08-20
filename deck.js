@@ -30,6 +30,7 @@
   var prev   = deck.querySelector('[data-deck-prev]');
   var next   = deck.querySelector('[data-deck-next]');
   var full   = deck.querySelector('[data-deck-full]');
+  var close  = deck.querySelector('[data-deck-close]');
   var now    = deck.querySelector('[data-deck-now]');
   var total  = deck.querySelector('[data-deck-total]');
   var label  = deck.querySelector('[data-deck-label]');
@@ -197,7 +198,7 @@
 
   if (full && frame) {
     full.addEventListener('click', function () {
-      if (expanded) { setExpanded(false); nativeOff(); }
+      if (expanded) { exit(); }
       else { setExpanded(true); nativeOn(deck.querySelector('.dk-view') || frame); }
     });
     /* leaving native full screen by the browser's own control (Escape, the
@@ -211,9 +212,19 @@
       });
     });
     document.addEventListener('keydown', function (e) {
-      if (expanded && e.key === 'Escape') { setExpanded(false); nativeOff(); }
+      if (expanded && e.key === 'Escape') { exit(); }
     });
   }
+
+  function exit() { setExpanded(false); nativeOff(); }
+
+  if (close) close.addEventListener('click', exit);
+
+  /* the letterbox around the page is a way out too, the way any lightbox is */
+  var view = deck.querySelector('.dk-view');
+  if (view) view.addEventListener('click', function (e) {
+    if (expanded && e.target === view) exit();
+  });
 
   addEventListener('resize', fit);
   addEventListener('orientationchange', fit);

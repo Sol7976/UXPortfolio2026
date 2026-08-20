@@ -2920,13 +2920,16 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   70%  {box-shadow:0 0 0 13px rgba(255,212,0,0)}
   100% {box-shadow:0 0 0 0 rgba(255,212,0,0)}
 }
-.dk-btn--next:not(:disabled){animation:dk-pulse 2.6s cubic-bezier(.4,0,.2,1) infinite}
+.dk-btn--next:not(:disabled){animation:dk-pulse 1.6s cubic-bezier(.4,0,.2,1) infinite}
 .dk-btn--next:hover{animation:none}
+/* its whole job is to say the deck moves; once the reader has moved it, it has
+   said it, so deck.js flags the deck and the pulse stops for good */
+.dk.is-used .dk-btn--next{animation:none}
 @media (prefers-reduced-motion: reduce){.dk-btn--next{animation:none}}
 .dk-btn--prev{background:#ffffff;border-color:rgba(18,18,16,.3)}
 .dk-btn--quiet{background:#ffffff;border-color:rgba(18,18,16,.12)}
 .dk-btn--prev:hover:not(:disabled),.dk-btn--quiet:hover:not(:disabled){background:#ffd400;border-color:#ffd400}
-.dk-count{font:300 22px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap;color:#a6a49d}
+.dk-count{font:300 28px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;color:#a6a49d}
 .dk-count [data-deck-now]{color:#1a1a17}   /* the slide you are on, inked; the rest stays faint */
 .dk-chaps{display:flex;gap:8px;flex-wrap:wrap}
 .dk-chap{min-height:44px;padding:0 16px;background:#f4f4f2;border:1px solid rgba(18,18,16,.12);border-radius:100px;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#67665f;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease}
@@ -3183,7 +3186,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .dk-nav,.dk-jump{gap:10px}
   .dk-nav{align-items:flex-start}
   .dk-nav-row{gap:10px}
-  .dk-count{font-size:19px}
+  .dk-count{font-size:24px}
   .dk-chaps{gap:6px}
   .dk-chap{padding:0 13px;letter-spacing:.1em}
   /* full screen buys nothing here: below 900px the deck is reflowed text, not a

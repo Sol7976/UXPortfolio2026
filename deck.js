@@ -79,8 +79,11 @@
     if (live) live.textContent = 'Slide ' + (i + 1) + ' of ' + slides.length +
       (slides[i].getAttribute('data-label') ? ', ' + slides[i].getAttribute('data-label') : '');
 
-    if (!opts.silent && history.replaceState) {
-      history.replaceState(null, '', '#' + slug(i));
+    if (!opts.silent) {
+      /* the forward button pulses until the reader moves the deck, by any
+         means: the button, the arrows, a swipe or a chapter pill */
+      deck.classList.add('is-used');
+      if (history.replaceState) history.replaceState(null, '', '#' + slug(i));
     }
     /* below 900px the frame is a fixed-ratio card that scrolls its own content,
        so a new slide starts at its top rather than wherever the last one was

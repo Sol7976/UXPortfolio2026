@@ -160,15 +160,58 @@
     }, { passive: true });
   }
 
+  /* Expand.
+
+     NOT the Fullscreen API on its own. Element.requestFullscreen does not
+     exist on iPhone Safari at all, so the button simply did nothing there,
+     and inside an iframe it is blocked outright. So the expand is CSS: a class
+     on the deck fixes the viewer over the viewport, which behaves identically
+     on every browser. The native call is then attempted on top, purely to hide
+     the browser's own chrome where it is allowed; if it is missing or refused,
+     nothing breaks, because the CSS has already done the work. */
+  var expanded = false;
+
+  function setExpanded(on) {
+    expanded = on;
+    deck.classList.toggle('is-full', on);
+    document.documentElement.style.overflow = on ? 'hidden' : '';
+    if (full) {
+      full.setAttribute('aria-pressed', on ? 'true' : 'false');
+      full.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen');
+    }
+    fit();
+  }
+
+  function nativeOn(el) {
+    var fn = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (fn && (document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+      try { var p = fn.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    }
+  }
+  function nativeOff() {
+    var fn = document.exitFullscreen || document.webkitExitFullscreen;
+    if ((document.fullscreenElement || document.webkitFullscreenElement) && fn) {
+      try { var p = fn.call(document); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    }
+  }
+
   if (full && frame) {
-    if (!frame.requestFullscreen) full.hidden = true;
-    else full.addEventListener('click', function () {
-      if (document.fullscreenElement) document.exitFullscreen();
-      else frame.requestFullscreen().then(fit, function () {});
+    full.addEventListener('click', function () {
+      if (expanded) { setExpanded(false); nativeOff(); }
+      else { setExpanded(true); nativeOn(deck.querySelector('.dk-view') || frame); }
     });
-    document.addEventListener('fullscreenchange', function () {
-      deck.classList.toggle('is-full', !!document.fullscreenElement);
-      fit();
+    /* leaving native full screen by the browser's own control (Escape, the
+       system gesture) must take the CSS mode with it */
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+      document.addEventListener(ev, function () {
+        if (expanded && !(document.fullscreenElement || document.webkitFullscreenElement)) {
+          setExpanded(false);
+        }
+        fit();
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (expanded && e.key === 'Escape') { setExpanded(false); nativeOff(); }
     });
   }
 

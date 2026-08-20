@@ -553,6 +553,15 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
    so they cannot outrank the homepage's mobile block in section 9, which both
    designs share unchanged: the case-study nav, mark and kicker are identical to
    the homepage's at mobile size. */
+/* Between 900 and 1199 the site scales .page with a transform, and a
+   transformed ancestor becomes the containing block for a position:fixed
+   child, so the expanded viewer would be trapped inside the scaled page
+   rather than covering the viewport. The deck is already near full width
+   through that band, so the control simply is not offered there. */
+@media (min-width: 900px) and (max-width: 1199px){
+  .dk-jump-row > .dk-btn{display:none}
+}
+
 @media (min-width: 900px){
   .nav--cs{border-bottom-color:rgba(18,18,16,.10)}
   .mark--sm{font-size:13px}
@@ -2868,7 +2877,18 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
 /* --- the viewer ------------------------------------------------------- */
 .tk-deck{padding:56px 0 0;padding-inline:var(--csb)}
 .dk-frame{position:relative;width:100%;aspect-ratio:16/9;border:1px solid rgba(18,18,16,.12);border-radius:14px;overflow:hidden;background:#1a1714;cursor:pointer}
-.dk-frame:fullscreen{border-radius:0;border:0;aspect-ratio:auto;width:100%;height:100%}
+/* Expanded: the viewer is fixed over the viewport and the frame letterboxes
+   inside it, keeping 16:9. Driven by a class rather than :fullscreen, because
+   iPhone Safari has no element fullscreen at all; deck.js still asks for the
+   native mode on top where it is allowed, purely to hide browser chrome. */
+.dk.is-full .dk-view{position:fixed;inset:0;z-index:200;background:#1a1714;display:flex;align-items:center;justify-content:center}
+/* sized from the height, not the width: with aspect-ratio and a definite
+   width, max-height clamps the box without shrinking the width and the frame
+   overflows the screen in landscape. Height first, width auto, so the 16:9
+   page always fits whichever way the phone is held. */
+.dk.is-full .dk-frame{height:min(100vh, calc(100vw * 9 / 16));width:auto;max-width:100vw;margin:0;border:0;border-radius:0}
+.dk.is-full .dk-inframe{position:absolute;inset:0;padding:0 1.2%;justify-content:space-between}
+.dk-frame:fullscreen,.dk-view:fullscreen{background:#1a1714}
 .dk-stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--dk-k,1));transform-origin:50% 50%}
 
 /* Controls, ABOVE the frame: a reader needs to know how to move through before

@@ -11,9 +11,11 @@
              stage is scaled to the frame, so every slide is pixel-exact and
              nothing reflows. One slide is shown at a time.
    <  900px  the stage is dismantled in CSS (section 22) and each slide lays
-             out in normal flow at a phone type scale. Still one slide at a
-             time, still the same markup: a 1920px stage scaled to a 375px
-             screen would render 25px body text at about 5px.
+             out in normal flow at a phone type scale, inside a fixed 3:4 card
+             that scrolls its own content. Same markup, same one-at-a-time
+             model: a 1920px stage scaled to a 375px screen would render the
+             deck's 25px body text at about 5px, and a card that grew and
+             shrank with each slide read as page content rather than a deck.
 
    The scale is computed here rather than in CSS because CSS cannot divide one
    length by another. It is read from offsetWidth, NOT getBoundingClientRect:
@@ -39,7 +41,6 @@
   if (!slides.length) return;
 
   var i = 0;
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---- scale ---------------------------------------------------------- */
 
@@ -81,12 +82,10 @@
     if (!opts.silent && history.replaceState) {
       history.replaceState(null, '', '#' + slug(i));
     }
-    /* on mobile each slide is a normal-flow block of its own height, so a long
-       slide leaves the reader part-way down when they advance */
-    if (innerWidth < MIN_DESKTOP && !opts.silent && frame) {
-      var top = frame.getBoundingClientRect().top + scrollY - 12;
-      scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
-    }
+    /* below 900px the frame is a fixed-ratio card that scrolls its own content,
+       so a new slide starts at its top rather than wherever the last one was
+       left. A no-op on desktop, where the frame never scrolls. */
+    if (frame) frame.scrollTop = 0;
   }
 
   function chapterState() {

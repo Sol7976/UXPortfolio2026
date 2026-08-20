@@ -2886,13 +2886,44 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
 .dk-btn{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:1px solid rgba(18,18,16,.3);border-radius:100px;color:#1a1a17;cursor:pointer;padding:0;transition:background .18s ease,border-color .18s ease,color .18s ease}
 .dk-btn:hover:not(:disabled){background:#ffd400;border-color:#ffd400}
 .dk-btn:disabled{opacity:.32;cursor:default}
+/* The chevrons sit inside the deck, on its left and right edges, the way a
+   reader expects to page a document. The layer is an overlay with no pointer
+   events of its own, so a click on the slide still advances; only the two
+   buttons take the click.
+
+   They are children of .dk-frame and NOT of .dk-stage, so --dk-k never scales
+   them and the 44px minimum target survives at any column width.
+
+   The inset is a PERCENTAGE, not a fixed px. Every slide's own left and right
+   padding is 120 of 1920, that is 6.25% of the frame whatever the scale, so a
+   1.2% inset plus a 44px button always lands inside that margin and never over
+   the type: 57px into a 69px margin at the 1104 column, 63px into 99px at the
+   1584 cap. A fixed 20px inset with a 48px button cleared the narrow case by
+   one pixel. */
+.dk-inframe{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:0 1.2%;pointer-events:none}
+.dk-inframe .dk-btn{pointer-events:auto}
+
 /* Forward is the control almost every reader wants, so it carries the system's
-   CTA fill on its own. Back and full screen are the quieter grey, the same
-   fill the chapter pills rest on, so the three read as one primary and two
-   secondaries rather than three equal buttons. */
+   CTA fill on its own. Back is white with a hairline, which reads on all three
+   slide surfaces: white, ivory and black. It carries the site's full outline
+   weight rather than a faint one, because on a white slide the border is the
+   only thing separating it from the background. Grey fill would have vanished
+   on the ivory chapter dividers, #f4f4f2 against #f3eee3. */
 .dk-btn--next{background:#ffd400;border-color:#ffd400}
 .dk-btn--next:hover:not(:disabled){background:#ffffff;border-color:#ffd400}
-.dk-btn--prev{background:#f4f4f2;border-color:rgba(18,18,16,.12)}
+/* Forward pulses, so it reads as the thing to press. A deliberate exception to
+   the site's "nothing loops" rule, which otherwise holds everywhere but the
+   client marquee. A ring rather than a scale, so it never nudges the layout,
+   and it stops under the cursor and for anyone who asked for less motion. */
+@keyframes dk-pulse{
+  0%   {box-shadow:0 0 0 0 rgba(255,212,0,.55)}
+  70%  {box-shadow:0 0 0 13px rgba(255,212,0,0)}
+  100% {box-shadow:0 0 0 0 rgba(255,212,0,0)}
+}
+.dk-btn--next:not(:disabled){animation:dk-pulse 2.6s cubic-bezier(.4,0,.2,1) infinite}
+.dk-btn--next:hover{animation:none}
+@media (prefers-reduced-motion: reduce){.dk-btn--next{animation:none}}
+.dk-btn--prev{background:#ffffff;border-color:rgba(18,18,16,.3)}
 .dk-btn--quiet{background:#ffffff;border-color:rgba(18,18,16,.12)}
 .dk-btn--prev:hover:not(:disabled),.dk-btn--quiet:hover:not(:disabled){background:#ffd400;border-color:#ffd400}
 .dk-count{font:300 22px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap;color:#a6a49d}
@@ -3128,16 +3159,27 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .tk-intro{padding:56px 24px 0}
   .tk-h1{font:300 34px/1.1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:-.03em;max-width:none}
   .tk-lede{font:400 16px/1.6 'Hanken Grotesk',system-ui,sans-serif;margin-top:20px;max-width:none}
+  /* A fixed-ratio card that scrolls its own content, not a block that changes
+     height with every slide. The slides still reflow to a phone type scale
+     rather than being a 1920px stage shrunk to 5px text, but they now read as
+     pages inside a document viewer: one constant 3:4 frame, hairline and
+     radius intact, with the slide scrolling inside it and the chevrons pinned
+     to the bottom of the card. */
   .tk-deck{padding:40px 0 0}
-  .dk-frame{aspect-ratio:auto;border-radius:0;border-left:0;border-right:0;background:#ffffff;box-shadow:none;cursor:auto}
-  .dk-stage{position:static;width:auto;height:auto;transform:none}
-  .dk-s{position:static;inset:auto;display:none;padding:36px 24px;overflow:visible;opacity:1;visibility:visible}
-  .dk-s.is-on{display:flex}
-  .dk-s--pad90,.dk-s--pad100,.dk-s--pad118{padding:36px 24px}
+  .dk-frame{aspect-ratio:3/4;width:auto;margin:0 24px;border-radius:14px;background:#ffffff;cursor:auto;
+    overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .dk-stage{position:static;width:auto;height:auto;min-height:100%;transform:none;display:flex;flex-direction:column}
+  .dk-s{position:static;inset:auto;display:none;padding:30px 22px 84px;overflow:visible;opacity:1;visibility:visible}
+  .dk-s.is-on{display:flex;flex:1}
+  .dk-s--pad90,.dk-s--pad100,.dk-s--pad118{padding:30px 22px 84px}
   .dk-s--flat{padding:0}
+  .dk-s--flat .s-div{padding:30px 22px 84px}
   .dk-hint{display:none}
   .dk-hint-m{display:block;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
   .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 32px;padding-top:22px}
+  /* pinned to the bottom of the card while the slide scrolls behind them; the
+     slide's 84px bottom padding is what keeps its last line clear of them */
+  .dk-inframe{position:sticky;inset:auto;bottom:14px;z-index:3;justify-content:center;gap:14px;padding:0;margin-top:-58px}
   .dk-nav,.dk-jump{gap:10px}
   .dk-nav{align-items:flex-start}
   .dk-nav-row{gap:10px}
@@ -3222,7 +3264,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .s-link--sm{font-size:14px;margin:14px 0 0;display:inline-flex}
   .s-src{font-size:13px;margin-top:10px}
 
-  .s-div{padding:36px 24px;justify-content:flex-start}
+  .s-div{padding:0;justify-content:flex-start}
   .s-div-n{font-size:200px;right:-6px;bottom:-52px}
   .s-div-k{margin-bottom:18px}
   .s-div-h{font-size:40px;line-height:1.04}

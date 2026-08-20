@@ -3204,7 +3204,7 @@ button[data-tabgroup],button[data-tab],button[data-carousel-nav]{min-height:44px
   .dk-frame{border-radius:0;border-left:0;border-right:0;cursor:auto}
   .dk-hint{display:none}
   .dk-hint-m{display:block;font:600 10px/1 'Hanken Grotesk',system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#67665f}
-  .dk-bar{flex-direction:column;align-items:stretch;gap:16px;margin:0 24px 24px;padding-top:34px}
+  .dk-bar{flex-direction:column;align-items:stretch;gap:30px;margin:0 24px 24px;padding-top:34px}
   .dk-nav,.dk-jump{gap:10px}
   .dk-nav{align-items:flex-start}
   .dk-nav-row{gap:10px}
